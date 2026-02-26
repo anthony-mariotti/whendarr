@@ -62,24 +62,12 @@
   }
 
   async function changeMonth(offset: number) {
-    currentDate = currentDate.add(offset, 'month')
-
-    // if (currentMonth < 0) {
-    //   currentMonth = 11;
-    //   currentYear--;
-    // }
-
-    // if (currentMonth > 11) {
-    //   currentMonth = 0;
-    //   currentYear++;
-    // }
+    currentDate = currentDate.add(offset, 'month');
 
     await load();
   }
 
   $: monthLabel = () => currentDate.format('MMMM');
-
-  $: isToday = (iso: string) => dayjs(iso).isToday();
 
   function getItemBorderStyle(item: CalendarItem, day: Dayjs): string {
     if (item.type === 'movie') {
