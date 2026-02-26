@@ -8,6 +8,16 @@
   import { stripTimestamp } from '$lib/utils';
   import { onMount } from 'svelte';
 
+  import { Button } from '$lib/components/ui/button';
+  import * as ToggleGroup from '$lib/components/ui/toggle-group';
+  import * as Popover from '$lib/components/ui/popover';
+  import * as Collapsible from '$lib/components/ui/collapsible';
+
+  import ArrowLeftIcon from '@lucide/svelte/icons/arrow-left';
+  import ArrowRightIcon from '@lucide/svelte/icons/arrow-right';
+  import { ToggleTheme } from '$lib/components/toggle-theme';
+  import { Badge } from '$lib/components/ui/badge';
+
   $: scope = '';
   $: loading = false;
   $: timeoutId = null as NodeJS.Timeout | null;
@@ -97,30 +107,41 @@
 
     return '';
   }
+
+  function movieRelease(item: MovieCalendarItem, day: string) {
+    if (stripTimestamp(item.inCinemas) === day) {
+        return 'Cinema';
+    }
+    if (stripTimestamp(item.digitalRelease) === day) {
+        return 'Digital';
+    }
+    if (stripTimestamp(item.physicalRelease) === day) {
+        return 'Physical';
+    }
+    return 'Unknown';
+  }
 </script>
 
-<div class="relative mx-auto flex min-h-lvh flex-col sm:p-6">
-  <!-- Header -->
-  <div class="mb-6 flex items-center justify-between">
-    <button
-      class="rounded bg-zinc-800 px-3 py-1 hover:bg-zinc-700"
-      on:click={async () => changeMonth(-1)}
-      aria-label="Previous Month"
+<div class="relative mx-auto flex min-h-lvh flex-col pt-6 sm:p-6">
+  <div class="mb-6 flex items-center justify-center gap-4">
+    <ToggleTheme />
+    <ToggleGroup.Root
+      type="single"
+      onValueChange={async (e) => await changeScope(e)}
+      variant="outline"
+      value="all"
     >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        class="lucide lucide-arrow-left-icon lucide-arrow-left"
-        ><path d="m12 19-7-7 7-7" /><path d="M19 12H5" /></svg
-      >
-    </button>
+      <ToggleGroup.Item value="all">All</ToggleGroup.Item>
+      <ToggleGroup.Item value="movie">Movie</ToggleGroup.Item>
+      <ToggleGroup.Item value="tv">Tv</ToggleGroup.Item>
+    </ToggleGroup.Root>
+  </div>
+
+  <!-- Header -->
+  <div class="mb-4 flex items-center justify-between p-6 sm:p-0">
+    <Button size="icon" onclick={async () => await changeMonth(-1)} aria-label="Previous Month">
+      <ArrowLeftIcon />
+    </Button>
 
     <div class="relative flex">
       <h1 class={['text-2xl font-bold tracking-tight', loading && 'blur-xs filter']}>
@@ -146,50 +167,13 @@
       {/if}
     </div>
 
-    <div>
-      <button
-        class="rounded bg-zinc-800 px-3 py-1 hover:bg-zinc-700"
-        on:click={async () => changeScope('movie')}
-      >
-        Movie
-      </button>
-      <button
-        class="rounded bg-zinc-800 px-3 py-1 hover:bg-zinc-700"
-        on:click={async () => changeScope('tv')}
-      >
-        Tv
-      </button>
-      <button
-        class="rounded bg-zinc-800 px-3 py-1 hover:bg-zinc-700"
-        on:click={async () => changeScope('')}
-      >
-        All
-      </button>
-    </div>
-
-    <button
-      class="rounded bg-zinc-800 px-3 py-1 hover:bg-zinc-700"
-      on:click={async () => changeMonth(1)}
-      aria-label="Next Month"
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        class="lucide lucide-arrow-right-icon lucide-arrow-right"
-        ><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg
-      >
-    </button>
+    <Button size="icon" onclick={async () => await changeMonth(1)} aria-label="Next Month">
+      <ArrowRightIcon />
+    </Button>
   </div>
 
   <!-- Weekday Headers -->
-  <div class="mb-2 grid grid-cols-7 text-center text-sm text-gray-400">
+  <div class="mb-2 grid grid-cols-7 text-center text-sm">
     <div>Sun</div>
     <div>Mon</div>
     <div>Tue</div>
@@ -207,25 +191,23 @@
   <div class="relative flex grow flex-col">
     <div
       class={[
-        'grid grow grid-cols-7 gap-0 overflow-hidden sm:rounded-lg bg-zinc-900 py-px select-none',
+        'grid grow grid-cols-7 gap-0 overflow-hidden bg-accent py-px select-none sm:rounded-lg',
         loading && 'blur-xs filter'
       ]}
     >
       {#each days as day}
         {#if day === null}
-          <div
-            class="min-h-30 bg-zinc-100 ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800"
-          ></div>
+          <div class="min-h-30 bg-neutral-200 dark:bg-neutral-900"></div>
         {:else}
           <div
             class={[
-              'flex min-h-32.5 flex-col border bg-zinc-100 p-2 transition hover:bg-zinc-200 dark:bg-zinc-900 dark:hover:bg-zinc-800',
-              isToday(day.date) ? 'border-green-500' : 'border-zinc-200 dark:border-zinc-800'
+              'flex min-h-32.5 flex-col p-2 transition',
+              isToday(day.date) ? 'border-2 border-green-500' : 'border'
             ]}
           >
             <!-- Day Number -->
             <div class="flex items-start justify-between">
-              <span class={['text-sm font-medium', isToday(day.date) && 'text-green-400']}>
+              <span class={['text-sm font-medium', isToday(day.date) && 'text-green-500']}>
                 {day.dayNumber}
               </span>
 
@@ -239,14 +221,78 @@
             <!-- Releases -->
             <div class="mt-2 space-y-1 overflow-hidden text-xs">
               {#each day.releases.slice(0, 2) as item}
-              <!-- {#each day.releases as item} -->
-                {@render renderCalendarItem(item, day.date)}
+                <!-- {#each day.releases as item} -->
+                <Popover.Root>
+                  <Popover.Trigger>
+                    {#snippet child({ props })}
+                      {@render renderCalendarItem(props, item, day.date)}
+                    {/snippet}
+                  </Popover.Trigger>
+                  <Popover.Content>
+                    {#if item.type === 'tv'}
+                      <div class="flex items-center justify-between">
+                        <h1 class="text-lg font-bold">{item.series}</h1>
+                        {#if item.episode === 1}
+                          <Badge variant="outline">Season Premere</Badge>
+                        {/if}
+                      </div>
+                      <div class="flex items-center justify-between">
+                        <h2>{item.title}</h2>
+                        <span>{item.season}x{item.episode}</span>
+                      </div>
+                    {/if}
+                    {#if item.type === 'movie'}
+                      <div class="flex items-center justify-between">
+                        <h1 class="text-lg font-bold">{item.title}</h1>
+                      </div>
+                      <div class="flex items-center justify-between">
+                        <h2>{movieRelease(item, day.date)} Release</h2>
+                      </div>
+                    {/if}
+                  </Popover.Content>
+                </Popover.Root>
               {/each}
 
               {#if day.releases.length > 2}
-                <div class="text-gray-500 text-center">
-                  +{day.releases.length - 2}
-                </div>
+                <Collapsible.Root>
+                  <Collapsible.Content class="space-y-1">
+                    {#each day.releases.slice(2) as item}
+                      <!-- {#each day.releases as item} -->
+                      <Popover.Root>
+                        <Popover.Trigger>
+                          {#snippet child({ props })}
+                            {@render renderCalendarItem(props, item, day.date)}
+                          {/snippet}
+                        </Popover.Trigger>
+                        <Popover.Content>
+                          {#if item.type === 'tv'}
+                            <div class="flex items-center justify-between">
+                              <h1 class="text-lg font-bold">{item.series}</h1>
+                              {#if item.episode === 1}
+                                <Badge variant="outline">Season Premere</Badge>
+                              {/if}
+                            </div>
+                            <div class="flex items-center justify-between">
+                              <h2>{item.title}</h2>
+                              <span>{item.season}x{item.episode}</span>
+                            </div>
+                          {/if}
+                          {#if item.type === 'movie'}
+                            <h1 class="text-lg font-bold">{item.title}</h1>
+                          {/if}
+                        </Popover.Content>
+                      </Popover.Root>
+                    {/each}
+                  </Collapsible.Content>
+                  <Collapsible.Trigger class="group">
+                    <div class="text-center text-neutral-500 group-data-[state=open]:hidden">
+                      +{day.releases.length - 2}
+                    </div>
+                    <div class="hidden text-center text-neutral-500 group-data-[state=open]:block">
+                      less
+                    </div>
+                  </Collapsible.Trigger>
+                </Collapsible.Root>
               {/if}
             </div>
           </div>
@@ -256,8 +302,9 @@
   </div>
 {/snippet}
 
-{#snippet renderCalendarItem(item: CalendarItem, day: string)}
+{#snippet renderCalendarItem(props: Record<string, unknown>, item: CalendarItem, day: string)}
   <div
+    {...props}
     class={[
       'relative w-full items-center border-l-4 p-1 transition-colors',
       getItemBorderStyle(item, day)
@@ -274,21 +321,19 @@
 {#snippet renderTvCalendarItem(item: TvCalendarItem)}
   <!-- {#each day.releases as item} -->
 
-  <div class="flex gap-1">
+  <div class="flex items-center justify-between">
     <div class="w-full truncate font-bold" title={item.series}>
       {item.series}
     </div>
     {#if item.episode === 1}
-      <span
-        class="hidden sm:inline-flex items-center rounded-md bg-blue-100 px-1.5 py-0.5 text-xs font-medium text-nowrap text-blue-700 dark:bg-blue-400/10 dark:text-blue-400"
-      >
-        Season Premere
-      </span>
+      <div class="hidden lg:block">
+        <Badge variant="outline">Season Premere</Badge>
+      </div>
     {/if}
   </div>
 
-  <div class="hidden sm:flex">
-    <div class="w-full truncate" title={item.title}>
+  <div class="hidden items-center justify-between sm:flex">
+    <div class="hidden w-full truncate lg:block" title={item.title}>
       {item.title}
     </div>
     <div class="">
@@ -296,7 +341,7 @@
     </div>
   </div>
 
-  <div class="hidden sm:flex">
+  <div class="hidden lg:flex">
     {item.airTime}
   </div>
 {/snippet}
@@ -307,14 +352,6 @@
   </div>
 
   <div class="hidden sm:flex">
-    {#if stripTimestamp(item.digitalRelease) === day}
-      Digital Release
-    {:else if stripTimestamp(item.physicalRelease) === day}
-      Physical Release
-    {:else if stripTimestamp(item.inCinemas) === day}
-      Cinema Release
-    {:else}
-      Unknown Release
-    {/if}
+    {movieRelease(item, day)} <span class="hidden lg:inline">&nbsp;Release</span>
   </div>
 {/snippet}
