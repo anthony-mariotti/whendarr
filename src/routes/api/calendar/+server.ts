@@ -63,7 +63,7 @@ export const GET: RequestHandler = async ({ fetch, url, getClientAddress }) => {
     const radarr = await radarrResponse.json();
     // console.log(radarr);
 
-    const normalized: Array<CalendarItem> = [
+    const normalized: Array<CalendarItem> = ([
         ...radarr.map((m: any) => ({
             type: 'movie',
             title: m.title,
@@ -71,22 +71,62 @@ export const GET: RequestHandler = async ({ fetch, url, getClientAddress }) => {
             isAvailable: m.isAvailable,
             inCinemas: m.inCinemas,
             physicalRelease: m.physicalRelease,
-            digitalRelease: m.digitalRelease
+            digitalRelease: m.digitalRelease,
+            hasFile: m.hasFile
         } as MovieCalendarItem)),
         ...sonarr.map((s: any) => ({
             type: 'tv',
+            seriesId: s.seriesId,
             series: s.series.title,
             title: s.title,
             season: s.seasonNumber,
             episode: s.episodeNumber,
             date: s.airDateUtc,
-            hasFile: s.hasFile,
-            airTime: s.series.airTime
+            airTime: s.series.airTime,
+            hasFile: s.hasFile
         } as TvCalendarItem))
-    ];
+    ] as Array<CalendarItem>).map(item => ({
+        ...item,
+        sortKey: getSortKey(item)
+    })).sort((a, b) => {
+        for(let i = 0; i < a.sortKey.length; i++) {
+            if (a.sortKey[i] < b.sortKey[i]) return -1;
+            if (a.sortKey[i] > b.sortKey[i]) return 1;
+        }
+        return 0;
+    });
+
 
     await setCached(cacheKey, normalized);
     return filteredResponse(scope, normalized);
+}
+
+function getSortKey(item: CalendarItem) {
+    const date = getSortDate(item);
+
+    if (item.type === 'tv') {
+        return [
+            date,
+            0,
+            item.seriesId,
+            item.season,
+            item.episode
+        ];
+    }
+
+    return [
+        date,
+        1,
+        item.title
+    ];
+}
+
+function getSortDate(item: CalendarItem) {
+    if (item.type === 'tv') {
+        return new Date(item.date).getTime();
+    }
+
+    return 0;
 }
 
 function filteredResponse(scope: CalendarScopes, normalized: Array<CalendarItem>) {
