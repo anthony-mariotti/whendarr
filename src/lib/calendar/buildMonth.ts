@@ -1,62 +1,65 @@
 import type { CalendarItem } from "$lib/components/CalendarItem";
-import { stripTimestamp } from "../utils";
+import dayjs, { type Dayjs } from "$lib/helpers/dayjs";
 
 export type CalendarDay = {
-    date: string;
+    date: Dayjs;
     dayNumber: number;
     releases: Array<CalendarItem>;
 } | null;
 
-function indexReleases(items: Array<CalendarItem>) {
+function indexReleases(currentDate: Dayjs, items: Array<CalendarItem>) {
     const map = new Map<string, CalendarItem[]>();
 
-    const push = (key: string, item: CalendarItem) => {
+    const push = (date: Dayjs, item: CalendarItem) => {
+        if (!currentDate.isSame(date, 'month')) return;
+
+        const key = date.format('YYYY-MM-DD');
         if (!map.has(key)) map.set(key, []);
         map.get(key)!.push(item);
     }
 
     for (const item of items) {
-        if (item.type === 'tv') push(stripTimestamp(item.date), item);
+        if (item.type === 'tv') {
+            push(dayjs.utc(item.date).local(), item);
+        }
         else {
-            if (item.inCinemas) push(stripTimestamp(item.inCinemas), item);
-            if (item.physicalRelease) push(stripTimestamp(item.physicalRelease), item);
-            if (item.digitalRelease) push(stripTimestamp(item.digitalRelease), item);
+            if (item.inCinemas) push(dayjs.utc(item.inCinemas).local(), item);
+            if (item.physicalRelease) push(dayjs.utc(item.physicalRelease).local(), item);
+            if (item.digitalRelease) push(dayjs.utc(item.digitalRelease).local(), item);
         }
     }
 
+    console.log(map);
     return map;
 }
 
 export function buildMonth(
-    year: number,
-    month: number,
+    date: Dayjs,
     items: Array<CalendarItem>): Array<CalendarDay> {
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
+    const firstDay = date.startOf('month');
+    const lastDay = date.endOf('month');
 
-    const startDayOfWeek = firstDay.getDay();
-    const totalDays = lastDay.getDate();
+    const startDayOfWeek = firstDay.day();
+    const totalDays = lastDay.date();
 
-    const releaseMap = indexReleases(items);
+    const releaseMap = indexReleases(date, items);
     const days: CalendarDay[] = [];
 
     for (let i = 0; i < startDayOfWeek; i++) {
-      days.push(null);
+        days.push(null);
     }
 
     for (let day = 1; day <= totalDays; day++) {
-      const dateObj = new Date(year, month, day).toISOString();
-      const iso = stripTimestamp(dateObj);
-
-      days.push({
-        date: iso,
-        dayNumber: day,
-        releases: releaseMap.get(iso) ?? []
-      });
+        const current = date.set('date', day);
+        days.push({
+            date: current,
+            dayNumber: day,
+            releases: releaseMap.get(current.format('YYYY-MM-DD')) ?? []
+        });
     }
 
     while (days.length % 7 !== 0) {
-      days.push(null);
+        days.push(null);
     }
 
     return days;

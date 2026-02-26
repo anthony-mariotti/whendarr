@@ -18,6 +18,9 @@
   import { ToggleTheme } from '$lib/components/toggle-theme';
   import { Badge } from '$lib/components/ui/badge';
 
+  import dayjs, { type Dayjs } from '$lib/helpers/dayjs';
+
+
   $: scope = '';
   $: loading = false;
   $: timeoutId = null as NodeJS.Timeout | null;
@@ -25,9 +28,7 @@
   $: items = [] as Array<CalendarItem>;
   $: calendarDays = [] as Array<CalendarDay>;
 
-  const today = new Date();
-  $: currentMonth = today.getMonth();
-  $: currentYear = today.getFullYear();
+  $: currentDate = dayjs().local();
 
   async function load() {
     if (timeoutId !== null) {
@@ -42,8 +43,8 @@
     }
 
     try {
-      items = await fetchCalendar(currentYear, currentMonth, scope);
-      calendarDays = buildMonth(currentYear, currentMonth, items);
+      items = await fetchCalendar(currentDate, scope);
+      calendarDays = buildMonth(currentDate, items);
     } finally {
       if (timeoutId) {
         clearTimeout(timeoutId);
@@ -61,32 +62,28 @@
   }
 
   async function changeMonth(offset: number) {
-    currentMonth += offset;
+    currentDate = currentDate.add(offset, 'month')
 
-    if (currentMonth < 0) {
-      currentMonth = 11;
-      currentYear--;
-    }
+    // if (currentMonth < 0) {
+    //   currentMonth = 11;
+    //   currentYear--;
+    // }
 
-    if (currentMonth > 11) {
-      currentMonth = 0;
-      currentYear++;
-    }
+    // if (currentMonth > 11) {
+    //   currentMonth = 0;
+    //   currentYear++;
+    // }
 
     await load();
   }
 
-  $: monthLabel = () =>
-    new Date(currentYear, currentMonth).toLocaleDateString(undefined, {
-      month: 'long',
-      year: 'numeric'
-    });
+  $: monthLabel = () => currentDate.format('MMMM');
 
-  $: isToday = (iso: string) => new Date(iso).toDateString() === today.toDateString();
+  $: isToday = (iso: string) => dayjs(iso).isToday();
 
-  function getItemBorderStyle(item: CalendarItem, day: string): string {
+  function getItemBorderStyle(item: CalendarItem, day: Dayjs): string {
     if (item.type === 'movie') {
-      if (stripTimestamp(item.inCinemas) === day) {
+      if (dayjs(item.inCinemas).isSame(day, 'date')) {
         return 'border-gray-500 bg-gray-500/15 hover:bg-gray-500/25';
       }
 
@@ -108,15 +105,15 @@
     return '';
   }
 
-  function movieRelease(item: MovieCalendarItem, day: string) {
-    if (stripTimestamp(item.inCinemas) === day) {
-        return 'Cinema';
+  function movieRelease(item: MovieCalendarItem, day: Dayjs) {
+    if (dayjs.utc(item.inCinemas).local().isSame(day, 'date')) {
+      return 'Cinema';
     }
-    if (stripTimestamp(item.digitalRelease) === day) {
-        return 'Digital';
+    if (dayjs.utc(item.digitalRelease).local().isSame(day, 'date')) {
+      return 'Digital';
     }
-    if (stripTimestamp(item.physicalRelease) === day) {
-        return 'Physical';
+    if (dayjs.utc(item.physicalRelease).local().isSame(day, 'date')) {
+      return 'Physical';
     }
     return 'Unknown';
   }
@@ -202,12 +199,12 @@
           <div
             class={[
               'flex min-h-32.5 flex-col p-2 transition',
-              isToday(day.date) ? 'border-2 border-green-500' : 'border'
+              day.date.isToday() ? 'border-2 border-green-500' : 'border'
             ]}
           >
             <!-- Day Number -->
             <div class="flex items-start justify-between">
-              <span class={['text-sm font-medium', isToday(day.date) && 'text-green-500']}>
+              <span class={['text-sm font-medium', day.date.isToday() && 'text-green-500']}>
                 {day.dayNumber}
               </span>
 
@@ -222,35 +219,7 @@
             <div class="mt-2 space-y-1 overflow-hidden text-xs">
               {#each day.releases.slice(0, 2) as item}
                 <!-- {#each day.releases as item} -->
-                <Popover.Root>
-                  <Popover.Trigger>
-                    {#snippet child({ props })}
-                      {@render renderCalendarItem(props, item, day.date)}
-                    {/snippet}
-                  </Popover.Trigger>
-                  <Popover.Content>
-                    {#if item.type === 'tv'}
-                      <div class="flex items-center justify-between">
-                        <h1 class="text-lg font-bold">{item.series}</h1>
-                        {#if item.episode === 1}
-                          <Badge variant="outline">Season Premere</Badge>
-                        {/if}
-                      </div>
-                      <div class="flex items-center justify-between">
-                        <h2>{item.title}</h2>
-                        <span>{item.season}x{item.episode}</span>
-                      </div>
-                    {/if}
-                    {#if item.type === 'movie'}
-                      <div class="flex items-center justify-between">
-                        <h1 class="text-lg font-bold">{item.title}</h1>
-                      </div>
-                      <div class="flex items-center justify-between">
-                        <h2>{movieRelease(item, day.date)} Release</h2>
-                      </div>
-                    {/if}
-                  </Popover.Content>
-                </Popover.Root>
+                {@render renderCalendarItem(item, day.date)}
               {/each}
 
               {#if day.releases.length > 2}
@@ -258,33 +227,10 @@
                   <Collapsible.Content class="space-y-1">
                     {#each day.releases.slice(2) as item}
                       <!-- {#each day.releases as item} -->
-                      <Popover.Root>
-                        <Popover.Trigger>
-                          {#snippet child({ props })}
-                            {@render renderCalendarItem(props, item, day.date)}
-                          {/snippet}
-                        </Popover.Trigger>
-                        <Popover.Content>
-                          {#if item.type === 'tv'}
-                            <div class="flex items-center justify-between">
-                              <h1 class="text-lg font-bold">{item.series}</h1>
-                              {#if item.episode === 1}
-                                <Badge variant="outline">Season Premere</Badge>
-                              {/if}
-                            </div>
-                            <div class="flex items-center justify-between">
-                              <h2>{item.title}</h2>
-                              <span>{item.season}x{item.episode}</span>
-                            </div>
-                          {/if}
-                          {#if item.type === 'movie'}
-                            <h1 class="text-lg font-bold">{item.title}</h1>
-                          {/if}
-                        </Popover.Content>
-                      </Popover.Root>
+                      {@render renderCalendarItem(item, day.date)}
                     {/each}
                   </Collapsible.Content>
-                  <Collapsible.Trigger class="group">
+                  <Collapsible.Trigger class="group w-full">
                     <div class="text-center text-neutral-500 group-data-[state=open]:hidden">
                       +{day.releases.length - 2}
                     </div>
@@ -302,20 +248,48 @@
   </div>
 {/snippet}
 
-{#snippet renderCalendarItem(props: Record<string, unknown>, item: CalendarItem, day: string)}
-  <div
-    {...props}
-    class={[
-      'relative w-full items-center border-l-4 p-1 transition-colors',
-      getItemBorderStyle(item, day)
-    ]}
-  >
-    {#if item.type === 'tv'}
-      {@render renderTvCalendarItem(item)}
-    {:else if item.type === 'movie'}
-      {@render renderMovieCalendarItem(item, day)}
-    {/if}
-  </div>
+{#snippet renderCalendarItem(item: CalendarItem, day: Dayjs)}
+  <Popover.Root>
+    <Popover.Trigger>
+      {#snippet child({ props })}
+        <div
+          {...props}
+          class={[
+            'relative w-full items-center border-l-4 p-1 transition-colors',
+            getItemBorderStyle(item, day)
+          ]}
+        >
+          {#if item.type === 'tv'}
+            {@render renderTvCalendarItem(item)}
+          {:else if item.type === 'movie'}
+            {@render renderMovieCalendarItem(item, day)}
+          {/if}
+        </div>
+      {/snippet}
+    </Popover.Trigger>
+    <Popover.Content>
+      {#if item.type === 'tv'}
+        <div class="flex items-center justify-between">
+          <h1 class="text-lg font-bold">{item.series}</h1>
+          {#if item.episode === 1}
+            <Badge variant="outline">Season Premere</Badge>
+          {/if}
+        </div>
+        <div class="flex items-center justify-between">
+          <h2>{item.title}</h2>
+          <span>{item.season}x{item.episode}</span>
+        </div>
+      {/if}
+      {#if item.type === 'movie'}
+        <div class="flex items-center justify-between">
+          <h1 class="text-lg font-bold">{item.title}</h1>
+        </div>
+        <div class="flex items-center justify-between">
+          <h2>{movieRelease(item, day)} Release</h2>
+        </div>
+      {/if}
+    </Popover.Content>
+  </Popover.Root>
 {/snippet}
 
 {#snippet renderTvCalendarItem(item: TvCalendarItem)}
@@ -340,13 +314,9 @@
       {item.season}x{item.episode}
     </div>
   </div>
-
-  <div class="hidden lg:flex">
-    {item.airTime}
-  </div>
 {/snippet}
 
-{#snippet renderMovieCalendarItem(item: MovieCalendarItem, day: string)}
+{#snippet renderMovieCalendarItem(item: MovieCalendarItem, day: Dayjs)}
   <div class="truncate font-bold">
     {item.title}
   </div>
