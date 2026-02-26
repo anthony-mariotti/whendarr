@@ -272,7 +272,7 @@
         <div class="flex items-center justify-between">
           <h1 class="text-lg font-bold">{item.series}</h1>
           {#if item.episode === 1}
-            <Badge variant="outline">Season Premere</Badge>
+            <Badge variant="outline">Season Premiere</Badge>
           {/if}
         </div>
         <div class="flex items-center justify-between">
@@ -301,7 +301,7 @@
     </div>
     {#if item.episode === 1}
       <div class="hidden lg:block">
-        <Badge variant="outline">Season Premere</Badge>
+        <Badge variant="outline">Season Premiere</Badge>
       </div>
     {/if}
   </div>
