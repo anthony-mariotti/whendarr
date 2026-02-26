@@ -24,7 +24,7 @@ export const GET: RequestHandler = async ({ fetch, url, getClientAddress }) => {
 
     const end = url.searchParams.get('end')
         ?? `${new Date(Date.now() + 1000 * 60 * 60 * 24 * 30)
-            .toISOString().split('T')[0]}T00:00:00Z`;
+            .toISOString().split('T')[0]}T23:59:59Z`;
 
     const scope = processScope(url.searchParams);
     const cacheKey = `calendar:${now}:${end}`;
@@ -63,7 +63,7 @@ export const GET: RequestHandler = async ({ fetch, url, getClientAddress }) => {
     const radarr = await radarrResponse.json();
     // console.log(radarr);
 
-    const normalized: Array<CalendarItem> = ([
+    const normalized: Array<CalendarItem> = [
         ...radarr.map((m: any) => ({
             type: 'movie',
             title: m.title,
@@ -85,11 +85,15 @@ export const GET: RequestHandler = async ({ fetch, url, getClientAddress }) => {
             airTime: s.series.airTime,
             hasFile: s.hasFile
         } as TvCalendarItem))
-    ] as Array<CalendarItem>).map(item => ({
+    ] as Array<CalendarItem>;
+
+    const tvBlocks = buildTvBlocks(normalized);
+
+    const sorted = normalized.map(item => ({
         ...item,
-        sortKey: getSortKey(item)
+        sortKey: getSortKey(item, tvBlocks)
     })).sort((a, b) => {
-        for(let i = 0; i < a.sortKey.length; i++) {
+        for (let i = 0; i < a.sortKey.length; i++) {
             if (a.sortKey[i] < b.sortKey[i]) return -1;
             if (a.sortKey[i] > b.sortKey[i]) return 1;
         }
@@ -97,26 +101,30 @@ export const GET: RequestHandler = async ({ fetch, url, getClientAddress }) => {
     });
 
 
-    await setCached(cacheKey, normalized);
+    await setCached(cacheKey, sorted);
     return filteredResponse(scope, normalized);
 }
 
-function getSortKey(item: CalendarItem) {
+function getSortKey(item: CalendarItem, tvBlocks?: Map<string, { priority: number }>) {
     const date = getSortDate(item);
 
     if (item.type === 'tv') {
+        const key = `${item.seriesId}-${item.season}-${item.date}`;
+        const blockPriority = tvBlocks?.get(key)?.priority ?? 2;
+
         return [
+            blockPriority,
             date,
             0,
             item.seriesId,
             item.season,
-            item.episode
+            item.episode,
         ];
     }
 
     return [
+        0,
         date,
-        1,
         item.title
     ];
 }
@@ -185,4 +193,39 @@ async function setCached(key: string, value: any): Promise<void> {
             console.error('Cache write failed', err);
         }
     }
+}
+
+function buildTvBlocks(items: CalendarItem[]) {
+    const groups = new Map<string, TvCalendarItem[]>();
+
+    for (const item of items) {
+        if (item.type !== 'tv') continue;
+
+        const key = `${item.seriesId}-${item.season}-${item.date}`;
+
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key)!.push(item);
+    }
+
+    const blockMeta = new Map<string, { priority: number }>();
+
+    for (const [key, episodes] of groups.entries()) {
+        const sorted = episodes.sort((a, b) => a.episode - b.episode);
+
+        const isPremiereOnly =
+            sorted.length === 1 &&
+            sorted[0].episode === 1;
+
+        const isSeasonDrop =
+            sorted.length > 1;
+
+        let priority = 2;
+
+        if (isPremiereOnly) priority = 0;
+        else if (isSeasonDrop) priority = 1;
+
+        blockMeta.set(key, { priority });
+    }
+
+    return blockMeta;
 }
