@@ -20,6 +20,7 @@
 
   import dayjs, { type Dayjs } from '$lib/helpers/dayjs';
 
+  $: today = dayjs();
 
   $: scope = '';
   $: loading = false;
@@ -77,6 +78,11 @@
 
       if (item.hasFile) {
         return 'border-green-500 bg-orange-500/15 hover:bg-orange-500/25';
+      } else if (
+        (!item.hasFile && dayjs(item.digitalRelease).isAfter(today)) ||
+        dayjs(item.physicalRelease).isAfter(today)
+      ) {
+        return 'border-blue-500 bg-orange-500/15 hover:bg-orange-500/25';
       } else {
         return 'border-red-500 bg-orange-500/15 hover:bg-orange-500/25';
       }
@@ -85,6 +91,8 @@
     if (item.type === 'tv') {
       if (item.hasFile) {
         return 'border-green-500 bg-blue-500/15 hover:bg-blue-500/25 dark:bg-blue-500/15 dark:hover:bg-blue-500/25';
+      } else if (!item.hasFile && dayjs(item.date).isAfter(today)) {
+        return 'border-blue-500 bg-blue-500/15 hover:bg-blue-500/25 dark:bg-blue-500/15 dark:hover:bg-blue-500/25';
       } else {
         return 'border-red-500 bg-blue-500/15 hover:bg-blue-500/25 dark:bg-blue-500/15 dark:hover:bg-blue-500/25';
       }
