@@ -7,13 +7,16 @@
   } from '$lib/components/CalendarItem';
   import { onMount } from 'svelte';
 
-  import { Button } from '$lib/components/ui/button';
+  import { Button, buttonVariants } from '$lib/components/ui/button';
   import * as ToggleGroup from '$lib/components/ui/toggle-group';
   import * as Popover from '$lib/components/ui/popover';
   import * as Collapsible from '$lib/components/ui/collapsible';
+  import * as Dialog from '$lib/components/ui/dialog';
 
   import ArrowLeftIcon from '@lucide/svelte/icons/arrow-left';
   import ArrowRightIcon from '@lucide/svelte/icons/arrow-right';
+  import CircleLoaderIcon from '@lucide/svelte/icons/loader-circle';
+
   import { ToggleTheme } from '$lib/components/toggle-theme';
   import { Badge } from '$lib/components/ui/badge';
 
@@ -68,8 +71,6 @@
     await load();
   }
 
-  $: monthLabel = () => currentDate.format('MMMM');
-
   function getItemBorderStyle(item: CalendarItem, day: Dayjs): string {
     if (item.type === 'movie') {
       if (dayjs(item.inCinemas).isSame(day, 'date')) {
@@ -115,156 +116,161 @@
   }
 </script>
 
-<div class="relative mx-auto flex min-h-lvh flex-col pt-6 sm:p-6">
-  <div class="grid grid-rows-2 gap-2 md:grid-cols-3 md:grid-rows-1 md:gap-0">
-    <div class="flex max-w-2xl items-center justify-center">
-      <div
-        class="relative w-full items-center border-l-4 border-green-500 pl-2"
-      >
-        Available
-      </div>
-      <div
-        class="relative w-full items-center border-l-4 border-red-500 pl-2"
-      >
-        Missing
-      </div>
-      <div
-        class="relative w-full items-center border-l-4 border-blue-500 pl-2"
-      >
-        Waiting
-      </div>
-      <div
-        class="relative w-full items-center border-l-4 border-gray-500 pl-2"
-      >
-        Ignored
-      </div>
-    </div>
-    <div class="flex items-center justify-center gap-4">
-      <ToggleTheme />
-      <ToggleGroup.Root
-        type="single"
-        onValueChange={async (e) => await changeScope(e)}
-        variant="outline"
-        value="all"
-      >
-        <ToggleGroup.Item value="all">All</ToggleGroup.Item>
-        <ToggleGroup.Item value="movie">Movie</ToggleGroup.Item>
-        <ToggleGroup.Item value="tv">Tv</ToggleGroup.Item>
-      </ToggleGroup.Root>
-    </div>
+<div class="wrapper">
+  <div class="wrapper__header">
+    <ToggleTheme />
+    <ToggleGroup.Root
+      type="single"
+      onValueChange={async (e) => await changeScope(e)}
+      variant="outline"
+      value="all"
+    >
+      <ToggleGroup.Item value="all">All</ToggleGroup.Item>
+      <ToggleGroup.Item value="movie">Movie</ToggleGroup.Item>
+      <ToggleGroup.Item value="tv">Tv</ToggleGroup.Item>
+    </ToggleGroup.Root>
+    <Dialog.Root>
+      <Dialog.Trigger type="button" class={buttonVariants({ variant: 'outline' })}>
+        Help Me
+      </Dialog.Trigger>
+      <Dialog.Content>
+        <Dialog.Header>
+          <Dialog.Title>Color Legend</Dialog.Title>
+          <Dialog.Description>
+            Guide to colors, and card types. Each card can clicked on to provide additional information.
+          </Dialog.Description>
+        </Dialog.Header>
+        <div class="space-y-4">
+          <div class="space-y-2">
+            <h2 class="font-bold">Cards</h2>
+            <div
+              class="relative w-full items-center border-l-4 bg-blue-500/15 p-1 transition-colors hover:bg-blue-500/25 dark:bg-blue-500/15 dark:hover:bg-blue-500/25"
+            >
+              <div class="flex flex-col justify-center">
+                <h1 class="text-lg font-bold">TV Series</h1>
+                <div class="flex items-center justify-between">
+                  <h2>Episode Title</h2>
+                  <span>1x99</span>
+                </div>
+              </div>
+            </div>
+            <div
+              class="relative w-full items-center border-l-4 bg-orange-500/15 p-1 transition-colors hover:bg-orange-500/25"
+            >
+              <div class="flex flex-col justify-center">
+                <h1 class="text-lg font-bold">Movie</h1>
+                <div class="flex items-center justify-between">
+                  <h2>Release</h2>
+                </div>
+              </div>
+            </div>
+          </div>
+          <Separator />
+          <div class="space-y-2">
+            <h2 class="font-bold">Colors</h2>
+            <div class="relative w-full items-center border-l-4 border-green-500 pl-2">
+              Available
+            </div>
+            <div class="relative w-full items-center border-l-4 border-red-500 pl-2">Missing</div>
+            <div class="relative w-full items-center border-l-4 border-blue-500 pl-2">Waiting</div>
+            <div class="relative w-full items-center border-l-4 border-gray-500 pl-2">Ignored</div>
+          </div>
+        </div>
+      </Dialog.Content>
+    </Dialog.Root>
   </div>
-
-  <!-- Header -->
-  <div class="mb-4 flex items-center justify-between p-6 sm:p-0">
-    <Button size="icon" onclick={async () => await changeMonth(-1)} aria-label="Previous Month">
+  <div class="wrapper__control">
+    <Button size="icon-lg" onclick={async () => await changeMonth(-1)} aria-label="Previous Month">
       <ArrowLeftIcon />
     </Button>
-
-    <div class="relative flex">
+    <div class="relative">
       <h1 class={['text-2xl font-bold tracking-tight', loading && 'blur-xs filter']}>
-        {currentDate.format('MMMM')} {currentDate.format('YYYY')}
+        {currentDate.format('MMMM')}
+        {currentDate.format('YYYY')}
       </h1>
-
       {#if loading}
         <div class="absolute inset-0 z-10 flex items-center justify-center text-white">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="48"
-            height="48"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="lucide lucide-loader-circle-icon lucide-loader-circle animate-spin"
-            ><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg
-          >
+          <CircleLoaderIcon class="animate-spin" />
         </div>
       {/if}
     </div>
-
-    <Button size="icon" onclick={async () => await changeMonth(1)} aria-label="Next Month">
+    <Button size="icon-lg" onclick={async () => await changeMonth(1)} aria-label="Next Month">
       <ArrowRightIcon />
     </Button>
   </div>
-
-  <!-- Weekday Headers -->
-  <div class="mb-2 grid grid-cols-7 text-center text-sm">
-    <div>Sun</div>
-    <div>Mon</div>
-    <div>Tue</div>
-    <div>Wed</div>
-    <div>Thu</div>
-    <div>Fri</div>
-    <div>Sat</div>
+  <div class="wrapper_calendar">
+    <div class="grid grid-cols-7 text-center text-sm">
+      <div>Sun</div>
+      <div>Mon</div>
+      <div>Tue</div>
+      <div>Wed</div>
+      <div>Thu</div>
+      <div>Fri</div>
+      <div>Sat</div>
+    </div>
+    {@render renderCalendarGrid(calendarDays)}
   </div>
-
-  <!-- Calendar Grid -->
-  {@render renderCalendarGrid(calendarDays)}
 </div>
 
 {#snippet renderCalendarGrid(days: Array<CalendarDay>)}
-  <div class="relative flex grow flex-col">
-    <div
-      class={[
-        'grid grow grid-cols-7 gap-0 overflow-hidden bg-accent py-px select-none sm:rounded-lg',
-        loading && 'blur-xs filter'
-      ]}
-    >
-      {#each days as day}
-        {#if day === null}
-          <div class="min-h-30 bg-neutral-200 dark:bg-neutral-900"></div>
-        {:else}
-          <div
-            class={[
-              'flex min-h-32.5 flex-col p-2 transition',
-              day.date.isToday() ? 'border-2 border-green-500' : 'border'
-            ]}
-          >
-            <!-- Day Number -->
-            <div class="flex items-start justify-between">
-              <span class={['text-sm font-medium', day.date.isToday() && 'text-green-500']}>
-                {day.dayNumber}
-              </span>
+  <div
+    class={[
+      'grid grid-cols-7 gap-0 overflow-hidden bg-accent py-px select-none sm:rounded-lg',
+      loading && 'blur-xs filter'
+    ]}
+  >
+    {#each days as day}
+      {#if day === null}
+        <div class="min-h-30 bg-neutral-200 dark:bg-neutral-900"></div>
+      {:else}
+        <div
+          class={[
+            'flex min-h-32.5 flex-col p-2 transition',
+            day.date.isToday() ? 'border-2 border-green-500' : 'border'
+          ]}
+        >
+          <!-- Day Number -->
+          <div class="flex items-start justify-between">
+            <span class={['text-sm font-medium', day.date.isToday() && 'text-green-500']}>
+              {day.dayNumber}
+            </span>
 
-              <!-- {#if day.releases.length > 0}
+            <!-- {#if day.releases.length > 0}
                 <span class="rounded bg-gray-600/20 px-2 py-0.5 text-xs text-gray-400 hidden sm:inline">
                   {day.releases.length}
                 </span>
               {/if} -->
-            </div>
-
-            <!-- Releases -->
-            <div class="mt-2 space-y-1 overflow-hidden text-xs">
-              {#each day.releases.slice(0, 2) as item}
-                <!-- {#each day.releases as item} -->
-                {@render renderCalendarItem(item, day.date)}
-              {/each}
-
-              {#if day.releases.length > 2}
-                <Collapsible.Root>
-                  <Collapsible.Content class="space-y-1">
-                    {#each day.releases.slice(2) as item}
-                      <!-- {#each day.releases as item} -->
-                      {@render renderCalendarItem(item, day.date)}
-                    {/each}
-                  </Collapsible.Content>
-                  <Collapsible.Trigger class="group w-full">
-                    <div class="text-center text-neutral-500 group-data-[state=open]:hidden">
-                      +{day.releases.length - 2}
-                    </div>
-                    <div class="hidden text-center text-neutral-500 group-data-[state=open]:block">
-                      less
-                    </div>
-                  </Collapsible.Trigger>
-                </Collapsible.Root>
-              {/if}
-            </div>
           </div>
-        {/if}
-      {/each}
-    </div>
+
+          <!-- Releases -->
+          <div class="mt-2 space-y-1 overflow-hidden text-xs">
+            {#each day.releases.slice(0, 2) as item}
+              <!-- {#each day.releases as item} -->
+              {@render renderCalendarItem(item, day.date)}
+            {/each}
+
+            {#if day.releases.length > 2}
+              <Collapsible.Root>
+                <Collapsible.Content class="space-y-1">
+                  {#each day.releases.slice(2) as item}
+                    <!-- {#each day.releases as item} -->
+                    {@render renderCalendarItem(item, day.date)}
+                  {/each}
+                </Collapsible.Content>
+                <Collapsible.Trigger class="group w-full">
+                  <div class="text-center text-neutral-500 group-data-[state=open]:hidden">
+                    +{day.releases.length - 2}
+                  </div>
+                  <div class="hidden text-center text-neutral-500 group-data-[state=open]:block">
+                    less
+                  </div>
+                </Collapsible.Trigger>
+              </Collapsible.Root>
+            {/if}
+          </div>
+        </div>
+      {/if}
+    {/each}
   </div>
 {/snippet}
 
@@ -353,3 +359,38 @@
     {movieRelease(item, day)} <span class="hidden lg:inline">&nbsp;Release</span>
   </div>
 {/snippet}
+
+<style lang="postcss">
+  @reference "tailwindcss";
+
+  .wrapper {
+    @apply grid min-h-svh gap-2 pt-2 max-h-lvh;
+    grid-template-columns: 1fr;
+    grid-template-rows: min-content min-content 1fr;
+    grid-template-areas:
+      'header'
+      'control'
+      'calendar';
+  }
+
+  /* .wrapper > * {
+    @apply border border-red-500;
+  } */
+
+  .wrapper__header {
+    grid-area: header;
+    @apply flex items-center justify-center space-x-2;
+  }
+
+  .wrapper__control {
+    grid-area: control;
+    @apply flex items-center justify-between px-4;
+  }
+
+  .wrapper_calendar {
+    grid-area: calendar;
+    grid-template-columns: 1fr;
+    grid-template-rows: min-content 1fr;
+    @apply grid gap-2;
+  }
+</style>
