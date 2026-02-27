@@ -19,6 +19,7 @@
   import { Badge } from '$lib/components/ui/badge';
 
   import dayjs, { type Dayjs } from '$lib/helpers/dayjs';
+  import { Separator } from '$lib/components/ui/separator';
 
   $: today = dayjs();
 
@@ -263,17 +264,25 @@
         </div>
       {/snippet}
     </Popover.Trigger>
-    <Popover.Content>
+    <Popover.Content class="space-y-2">
       {#if item.type === 'tv'}
-        <div class="flex items-center justify-between">
+        <div class="flex flex-col justify-center">
           <h1 class="text-lg font-bold">{item.series}</h1>
+          <div class="flex items-center justify-between">
+            <h2>{item.title}</h2>
+            <span>{item.season}x{item.episode}</span>
+          </div>
+        </div>
+        {#if dayjs.utc(item.date).local().isBetween(today.startOf('day'), today.endOf('day'))}
+          <Separator />
+        {/if}
+        <div class="flex items-center justify-between">
+          {#if dayjs.utc(item.date).local().isBetween(today.startOf('day'), today.endOf('day'))}
+            <p>{dayjs.utc(item.date).local().fromNow()}</p>
+          {/if}
           {#if item.episode === 1}
             <Badge variant="outline">Season Premiere</Badge>
           {/if}
-        </div>
-        <div class="flex items-center justify-between">
-          <h2>{item.title}</h2>
-          <span>{item.season}x{item.episode}</span>
         </div>
       {/if}
       {#if item.type === 'movie'}

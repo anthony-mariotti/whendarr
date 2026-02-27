@@ -1,9 +1,13 @@
   import dayjs, { type Dayjs } from 'dayjs';
-  import isTodayExtension from 'dayjs/plugin/isToday';
-  import utcExtension from 'dayjs/plugin/utc';
+  import isTodayPlugin from 'dayjs/plugin/isToday';
+  import utcPlugin from 'dayjs/plugin/utc';
+  import relativeTimePlugin from 'dayjs/plugin/relativeTime';
+  import isBetweenPlugin from 'dayjs/plugin/isBetween';
 
-  dayjs.extend(isTodayExtension);
-  dayjs.extend(utcExtension);
+  dayjs.extend(isTodayPlugin);
+  dayjs.extend(utcPlugin);
+  dayjs.extend(relativeTimePlugin);
+  dayjs.extend(isBetweenPlugin);
 
   export default dayjs;
   export {
