@@ -5,7 +5,6 @@
     TvCalendarItem,
     MovieCalendarItem
   } from '$lib/components/CalendarItem';
-  import { stripTimestamp } from '$lib/utils';
   import { onMount } from 'svelte';
 
   import { Button } from '$lib/components/ui/button';
@@ -117,18 +116,42 @@
 </script>
 
 <div class="relative mx-auto flex min-h-lvh flex-col pt-6 sm:p-6">
-  <div class="mb-6 flex items-center justify-center gap-4">
-    <ToggleTheme />
-    <ToggleGroup.Root
-      type="single"
-      onValueChange={async (e) => await changeScope(e)}
-      variant="outline"
-      value="all"
-    >
-      <ToggleGroup.Item value="all">All</ToggleGroup.Item>
-      <ToggleGroup.Item value="movie">Movie</ToggleGroup.Item>
-      <ToggleGroup.Item value="tv">Tv</ToggleGroup.Item>
-    </ToggleGroup.Root>
+  <div class="grid grid-rows-2 gap-2 md:grid-cols-3 md:grid-rows-1 md:gap-0">
+    <div class="flex max-w-2xl items-center justify-center">
+      <div
+        class="relative w-full items-center border-l-4 border-green-500 pl-2"
+      >
+        Available
+      </div>
+      <div
+        class="relative w-full items-center border-l-4 border-red-500 pl-2"
+      >
+        Missing
+      </div>
+      <div
+        class="relative w-full items-center border-l-4 border-blue-500 pl-2"
+      >
+        Waiting
+      </div>
+      <div
+        class="relative w-full items-center border-l-4 border-gray-500 pl-2"
+      >
+        Ignored
+      </div>
+    </div>
+    <div class="flex items-center justify-center gap-4">
+      <ToggleTheme />
+      <ToggleGroup.Root
+        type="single"
+        onValueChange={async (e) => await changeScope(e)}
+        variant="outline"
+        value="all"
+      >
+        <ToggleGroup.Item value="all">All</ToggleGroup.Item>
+        <ToggleGroup.Item value="movie">Movie</ToggleGroup.Item>
+        <ToggleGroup.Item value="tv">Tv</ToggleGroup.Item>
+      </ToggleGroup.Root>
+    </div>
   </div>
 
   <!-- Header -->
@@ -139,7 +162,7 @@
 
     <div class="relative flex">
       <h1 class={['text-2xl font-bold tracking-tight', loading && 'blur-xs filter']}>
-        {monthLabel()}
+        {currentDate.format('MMMM')} {currentDate.format('YYYY')}
       </h1>
 
       {#if loading}
