@@ -5,11 +5,8 @@ export async function fetchCalendar(
     date: Dayjs,
     scope: string
 ): Promise<Array<CalendarItem>> {
-    const firstDay = date.startOf('month');
-    const lastDay = date.endOf('month').subtract(1, 'day');
-
-    const start = `${firstDay.toISOString().split('T')[0]}T00:00:00Z`;
-    const end = `${lastDay.toISOString().split('T')[0]}T23:59:59Z`;
+    const start = date.startOf('month').format('YYYY-MM-DD');
+    const end = date.endOf('month').format('YYYY-MM-DD');
 
     const res = await fetch(
         `/api/calendar?scope=${scope}&start=${start}&end=${end}`

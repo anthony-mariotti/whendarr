@@ -2,6 +2,7 @@ import { env } from "$env/dynamic/private";
 import type { CalendarItem, MovieCalendarItem, TvCalendarItem } from "$lib/components/CalendarItem";
 import { rateLimit } from "$lib/server/rateLimit";
 import { redis } from "$lib/server/redis";
+import dayjs from '$lib/helpers/dayjs'
 
 import type { RequestHandler } from "./$types";
 
@@ -16,18 +17,17 @@ export const GET: RequestHandler = async ({ fetch, url, getClientAddress }) => {
         return new Response(JSON.stringify({
             status: 429,
             message: 'Rate Limit Exceeded'
-        }), { status: 429 })
+        }), { status: 429 });
     }
 
     const now = url.searchParams.get('start')
-        ?? `${new Date().toISOString().split('T')[0]}T00:00:00Z`;
+        ?? dayjs.utc().hour(0).minute(0).second(0).millisecond(0).toISOString();
 
     const end = url.searchParams.get('end')
-        ?? `${new Date(Date.now() + 1000 * 60 * 60 * 24 * 30)
-            .toISOString().split('T')[0]}T23:59:59Z`;
+        ?? dayjs.utc().endOf('month').subtract(1).hour(23).minute(59).second(59).toISOString();
 
     const scope = processScope(url.searchParams);
-    const cacheKey = `calendar:${now}:${end}`;
+    const cacheKey = `calendar:${now}-${end}`;
     const cached = await getCached(cacheKey);
 
     if (cached) {
@@ -168,9 +168,9 @@ function processScope(params: URLSearchParams): CalendarScopes {
 }
 
 async function getCached(key: string): Promise<string | null> {
-    if (redis.enabled) {
+    if (redis?.status === 'ready') {
         try {
-            return await redis.client.get(key);
+            return await redis.get(key);
         } catch (err) {
             console.error('Cache read failed', err);
             return null;
@@ -181,14 +181,9 @@ async function getCached(key: string): Promise<string | null> {
 }
 
 async function setCached(key: string, value: any): Promise<void> {
-    if (redis.enabled) {
+    if (redis?.status === 'ready') {
         try {
-            await redis.client.set(key, JSON.stringify(value), {
-                expiration: {
-                    type: 'EX',
-                    value: 300
-                }
-            });
+            await redis.set(key, JSON.stringify(value), 'EX', env.NODE_ENV === 'production' ? 43200 : 300);
         } catch (err) {
             console.error('Cache write failed', err);
         }

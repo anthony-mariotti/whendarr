@@ -1,0 +1,44 @@
+services:
+  server:
+    build: .
+    container_name: whendarr
+    restart: unless-stopped
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      SONARR_URL: ${SONARR_URL}
+      SONARR_KEY: ${SONARR_KEY}
+      RADARR_URL: ${RADARR_URL}
+      RADARR_KEY: ${RADARR_KEY}
+      REDIS_URL: redis://redis:6379
+    ports:
+      - "3000:3000"
+    networks:
+      - cache-net
+      - public
+  redis:
+    image: redis:latest
+    container_name: cache
+    ports:
+      - 6379:6379
+    volumes:
+      - cache:/data
+    command: redis-server --save 20 1 --loglevel warning
+    networks:
+      cache-net:
+        aliases:
+          - redis
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+networks:
+  cache-net:
+    internal: true
+  public: {}
+
+volumes:
+  cache: {}
