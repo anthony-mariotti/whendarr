@@ -12,6 +12,7 @@ services:
       RADARR_URL: ${RADARR_URL}
       RADARR_KEY: ${RADARR_KEY}
       REDIS_URL: redis://redis:6379
+      WHENDARR_ORIGIN: http://when.marsickle.net
     ports:
       - "3000:3000"
     networks:
@@ -37,7 +38,7 @@ services:
 
 networks:
   cache-net:
-    internal: true
+    # internal: true
   public: {}
 
 volumes:
