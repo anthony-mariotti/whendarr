@@ -2,8 +2,8 @@ import { env } from "$env/dynamic/private";
 import { createHash } from "crypto";
 import { redis } from "./redis";
 
-const WINDOW_SECONDS = Number(env.RATELIMIT_WINDOW) ?? 60;
-const MAX_REQUESTS =  Number(env.RATELIMIT_BURST) ?? 500;
+const WINDOW_SECONDS = Number(env.RATELIMIT_WINDOW ?? 60);
+const MAX_REQUESTS =  Number(env.RATELIMIT_BURST ?? 500);
 
 export async function rateLimit(ip: string): Promise<boolean> {
     if (redis?.status !== 'ready') return true;
