@@ -1,43 +1,61 @@
 import { env } from '$env/dynamic/private';
-import { createClient, type RedisClientType } from 'redis';
+import redis, { type Redis } from 'ioredis';
 
-type RedisConnectEnabled = {
-    enabled: true;
-    client: RedisClientType
-};
+type RedisConnect =
+    | { enabled: true; client: Redis }
+    | { enabled: false; client: null };
 
-type RedisConnectDisabled = {
-    enabled: false;
+let client: Redis | null = null;
+let enabled: boolean = false;
+
+let state: RedisConnect = {
+    enabled: false,
     client: null
 }
 
-type RedisConnect = RedisConnectEnabled | RedisConnectDisabled;
-
-let client: RedisClientType | null = null;
-let enabled: boolean = false;
-
 if (env.REDIS_URL) {
     try {
-        client = createClient({ url: env.REDIS_URL });
+        client = new redis(env.REDIS_URL);
 
-        client.on('error', (err) => {
-            console.error('Redis Client Error', err);
+        // client = createClient({
+        //     url: env.REDIS_URL,
+        //     socket: {
+        //         reconnectStrategy: (retries) => {
+        //             return Math.min(retries * 100, 5000);
+        //         },
+        //     }
+        // });
+
+        client.on('connect', () => {
+            console.log('Redis connecting...');
+            enabled = false
+        });
+
+        client.on('ready', () => {
+            console.log('Redis connected - caching enabled');
+            enabled = true
+        });
+
+        client.on('end', () => {
+            console.warn('Redis disconnected - caching disabled');
+            enabled = false
+        });
+
+        client.on('error', () => {
+
         });
 
         await client.connect();
         console.log('Redis Caching Enabled');
-        enabled = true;
     } catch (err) {
-        console.error('Redis failed to initialize, continuing eithout cache', err);
-        client = null;
+        console.error('Redis failed to initialize, continuing eithout cache')
+        console.error('Redis', err);
         enabled = false;
     }
 } else {
     console.log('Redis disabled (no REDIS_URL)');
 }
 
-export const redis = {
-    enabled,
-    client
-} as RedisConnect
-
+export {
+    client as redis
+}
