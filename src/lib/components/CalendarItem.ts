@@ -1,5 +1,6 @@
 export type TvCalendarItem = {
   type: 'tv';
+  id: number;
   seriesId: number;
   series: string;
   title: string;
@@ -14,6 +15,7 @@ export type TvCalendarItem = {
 
 export type MovieCalendarItem = {
   type: 'movie';
+  id: number;
   title: string;
   overview: string;
   certification: string;

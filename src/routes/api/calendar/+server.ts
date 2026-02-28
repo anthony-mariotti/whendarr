@@ -78,6 +78,7 @@ export const GET: RequestHandler = async ({ fetch, url, getClientAddress }) => {
       (m: RadarrAPICalendarItem) =>
         ({
           type: 'movie',
+          id: m.id,
           title: m.title,
           overview: m.overview,
           certification: m.certification ?? 'NOT RATED',
@@ -94,6 +95,7 @@ export const GET: RequestHandler = async ({ fetch, url, getClientAddress }) => {
       (s: SonarrAPICalendarItem) =>
         ({
           type: 'tv',
+          id: s.id,
           seriesId: s.seriesId,
           series: s.series?.title,
           title: s.title,
