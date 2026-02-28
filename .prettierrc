@@ -12,5 +12,6 @@
       }
     }
   ],
+  "tabWidth": 2,
   "tailwindStylesheet": "./src/routes/layout.css"
 }
