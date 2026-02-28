@@ -3,10 +3,10 @@ name: Release
 on:
   push:
     tags:
-      - "v*"
+      - 'v*'
 
 concurrency:
-  group: "release-${{ github.ref }}"
+  group: 'release-${{ github.ref }}'
   cancel-in-progress: false
 
 env:
