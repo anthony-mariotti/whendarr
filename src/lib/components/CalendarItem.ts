@@ -3,8 +3,10 @@ export type TvCalendarItem = {
     seriesId: number;
     series: string;
     title: string;
+    overview: string;
     season: number;
     episode: number;
+    certification: string;
     date: string;
     airTime: Date;
     hasFile: boolean;
@@ -13,6 +15,8 @@ export type TvCalendarItem = {
 export type MovieCalendarItem = {
     type: 'movie';
     title: string;
+    overview: string;
+    certification: string;
     status: string;
     isAvailable: boolean;
     inCinemas: string;
@@ -20,6 +24,7 @@ export type MovieCalendarItem = {
     digitalRelease: string;
     releaseDate: string;
     hasFile: boolean;
+    qualityNotMet: boolean;
 }
 
 export type CalendarItem = TvCalendarItem | MovieCalendarItem;

@@ -67,20 +67,25 @@ export const GET: RequestHandler = async ({ fetch, url, getClientAddress }) => {
         ...radarr.map((m: any) => ({
             type: 'movie',
             title: m.title,
+            overview: m.overview,
+            certification: m.certification ?? 'NOT RATED',
             status: m.status,
             isAvailable: m.isAvailable,
             inCinemas: m.inCinemas,
             physicalRelease: m.physicalRelease,
             digitalRelease: m.digitalRelease,
-            hasFile: m.hasFile
+            hasFile: m.hasFile,
+            qualityNotMet: m.hasFile ? m.movieFile?.qualityCutoffNotMet ?? false : false
         } as MovieCalendarItem)),
         ...sonarr.map((s: any) => ({
             type: 'tv',
             seriesId: s.seriesId,
             series: s.series.title,
             title: s.title,
+            overview: s.overview,
             season: s.seasonNumber,
             episode: s.episodeNumber,
+            certification: s.series.certification ?? 'NOT RATED',
             date: s.airDateUtc,
             airTime: s.series.airTime,
             hasFile: s.hasFile

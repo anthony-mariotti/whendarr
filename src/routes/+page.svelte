@@ -16,6 +16,7 @@
   import ArrowLeftIcon from '@lucide/svelte/icons/arrow-left';
   import ArrowRightIcon from '@lucide/svelte/icons/arrow-right';
   import CircleLoaderIcon from '@lucide/svelte/icons/loader-circle';
+  import TriangleAlertIcon from '@lucide/svelte/icons/triangle-alert';
 
   import { ToggleTheme } from '$lib/components/toggle-theme';
   import { Badge } from '$lib/components/ui/badge';
@@ -137,7 +138,8 @@
         <Dialog.Header>
           <Dialog.Title>Color Legend</Dialog.Title>
           <Dialog.Description>
-            Guide to colors, and card types. Each card can clicked on to provide additional information.
+            Guide to colors, and card types. Each card can clicked on to provide additional
+            information.
           </Dialog.Description>
         </Dialog.Header>
         <div class="space-y-4">
@@ -275,8 +277,8 @@
 {/snippet}
 
 {#snippet renderCalendarItem(item: CalendarItem, day: Dayjs)}
-  <Popover.Root>
-    <Popover.Trigger>
+  <Dialog.Root>
+    <Dialog.Trigger>
       {#snippet child({ props })}
         <div
           {...props}
@@ -292,47 +294,46 @@
           {/if}
         </div>
       {/snippet}
-    </Popover.Trigger>
-    <Popover.Content class="space-y-2">
-      {#if item.type === 'tv'}
-        <div class="flex flex-col justify-center">
-          <h1 class="text-lg font-bold">{item.series}</h1>
-          <div class="flex items-center justify-between">
-            <h2>{item.title}</h2>
-            <span>{item.season}x{item.episode}</span>
-          </div>
-        </div>
-        {#if dayjs.utc(item.date).local().isBetween(today.startOf('day'), today.endOf('day'))}
-          <Separator />
+    </Dialog.Trigger>
+    <Dialog.Content>
+      <Dialog.Header class="text-left">
+        {#if item.type === 'tv'}
+          <Dialog.Title>
+            <h1 class="text-xl">{item.series}</h1>
+          </Dialog.Title>
+          <Dialog.Description class="space-x-1 flex items-center">
+            <p class="border-2 rounded w-min px-1 text-nowrap">{item.certification}</p>
+            <p>{item.season.toString().padStart(2, '0')}x{item.episode.toString().padStart(2, '0')}</p>
+          </Dialog.Description>
+        {:else if item.type === 'movie'}
+          <Dialog.Title>
+            <h1 class="text-xl">{item.title}</h1>
+          </Dialog.Title>
+          <Dialog.Description class="space-x-1 flex items-center">
+            <p class="border-2 rounded w-min px-1 text-nowrap">{item.certification}</p>
+            <p>{movieRelease(item, day)} Release</p>
+          </Dialog.Description>
         {/if}
-        <div class="flex items-center justify-between">
-          {#if dayjs.utc(item.date).local().isBetween(today.startOf('day'), today.endOf('day'))}
-            <p>{dayjs.utc(item.date).local().fromNow()}</p>
-          {/if}
-          {#if item.episode === 1}
-            <Badge variant="outline">Season Premiere</Badge>
-          {/if}
-        </div>
+      </Dialog.Header>
+      <Separator />
+      {#if item.type === 'tv'}
+      <div class="space-y-2">
+        <h2 class="text-xl">{item.title}</h2>
+        <p class="text-muted-foreground">{item.overview}</p>
+      </div>
+      {:else if item.type === 'movie'}
+      <div class="space-y-2">
+        <h2 class="text-xl">Overview</h2>
+        <p class="text-muted-foreground">{item.overview}</p>
+      </div>
       {/if}
-      {#if item.type === 'movie'}
-        <div class="flex items-center justify-between">
-          <h1 class="text-lg font-bold">{item.title}</h1>
-        </div>
-        <div class="flex items-center justify-between">
-          <h2>{movieRelease(item, day)} Release</h2>
-        </div>
-      {/if}
-    </Popover.Content>
-  </Popover.Root>
+    </Dialog.Content>
+  </Dialog.Root>
 {/snippet}
 
 {#snippet renderTvCalendarItem(item: TvCalendarItem)}
-  <!-- {#each day.releases as item} -->
-
   <div class="flex items-center justify-between">
-    <div class="w-full truncate font-bold" title={item.series}>
-      {item.series}
-    </div>
+    <h1 class="truncate font-bold lg:text-sm" title={item.series}>{item.series}</h1>
     {#if item.episode === 1}
       <div class="hidden lg:block">
         <Badge variant="outline">Season Premiere</Badge>
@@ -345,18 +346,24 @@
       {item.title}
     </div>
     <div class="">
-      {item.season}x{item.episode}
+      {item.season.toString().padStart(2, '0')}x{item.episode.toString().padStart(2, '0')}
     </div>
   </div>
 {/snippet}
 
 {#snippet renderMovieCalendarItem(item: MovieCalendarItem, day: Dayjs)}
-  <div class="truncate font-bold">
-    {item.title}
+  <div class="flex items-center justify-between">
+    <h1 class="truncate font-bold lg:text-sm" title={item.title}>{item.title}</h1>
+    {#if item.qualityNotMet}
+      <span title="Quality Not Met">
+        <TriangleAlertIcon class="h-4 w-4" />
+      </span>
+    {/if}
   </div>
 
-  <div class="hidden sm:flex">
-    {movieRelease(item, day)} <span class="hidden lg:inline">&nbsp;Release</span>
+  <div class="hidden items-center justify-between sm:flex">
+    <span>{movieRelease(item, day)} <span class="hidden lg:inline">Release</span></span>
+    <span class="border-2 rounded w-min px-1 text-nowrap hidden lg:inline">{item.certification ?? 'NOT RATED'}</span>
   </div>
 {/snippet}
 
@@ -364,7 +371,7 @@
   @reference "tailwindcss";
 
   .wrapper {
-    @apply grid min-h-svh gap-2 pt-2 max-h-lvh;
+    @apply grid max-h-lvh min-h-svh gap-2 pt-2;
     grid-template-columns: 1fr;
     grid-template-rows: min-content min-content 1fr;
     grid-template-areas:
