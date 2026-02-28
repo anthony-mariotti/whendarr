@@ -1,6 +1,6 @@
 {
-	"files.associations": {
-		"*.css": "tailwindcss",
-        // "*.pcss": "tailwindcss"
-	}
+  "files.associations": {
+    "*.css": "tailwindcss"
+    // "*.pcss": "tailwindcss"
+  }
 }
