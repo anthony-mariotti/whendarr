@@ -114,6 +114,15 @@
     }
     return 'Unknown';
   }
+
+  function getUniqueItemId(item: CalendarItem, day: Dayjs) {
+    if (item.type === 'movie') {
+      return `${item.type}-${item.id}-${movieRelease(item, day).toLowerCase()}`;
+    }
+    if (item.type === 'tv') {
+      return `${item.type}-${item.id}-${item.seriesId}`;
+    }
+  }
 </script>
 
 <div class="wrapper">
@@ -220,7 +229,7 @@
       loading && 'blur-xs filter'
     ]}
   >
-    {#each days as day (day?.dayNumber)}
+    {#each days as day, i (day?.dayNumber ?? i + 100)}
       {#if day === null}
         <div class="min-h-30 bg-neutral-200 dark:bg-neutral-900"></div>
       {:else}
@@ -245,7 +254,7 @@
 
           <!-- Releases -->
           <div class="mt-2 space-y-1 overflow-hidden text-xs">
-            {#each day.releases.slice(0, 2) as item (`${item.type}-${item.id}`)}
+            {#each day.releases.slice(0, 2) as item (getUniqueItemId(item, day.date))}
               <!-- {#each day.releases as item} -->
               {@render renderCalendarItem(item, day.date)}
             {/each}
@@ -253,7 +262,7 @@
             {#if day.releases.length > 2}
               <Collapsible.Root>
                 <Collapsible.Content class="space-y-1">
-                  {#each day.releases.slice(2) as item (`${item.type}-${item.id}`)}
+                  {#each day.releases.slice(2) as item (getUniqueItemId(item, day.date))}
                     <!-- {#each day.releases as item} -->
                     {@render renderCalendarItem(item, day.date)}
                   {/each}
