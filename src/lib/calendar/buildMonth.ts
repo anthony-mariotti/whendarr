@@ -28,7 +28,6 @@ function indexReleases(currentDate: Dayjs, items: Array<CalendarItem>) {
     }
   }
 
-  console.log(map);
   return map;
 }
 
