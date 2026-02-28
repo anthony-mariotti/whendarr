@@ -1,4 +1,5 @@
 export type SonarrAPICalendarItem = {
+  id: number;
   seriesId: number;
   title: string;
   overview: string;

@@ -9,7 +9,6 @@
 
   import { Button, buttonVariants } from '$lib/components/ui/button';
   import * as ToggleGroup from '$lib/components/ui/toggle-group';
-  import * as Popover from '$lib/components/ui/popover';
   import * as Collapsible from '$lib/components/ui/collapsible';
   import * as Dialog from '$lib/components/ui/dialog';
 
@@ -24,16 +23,16 @@
   import dayjs, { type Dayjs } from '$lib/helpers/dayjs';
   import { Separator } from '$lib/components/ui/separator';
 
-  $: today = dayjs();
+  let today = $state(dayjs());
 
-  $: scope = '';
-  $: loading = false;
-  $: timeoutId = null as NodeJS.Timeout | null;
+  let scope = $state('');
+  let loading = $state(false);
+  let timeoutId = $state<NodeJS.Timeout | null>(null);
 
-  $: items = [] as Array<CalendarItem>;
-  $: calendarDays = [] as Array<CalendarDay>;
+  let items = $state<Array<CalendarItem>>([]);
+  let calendarDays = $state<Array<CalendarDay>>([]);
 
-  $: currentDate = dayjs().local();
+  let currentDate = $state(dayjs().local());
 
   async function load() {
     if (timeoutId !== null) {
@@ -221,7 +220,7 @@
       loading && 'blur-xs filter'
     ]}
   >
-    {#each days as day}
+    {#each days as day (day?.dayNumber)}
       {#if day === null}
         <div class="min-h-30 bg-neutral-200 dark:bg-neutral-900"></div>
       {:else}
@@ -246,7 +245,7 @@
 
           <!-- Releases -->
           <div class="mt-2 space-y-1 overflow-hidden text-xs">
-            {#each day.releases.slice(0, 2) as item}
+            {#each day.releases.slice(0, 2) as item (`${item.type}-${item.id}`)}
               <!-- {#each day.releases as item} -->
               {@render renderCalendarItem(item, day.date)}
             {/each}
@@ -254,7 +253,7 @@
             {#if day.releases.length > 2}
               <Collapsible.Root>
                 <Collapsible.Content class="space-y-1">
-                  {#each day.releases.slice(2) as item}
+                  {#each day.releases.slice(2) as item (`${item.type}-${item.id}`)}
                     <!-- {#each day.releases as item} -->
                     {@render renderCalendarItem(item, day.date)}
                   {/each}

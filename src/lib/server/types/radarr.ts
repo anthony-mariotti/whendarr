@@ -1,4 +1,5 @@
 export type RadarrAPICalendarItem = {
+  id: number;
   title: string;
   overview: string;
   certification: string;
