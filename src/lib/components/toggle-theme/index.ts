@@ -1,5 +1,3 @@
-import ToggleTheme from "./toggle-theme.svelte";
+import ToggleTheme from './toggle-theme.svelte';
 
-export {
-    ToggleTheme
-}
+export { ToggleTheme };

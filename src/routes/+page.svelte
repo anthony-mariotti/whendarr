@@ -301,31 +301,33 @@
           <Dialog.Title>
             <h1 class="text-xl">{item.series}</h1>
           </Dialog.Title>
-          <Dialog.Description class="space-x-1 flex items-center">
-            <p class="border-2 rounded w-min px-1 text-nowrap">{item.certification}</p>
-            <p>{item.season.toString().padStart(2, '0')}x{item.episode.toString().padStart(2, '0')}</p>
+          <Dialog.Description class="flex items-center space-x-1">
+            <p class="w-min rounded border-2 px-1 text-nowrap">{item.certification}</p>
+            <p>
+              {item.season.toString().padStart(2, '0')}x{item.episode.toString().padStart(2, '0')}
+            </p>
           </Dialog.Description>
         {:else if item.type === 'movie'}
           <Dialog.Title>
             <h1 class="text-xl">{item.title}</h1>
           </Dialog.Title>
-          <Dialog.Description class="space-x-1 flex items-center">
-            <p class="border-2 rounded w-min px-1 text-nowrap">{item.certification}</p>
+          <Dialog.Description class="flex items-center space-x-1">
+            <p class="w-min rounded border-2 px-1 text-nowrap">{item.certification}</p>
             <p>{movieRelease(item, day)} Release</p>
           </Dialog.Description>
         {/if}
       </Dialog.Header>
       <Separator />
       {#if item.type === 'tv'}
-      <div class="space-y-2">
-        <h2 class="text-xl">{item.title}</h2>
-        <p class="text-muted-foreground">{item.overview}</p>
-      </div>
+        <div class="space-y-2">
+          <h2 class="text-xl">{item.title}</h2>
+          <p class="text-muted-foreground">{item.overview}</p>
+        </div>
       {:else if item.type === 'movie'}
-      <div class="space-y-2">
-        <h2 class="text-xl">Overview</h2>
-        <p class="text-muted-foreground">{item.overview}</p>
-      </div>
+        <div class="space-y-2">
+          <h2 class="text-xl">Overview</h2>
+          <p class="text-muted-foreground">{item.overview}</p>
+        </div>
       {/if}
     </Dialog.Content>
   </Dialog.Root>
@@ -363,7 +365,9 @@
 
   <div class="hidden items-center justify-between sm:flex">
     <span>{movieRelease(item, day)} <span class="hidden lg:inline">Release</span></span>
-    <span class="border-2 rounded w-min px-1 text-nowrap hidden lg:inline">{item.certification ?? 'NOT RATED'}</span>
+    <span class="hidden w-min rounded border-2 px-1 text-nowrap lg:inline"
+      >{item.certification ?? 'NOT RATED'}</span
+    >
   </div>
 {/snippet}
 
