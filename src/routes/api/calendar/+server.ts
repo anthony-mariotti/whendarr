@@ -5,6 +5,8 @@ import { redis } from '$lib/server/redis';
 import dayjs from '$lib/helpers/dayjs';
 
 import type { RequestHandler } from './$types';
+import type { RadarrAPICalendarItem } from '$lib/server/types/radarr';
+import type { SonarrAPICalendarItem } from '$lib/server/types/sonarr';
 
 const ALLOWED_SCOPES = ['tv', 'movie'] as const;
 type CalendarScopes = Array<(typeof ALLOWED_SCOPES)[number]>;
@@ -73,7 +75,7 @@ export const GET: RequestHandler = async ({ fetch, url, getClientAddress }) => {
 
   const normalized: Array<CalendarItem> = [
     ...radarr.map(
-      (m: any) =>
+      (m: RadarrAPICalendarItem) =>
         ({
           type: 'movie',
           title: m.title,
@@ -89,18 +91,18 @@ export const GET: RequestHandler = async ({ fetch, url, getClientAddress }) => {
         }) as MovieCalendarItem
     ),
     ...sonarr.map(
-      (s: any) =>
+      (s: SonarrAPICalendarItem) =>
         ({
           type: 'tv',
           seriesId: s.seriesId,
-          series: s.series.title,
+          series: s.series?.title,
           title: s.title,
           overview: s.overview,
           season: s.seasonNumber,
           episode: s.episodeNumber,
-          certification: s.series.certification ?? 'NOT RATED',
+          certification: s.series?.certification ?? 'NOT RATED',
           date: s.airDateUtc,
-          airTime: s.series.airTime,
+          airTime: s.series?.airTime,
           hasFile: s.hasFile
         }) as TvCalendarItem
     )
@@ -162,7 +164,9 @@ function processScope(params: URLSearchParams): CalendarScopes {
       rawScope
         .split(',')
         .map((s) => s.trim().toLocaleLowerCase())
-        .filter((s): s is (typeof ALLOWED_SCOPES)[number] => ALLOWED_SCOPES.includes(s as any))
+        .filter((s): s is (typeof ALLOWED_SCOPES)[number] =>
+          ALLOWED_SCOPES.includes(s as (typeof ALLOWED_SCOPES)[number])
+        )
     )
   );
 
@@ -186,7 +190,7 @@ async function getCached(key: string): Promise<string | null> {
   return null;
 }
 
-async function setCached(key: string, value: any): Promise<void> {
+async function setCached(key: string, value: unknown): Promise<void> {
   if (redis?.status === 'ready') {
     try {
       await redis.set(

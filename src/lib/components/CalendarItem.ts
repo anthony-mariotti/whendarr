@@ -8,7 +8,7 @@ export type TvCalendarItem = {
   episode: number;
   certification: string;
   date: string;
-  airTime: Date;
+  airTime: string;
   hasFile: boolean;
 };
 
