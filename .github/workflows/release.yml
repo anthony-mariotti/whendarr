@@ -3,10 +3,10 @@ name: Release
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 
 concurrency:
-  group: 'release-${{ github.ref }}'
+  group: "release-${{ github.ref }}"
   cancel-in-progress: false
 
 env:
@@ -79,11 +79,19 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Extract Metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}},enable=${{ needs.check-release.outputs.prerelease == 'false' }}
+            type=semver,pattern={{major}},enable=${{ needs.check-release.outputs.prerelease == 'false' }}
+            type=raw,value=latest,enable=${{ needs.check-release.outputs.prerelease == 'false' }}
+            type=raw,value=next,enable=${{ needs.check-release.outputs.prerelease == 'true' }}
+
       - name: Build and Push via Digest
         id: build
         uses: docker/build-push-action@v6
@@ -113,6 +121,22 @@ jobs:
           path: /tmp/digests/*
           if-no-files-found: error
           retention-days: 1
+
+      - name: Create Manifest and Push
+        working-directory: /tmp/digests
+        run: |
+          if [ -z "$(ls -A .)" ]; then
+            echo "Error: No digests found!"
+            exit 1
+          fi
+          docker buildx imagetools create \
+            $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+            $(printf '${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@sha256:%s ' *)
+
+      - name: Inspect image
+        run: |
+          docker buildx imagetools inspect ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version }}
+
   create-release:
     runs-on: ubuntu-latest
     needs: [check-release, build-docker]
