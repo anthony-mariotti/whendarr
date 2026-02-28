@@ -79,11 +79,13 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - id: meta
+      - name: Extract Metadata
+        id: meta
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-      - id: build
+      - name: Build and Push via Digest
+        id: build
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -99,7 +101,13 @@ jobs:
             APP_COMMIT=${{ github.sha }}
             APP_BUILD_DATE=${{ github.event.head_commit.timestamp }}
             CACHE_BUST=${{ github.sha }}
-      - uses: actions/upload-artifact@v6
+      - name: Export Digest
+        run: |
+          mkdir -p /tmp/digests
+          digest="${{ steps.build.outputs.digest }}"
+          touch "/tmp/digests/${digest#sha256:}"
+      - name: Upload Digest
+        uses: actions/upload-artifact@v6
         with:
           name: digests-docker-${{ matrix.arch }}
           path: /tmp/digests/*
