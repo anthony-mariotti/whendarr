@@ -1,14 +1,14 @@
 import { env } from '$env/dynamic/private';
-import redis, { type Redis } from 'ioredis';
+import redis, { type Redis, type RedisOptions } from 'ioredis';
 
 // type RedisConnect = { enabled: true; client: Redis } | { enabled: false; client: null };
 
 let client: Redis | null = null;
 
 try {
-  client = new redis(env.REDIS_URL, {
+  client = new redis(env.REDIS_URL ?? '', {
     enableOfflineQueue: false
-  });
+  } as RedisOptions);
 
   // client = createClient({
   //     url: env.REDIS_URL,

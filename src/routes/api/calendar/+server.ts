@@ -47,13 +47,13 @@ export const GET: RequestHandler = async ({ fetch, url, getClientAddress }) => {
       headers: {
         'X-API-KEY': env.SONARR_KEY,
         'User-Agent': 'Whendarr/0.0.1'
-      }
+      } as HeadersInit
     }),
     fetch(`${env.RADARR_URL}/api/v3/calendar?start=${now}&end=${end}`, {
       headers: {
         'X-API-KEY': env.RADARR_KEY,
         'User-Agent': 'Whendarr/0.0.1'
-      }
+      } as HeadersInit
     })
   ]);
 
