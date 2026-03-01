@@ -1,42 +1,67 @@
-# sv
+<h1 align="center">
+  Whendarr
+</h1>
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+<p align="center">
+  Public-friendly calendar for private media libraries.
+</p>
 
-## Creating a project
+<p align="center">
+  <a href="https://github.com/anthony-mariotti/whendarr/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/anthony-mariotti/whendarr/ci.yml?branch=main&style=flat-square&label=CI" alt="CI Status" /></a>
+  <a href="https://github.com/anthony-mariotti/whendarr/releases"><img src="https://img.shields.io/github/v/release/anthony-mariotti/whendarr?style=flat-square&color=a86add" alt="Latest Release" /></a>
+  <a href="https://ghcr.io/anthony-mariotti/whendarr"><img src="https://img.shields.io/badge/ghcr.io-whendarr-blue?style=flat-square&logo=docker&logoColor=white" alt="Docker" /></a>
+  <a href="https://github.com/anthony-mariotti/whendarr/blob/main/LICENSE.md"><img src="https://img.shields.io/github/license/anthony-mariotti/whendarr?style=flat-square" alt="License" /></a>
+  <a href="https://docs.whendarr.com"><img src="https://img.shields.io/badge/docs-whendarr.com-a86add?style=flat-square" alt="Documentation" /></a>
+</p>
 
-If you're seeing this, you've probably already done this step. Congrats!
+A lightweight web calendar for Sonarr and Radarr that aggregates upcoming TV and movie releases into a fast, shareable monthly view with caching and rate limiting.
 
-```sh
-# create a new project
-npx sv create my-app
+### Docker Tags
+
+| Tag      | Description                                         |
+| -------- | --------------------------------------------------- |
+| `latest` | Stable Release (requires external redis/valkey)     |
+| `next`   | Latest Pre-Release (requires external redis/valkey) |
+
+```bash
+# Stable (requires externall services)
+docker pull ghcr.io/anthony-mariotti/whendarr:latest
+
+# Beeding Edge
+docker pull ghcr.io/anthony-mariotti/whendarr:next
 ```
 
-To recreate this project with the same configuration:
+### Logging
 
-```sh
-# recreate this project
-pnpm dlx sv create --template minimal --types ts --add prettier eslint sveltekit-adapter="adapter:auto" vitest="usages:unit,component" tailwindcss="plugins:typography,forms" --install pnpm .
+**Docker** - Checking the service running in its container
+
+```bash
+docker logs whendarr
+docker logs whendarr-redis # or valkey
 ```
 
-## Developing
+### Development Setup
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+```bash
+pnpm install
 
-```sh
-npm run dev
+# Copy and Configure Environment
+cp .env.example .env
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+# Start Development Server
+pnpm dev
 ```
 
-## Building
+SvelteKit typically starts at `localhost:5173`
 
-To create a production version of your app:
+## Contributing
 
-```sh
-npm run build
-```
+Contributions are welcome! Please:
 
-You can preview the production build with `npm run preview`.
+1. Fork the repo
+2. Create a feature branch (`git checkout -b feature/thing`)
+3. Make desiered changes
+4. Run tests and linting (`pnpm test && pnpm lint`)
+5. Open a PR
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+Check the [issues](https://github.com/anthony-mariotti/whendarr/issues) for things to work on.
