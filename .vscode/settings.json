@@ -6,5 +6,8 @@
   "prettier.configPath": ".prettierrc",
   "prettier.tabWidth": 2,
   "editor.tabSize": 2,
-  "editor.detectIndentation": false
+  "editor.detectIndentation": false,
+  "markdownlint.config": {
+    "no-inline-html": false
+  }
 }
