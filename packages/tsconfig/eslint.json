@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "./base.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "types": ["node"],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./apps/frontend/src/*"]
+    }
+  },
+  "include": [
+    "apps/server/src/**/*.ts",
+    "apps/frontend/src/**/*.ts",
+    "apps/frontend/src/**/*.tsx",
+    "*.config.ts",
+    "*.config.js",
+    "*.config.mjs"
+  ],
+  "exclude": [
+    "node_modules",
+    "**/node_modules",
+    "**/dist",
+    "**/build",
+    "**/.turbo",
+    "**/coverage",
+    "**/.expo"
+  ]
+}

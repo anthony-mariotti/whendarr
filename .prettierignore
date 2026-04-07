@@ -1,3 +1,9 @@
+# General
+node_modules
+dist
+build
+coverage
+
 # Package Managers
 package-lock.json
 pnpm-lock.yaml
@@ -5,10 +11,10 @@ yarn.lock
 bun.lock
 bun.lockb
 
-# Miscellaneous
-/static/
+# Framework
+.turbo
+.next
 
+# Miscellaneous
 README.md
 LICENSE.md
-
-src/lib/components/ui
