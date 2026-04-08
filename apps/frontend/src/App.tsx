@@ -1,10 +1,15 @@
-import { Button } from './components/ui/button';
+import { Calendar } from './components/calendar';
+import { Toolbar } from './components/toolbar';
+import { useCalendar } from './hooks/api/useCalendar';
 
 function App() {
+  const { data, isLoading } = useCalendar();
+
   return (
-    <>
-      <Button>Test Button</Button>
-    </>
+    <div className="h-full w-full">
+      <Toolbar />
+      <Calendar events={data?.data} isLoading={isLoading} />
+    </div>
   );
 }
 
