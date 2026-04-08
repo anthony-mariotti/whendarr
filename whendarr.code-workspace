@@ -1,0 +1,28 @@
+{
+  "folders": [
+    {
+      "name": "@whendarr/root",
+      "path": "."
+    },
+    {
+      "name": "@whendarr/frontend",
+      "path": "./apps/frontend"
+    },
+    {
+      "name": "@whendarr/backend",
+      "path": "./apps/backend"
+    },
+    {
+      "name": "@whendarr/shared",
+      "path": "./packages/shared"
+    },
+    {
+      "name": "@whendarr/translations",
+      "path": "./packages/translations"
+    },
+    {
+      "name": "@whendarr/tsconfig",
+      "path": "./packages/tsconfig"
+    }
+  ]
+}

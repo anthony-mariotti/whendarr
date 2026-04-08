@@ -9,6 +9,10 @@
     "types": ["node"],
     "baseUrl": ".",
     "paths": {
+      "@whendarr/shared": ["./packages/shared/src"],
+      "@whendarr/shared/*": ["./packages/shared/src/*"],
+      "@whendarr/translations": ["./packages/translations/src"],
+      "@whendarr/translations/*": ["./packages/translations/src/*"],
       "@/*": ["./apps/frontend/src/*"]
     }
   },
@@ -16,6 +20,8 @@
     "apps/server/src/**/*.ts",
     "apps/frontend/src/**/*.ts",
     "apps/frontend/src/**/*.tsx",
+    "packages/shared/src/**/*.ts",
+    "packages/translations/src/**/*.ts",
     "*.config.ts",
     "*.config.js",
     "*.config.mjs"
