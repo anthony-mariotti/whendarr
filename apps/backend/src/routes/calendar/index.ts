@@ -7,11 +7,11 @@ export async function registerCalendarRoute(instance: FastifyInstance) {
 }
 
 const calendarV1: FastifyPluginAsync = async (instance: FastifyInstance) => {
-  instance.get('/', async (request) => {
+  instance.get('/', async (request, reply) => {
     const query = await calendarQuerySchema.safeParseAsync(request.query);
     instance.assert(query.success, 400, query.error?.issues?.at(0)?.message);
 
-    const start = query.data.month
+    const startDate = query.data.month
       ? instance
           .dayjs(query.data.month, 'YYYY-MM-DD')
           .startOf('month')
@@ -24,7 +24,7 @@ const calendarV1: FastifyPluginAsync = async (instance: FastifyInstance) => {
           .tz(query.data.tz ?? 'UTC', false)
           .startOf('date');
 
-    const end = query.data.month
+    const endDate = query.data.month
       ? instance.dayjs(query.data.month, 'YYYY-MM-DD').endOf('month').endOf('week').endOf('date')
       : instance.dayjs
           .utc()
@@ -33,28 +33,32 @@ const calendarV1: FastifyPluginAsync = async (instance: FastifyInstance) => {
           .tz(query.data.tz ?? 'UTC', false)
           .endOf('date');
 
-    const response = await instance.radarr.calendar({
-      start: start.toISOString(),
-      end: end.toISOString()
-    });
+    const start = startDate.toISOString();
+    const end = endDate.toISOString();
 
-    if (!response.ok) {
-      return {
-        status: response.status,
-        message: response.statusText
-      };
+    const [radarrResponse, sonarrResponse] = await Promise.all([
+      instance.radarr.calendar({ start, end }),
+      instance.sonarr.calendar({ start, end })
+    ]);
+
+    if (!radarrResponse.ok) {
+      return reply.badGateway(`Radarr API failed with status ${radarrResponse.status}`);
     }
 
-    const mapped = response.data.flatMap((movie) =>
-      mapMovieToEntries(instance, movie, start, end, query.data.tz ?? 'UTC')
+    if (!sonarrResponse.ok) {
+      return reply.badGateway(`Sonarr API failed with status ${sonarrResponse.status}`);
+    }
+
+    const mapped = radarrResponse.data.flatMap((movie) =>
+      mapMovieToEntries(instance, movie, startDate, endDate, query.data.tz ?? 'UTC')
     );
 
     return {
       tz: query.data.tz ?? 'UTC',
-      start: start.toISOString(),
-      end: end.toISOString(),
+      start: start,
+      end: end,
       data: mapped,
-      raw: response.data
+      raw: radarrResponse.data
     };
   });
 };

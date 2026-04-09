@@ -29,12 +29,11 @@
     "files.associations": {
       "*.css": "tailwindcss"
     },
-    "prettier.tabWidth": 2,
     "editor.tabSize": 2,
     "editor.indentSize": "tabSize",
-    "editor.detectIndentation": true,
+    "editor.detectIndentation": false,
     "markdownlint.config": {
       "no-inline-html": false
-    }
+    },
   }
 }
