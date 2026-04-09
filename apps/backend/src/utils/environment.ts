@@ -49,7 +49,19 @@ export function readStringFromEnvironment(
   variable: ENVIRONMENT,
   defaultValue?: string | undefined
 ): string | undefined {
-  if (process.env[variable]) {
+  const env = process.env[variable];
+  if (env) {
+    if (env.startsWith('http')) {
+      try {
+        new URL(env);
+        if (env.endsWith('/')) {
+          return env.slice(0, -1);
+        }
+      } catch {
+        /* Not a URL */
+      }
+    }
+
     return process.env[variable];
   }
 
@@ -83,4 +95,9 @@ export type ENVIRONMENT =
   | 'REDIS_URL'
   | 'REDIS_HOST'
   | 'REDIS_PORT'
-  | 'REDIS_PREFIX';
+  | 'REDIS_PREFIX'
+  | 'REDIS_PASSWORD'
+  | 'RADARR_URL'
+  | 'RADARR_KEY'
+  | 'SONARR_URL'
+  | 'SONARR_KEY';

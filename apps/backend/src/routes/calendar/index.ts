@@ -1,6 +1,7 @@
 import type { Dayjs } from 'dayjs';
 import type { FastifyInstance, FastifyPluginAsync } from 'fastify';
 import { calendarQuerySchema, type MovieItem } from '@whendarr/shared';
+import { readStringFromEnvironment } from '@/utils/environment.js';
 
 export async function registerCalendarRoute(instance: FastifyInstance) {
   await instance.register(calendarV1, { prefix: '/api/v1/calendar' });
@@ -33,11 +34,11 @@ const calendarV1: FastifyPluginAsync = async (instance: FastifyInstance) => {
           .tz(query.data.tz ?? 'UTC', false)
           .endOf('date');
 
-    const radarrEndpoint = `https://radarrplaceholderforcommiting/api/v3/calendar?start=${start.toISOString()}&end=${end.toISOString()}`;
+    const radarrEndpoint = `${readStringFromEnvironment('RADARR_URL')}/api/v3/calendar?start=${start.toISOString()}&end=${end.toISOString()}`;
     instance.log.info({ service: 'radarr', fetch: { url: radarrEndpoint } });
     const response = await fetch(radarrEndpoint, {
       headers: {
-        'X-API-KEY': 'totallylegitapikey',
+        'X-API-KEY': readStringFromEnvironment('RADARR_KEY'),
         'User-Agent': 'Whendarr/0.0.1'
       }
     });
