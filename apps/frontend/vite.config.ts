@@ -26,8 +26,8 @@ export default defineConfig(({ command }) => ({
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
-      'dayjs/locale': path.resolve('node_modules/dayjs/esm/locale')
+      '@': path.resolve(__dirname, './src')
+      // 'dayjs/locale': path.resolve('node_modules/dayjs/esm/locale')
     }
   }
 }));

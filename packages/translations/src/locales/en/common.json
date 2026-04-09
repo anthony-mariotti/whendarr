@@ -1,1 +1,11 @@
-{}
+{
+  "time": {
+    "today": "Today"
+  },
+  "media": {
+    "movie": "Movie",
+    "movie_plural": "Movies",
+    "tv_show": "TV Show",
+    "tv_show_plural": "TV Shows"
+  }
+}

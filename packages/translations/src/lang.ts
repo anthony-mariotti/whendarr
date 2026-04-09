@@ -1,6 +1,5 @@
 export const LANG_NAMES = {
-  en: 'English',
-  'de-DE': 'Deutsch'
+  en: 'English'
 } as const;
 
 export type LangCode = keyof typeof LANG_NAMES;

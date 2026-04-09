@@ -81,7 +81,7 @@ function CalendarDay({ day, events }: CalendarDayProps) {
   return (
     <div className="relative flex h-full w-full flex-1 flex-col overflow-hidden border-l border-black last:border-r">
       <h2 className="text-center">
-        {day.date() === 1 ? `${day.format('MMM')} ${day.date()}` : day.date()}
+        {day.date() === 1 ? `${day.format('MMM')} ${day.format('D')}` : day.format('D')}
       </h2>
       <div className="flex h-full w-full flex-1 flex-col flex-nowrap space-y-1 p-1">
         {dayEvents?.map((event, idx) => (

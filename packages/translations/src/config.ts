@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 /// <reference types="node" />
 
-import i18n from 'i18next';
+import i18n, { type InitOptions } from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
 import commonEn from './locales/en/common.json' with { type: 'json' };
@@ -79,7 +79,7 @@ export const defaultI18nConfig = {
   // Returning the key is better than empty string for debugging
   returnNull: false,
   returnEmptyString: false
-} as const;
+} as InitOptions;
 
 let initPromise: Promise<typeof i18n> | null = null;
 
