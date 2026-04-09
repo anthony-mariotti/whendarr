@@ -30,8 +30,8 @@ export class RadarrApi {
     this.instance = options.instance;
   }
 
-  calendar = async (params: CalendarParams) => {
-    return this.get<CalendarResponse[]>(RadarrApiRoutes.calendar.get, params);
+  calendar = async (params: RadarrCalendarParams) => {
+    return this.get<RadarrCalendarResponse[]>(RadarrApiRoutes.calendar.get, params);
   };
 
   private get = async <T>(url: string, params?: unknown): Promise<RadarrResponse<T>> => {
@@ -87,7 +87,7 @@ export class RadarrApi {
   }
 }
 
-export interface CalendarParams {
+export interface RadarrCalendarParams {
   start?: string;
   end?: string;
   unmonitored?: boolean;
@@ -105,7 +105,7 @@ type RadarrResponseFailed = Response & {
 
 export type RadarrResponse<T> = RadarrResponseSuccess<T> | RadarrResponseFailed;
 
-export interface CalendarResponse {
+export interface RadarrCalendarResponse {
   isAvailable?: boolean;
   title: string;
   status: string;

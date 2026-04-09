@@ -1,4 +1,4 @@
-import { RadarrApi, type RadarrApiOptions } from '@/services/radarr/api.js';
+import { RadarrApi, type RadarrApiOptions } from '@/integrations/radarr/api.js';
 import { readFromFileEnvironment, readStringFromEnvironment } from '@/utils/environment.js';
 import type { FastifyPluginAsync } from 'fastify';
 import fastifyPlugin from 'fastify-plugin';

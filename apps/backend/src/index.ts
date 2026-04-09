@@ -10,6 +10,7 @@ import { registerServerRoute } from '@/routes/server/index.js';
 import redisPlugin, { redisConnect, redisConnectTest } from '@/plugins/redis.js';
 import dayjsPlugin from '@/plugins/dayjs.js';
 import radarrPlugin from '@/plugins/radarr.js';
+import sonarrPlugin from '@/plugins/sonarr.js';
 
 import { registerHealthRoute } from '@/routes/health/index.js';
 import fastifySensible from '@fastify/sensible';
@@ -57,6 +58,7 @@ async function build() {
   await instance.register(redisPlugin);
   await instance.register(dayjsPlugin);
   await instance.register(radarrPlugin);
+  await instance.register(sonarrPlugin);
 
   const redisReady = await redisConnectTest();
   if (!redisReady) {
