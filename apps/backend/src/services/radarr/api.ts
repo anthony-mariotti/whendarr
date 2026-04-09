@@ -24,7 +24,10 @@ export class RadarrApi {
     });
 
     if (!response.ok) {
-      return response;
+      return {
+        ...response,
+        ok: false
+      };
     }
 
     return {
@@ -40,7 +43,7 @@ export class RadarrApi {
     if (params.unmonitored) query.set('unmonitored', `${params.unmonitored}`);
     if (params.tags) query.set('tags', params.tags);
 
-    return this.get<CalendarResponse>(
+    return this.get<CalendarResponse[]>(
       query.size > 0
         ? `${this.endpoint}/api/v3/calendar?${query}`
         : `${this.endpoint}/api/v3/calendar`
@@ -60,7 +63,9 @@ type RadarrResponseSuccess<T> = {
   data: T;
 };
 
-type RadarrResponseFailed = Response;
+type RadarrResponseFailed = Response & {
+  ok: false;
+};
 
 export type RadarrResponse<T> = RadarrResponseSuccess<T> | RadarrResponseFailed;
 
