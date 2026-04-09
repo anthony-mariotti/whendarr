@@ -1,6 +1,15 @@
 import fs from 'fs';
 
 /**
+ * Options for reading environment variables
+ * @template T The expected default type
+ */
+export interface EnvironmentOptions<T> {
+  default?: T;
+  required?: boolean;
+}
+
+/**
  * Get a boolean from an environment variable. Must strictly true or false, case-insensitive
  * @param variable Expected environment variable.
  * @param defaultValue The default value when environment variable is not found.
@@ -8,48 +17,92 @@ import fs from 'fs';
  */
 export function readBooleanFromEnvironment(
   variable: ENVIRONMENT,
-  defaultValue: boolean = false
+  options: EnvironmentOptions<boolean> = { required: false }
 ): boolean {
   if (process.env[variable]) {
     return process.env[variable]?.toLowerCase() === 'true';
   }
 
-  return defaultValue;
+  return options?.default ?? false;
 }
 
+export function readFromFileEnvironment(variable: ENVIRONMENT): string | undefined;
+
+export function readFromFileEnvironment(variable: ENVIRONMENT, options: { required: true }): string;
+
+export function readFromFileEnvironment(
+  variable: ENVIRONMENT,
+  options: { required: false }
+): string | undefined;
+
+export function readFromFileEnvironment(
+  variable: ENVIRONMENT,
+  options: EnvironmentOptions<string>
+): string | undefined;
+
 /**
- * Will read the passed environment variable as `VARIABLE_FILE` first then if not found, will use the non-file version.
- * @param variable Expected environment variable
- * @param defaultValue The default value when environment variable is not found
- * @returns The output of the file or environment variable
+ * Reads an environment variable from a file or the corresponding variable.
+ *
+ * If `${variable}_FILE` is set, then the file will be read and returned
+ * Otherwise, fallback to reading the non-file version of the environment variable.
+ *
+ * @param variable Environment variable to read
+ * @param options Optional configuration
+ * @returns The file contents as a Buffer, the fallback environment variable as a tring, or default value if supplied
+ * @throws Error only if fallback environment variable is not set and required
  */
 export function readFromFileEnvironment(
   variable: ENVIRONMENT,
-  defaultValue?: string | undefined
-): Buffer | string | undefined {
+  options: EnvironmentOptions<string> = { required: false }
+): string | undefined {
   const path = process.env[`${variable}_FILE`];
+
   if (path) {
     try {
-      return fs.readFileSync(path);
+      const value = fs.readFileSync(path);
+      if (Buffer.isBuffer(value)) {
+        return value.toString('utf-8').trim();
+      }
+      return value;
     } catch {
-      return defaultValue;
+      /* Fallback */
     }
   }
 
-  return readStringFromEnvironment(variable, defaultValue);
+  return readStringFromEnvironment(variable, options);
 }
+
+export function readStringFromEnvironment(variable: ENVIRONMENT): string | undefined;
+
+export function readStringFromEnvironment(
+  variable: ENVIRONMENT,
+  options: { required: false }
+): string | undefined;
+
+export function readStringFromEnvironment(
+  variable: ENVIRONMENT,
+  options: { required: true }
+): string;
+
+export function readStringFromEnvironment(
+  variable: ENVIRONMENT,
+  options: EnvironmentOptions<string>
+): string;
 
 /**
  * Read an environment variable as a string, or return the default value if supplied.
- * @param variable Expected environment variable.
- * @param defaultValue The default value when environment variable is not found.
- * @returns The string of the set environment variable or the default value.
+ *
+ * @param variable Environment variable to read
+ * @param options Optional configuration
+ * @returns The value of the environment variable, or the default value
+ * @throws Error if the environment variable is required and not set
  */
 export function readStringFromEnvironment(
   variable: ENVIRONMENT,
-  defaultValue?: string | undefined
+  options: EnvironmentOptions<string> = { required: false }
 ): string | undefined {
   const env = process.env[variable];
+
   if (env) {
     if (env.startsWith('http')) {
       try {
@@ -65,28 +118,70 @@ export function readStringFromEnvironment(
     return process.env[variable];
   }
 
-  return defaultValue;
+  if (options?.required) {
+    throw new Error(`Missing required ${variable} environment variable.`);
+  }
+
+  return options?.default;
 }
+
+export function readNumberFromEnvironment(variable: ENVIRONMENT): number | undefined;
+
+export function readNumberFromEnvironment(variable: ENVIRONMENT, radix: number): number | undefined;
 
 export function readNumberFromEnvironment(
   variable: ENVIRONMENT,
-  radix?: number,
-  defaultValue?: number | undefined
+  radix: number,
+  options: { required: false }
+): number | undefined;
+
+export function readNumberFromEnvironment(
+  variable: ENVIRONMENT,
+  radix: number,
+  options: { required: true }
+): number;
+
+export function readNumberFromEnvironment(
+  variable: ENVIRONMENT,
+  radix: number,
+  options: EnvironmentOptions<number>
+): number | undefined;
+
+/**
+ *
+ * @param variable
+ * @param radix
+ * @param options
+ * @returns
+ */
+export function readNumberFromEnvironment(
+  variable: ENVIRONMENT,
+  radix: number = 10,
+  options: EnvironmentOptions<number> = { required: false }
 ): number | undefined {
   const value = process.env[variable];
+
   if (value) {
     try {
       return parseInt(value, radix);
     } catch {
-      // TODO: Log when number cannot be parsed.
-      return defaultValue;
+      /* Fallback */
     }
   }
 
-  return defaultValue;
+  if (options?.required) {
+    throw new Error(`Missing required ${variable} environment variable.`);
+  }
+
+  return options?.default;
+}
+
+export function isDevelopment(): boolean {
+  return readStringFromEnvironment('NODE_ENV') === 'development';
 }
 
 export type ENVIRONMENT =
+  | 'NODE_ENV'
   | 'LOG_LEVEL'
   | 'PORT'
   | 'HOST'

@@ -1,5 +1,5 @@
 import { RadarrApi, type RadarrApiOptions } from '@/services/radarr/api.js';
-import { readStringFromEnvironment } from '@/utils/environment.js';
+import { readFromFileEnvironment, readStringFromEnvironment } from '@/utils/environment.js';
 import type { FastifyPluginAsync } from 'fastify';
 import fastifyPlugin from 'fastify-plugin';
 
@@ -10,14 +10,13 @@ declare module 'fastify' {
 }
 
 const radarrPlugin: FastifyPluginAsync = async (instance) => {
-  const endpoint = readStringFromEnvironment('RADARR_URL');
-  if (!endpoint) throw new Error('Missing RADARR_URL');
-  const key = readStringFromEnvironment('RADARR_KEY');
-  if (!key) throw new Error('Missing RADARR_KEY');
+  const endpoint = readFromFileEnvironment('RADARR_URL', { required: true });
+  const key = readFromFileEnvironment('RADARR_KEY', { required: true });
 
   const options: RadarrApiOptions = {
     endpoint,
-    key
+    key,
+    instance
   };
 
   const radarr = new RadarrApi(options);

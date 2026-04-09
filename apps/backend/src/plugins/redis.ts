@@ -15,7 +15,7 @@ const build = (
   let endpoint = readStringFromEnvironment('REDIS_URL');
   if (!endpoint) {
     const host = readStringFromEnvironment('REDIS_HOST');
-    const port = readNumberFromEnvironment('REDIS_PORT', 10);
+    const port = readNumberFromEnvironment('REDIS_PORT');
     if (!host || !port || port <= 0) {
       endpoint = undefined;
     }

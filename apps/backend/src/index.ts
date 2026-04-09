@@ -1,5 +1,9 @@
 import Fastify from 'fastify';
-import { readNumberFromEnvironment, readStringFromEnvironment } from '@/utils/environment.js';
+import {
+  isDevelopment,
+  readNumberFromEnvironment,
+  readStringFromEnvironment
+} from '@/utils/environment.js';
 import { registerCalendarRoute } from '@/routes/calendar/index.js';
 import { registerServerRoute } from '@/routes/server/index.js';
 
@@ -18,16 +22,19 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const PORT = readNumberFromEnvironment('PORT', 10, 3000);
-const HOST = readStringFromEnvironment('HOST', '0.0.0.0');
-
 const PROJECT_ROOT = resolve(__dirname, '../../..');
 config({ path: resolve(PROJECT_ROOT, '.env'), quiet: true });
+
+const PORT = readNumberFromEnvironment('PORT', 10, { default: 3000 });
+const HOST = readStringFromEnvironment('HOST', { default: '0.0.0.0' });
 
 async function build() {
   const instance = Fastify({
     logger: {
-      level: readStringFromEnvironment('LOG_LEVEL', 'info')
+      level: readStringFromEnvironment('LOG_LEVEL', { default: 'info' }),
+      transport: isDevelopment()
+        ? { target: 'pino-pretty', options: { colorize: true } }
+        : undefined
     },
     trustProxy: (address, hop) => {
       const trustedProxy = readStringFromEnvironment('TRUSTED_PROXY');
