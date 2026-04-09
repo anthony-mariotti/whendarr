@@ -1,12 +1,11 @@
 {
   "files.associations": {
     "*.css": "tailwindcss"
-    // "*.pcss": "tailwindcss"
   },
-  "prettier.configPath": ".prettierrc",
   "prettier.tabWidth": 2,
   "editor.tabSize": 2,
-  "editor.detectIndentation": false,
+  "editor.indentSize": "tabSize",
+  "editor.detectIndentation": true,
   "markdownlint.config": {
     "no-inline-html": false
   }

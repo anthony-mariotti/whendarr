@@ -1,11 +1,15 @@
+import './styles/globals.css';
+import './lib/dayjs.js';
+
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
 import App from './App';
 
-import './styles/globals.css';
 import { i18nReady } from './i18n';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { TooltipProvider } from './components/ui/tooltip';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -28,7 +32,10 @@ void i18nReady.then(() => {
   createRoot(root).render(
     <StrictMode>
       <QueryClientProvider client={queryClient}>
-        <App />
+        <TooltipProvider>
+          <App />
+          <ReactQueryDevtools initialIsOpen={false} />
+        </TooltipProvider>
       </QueryClientProvider>
     </StrictMode>
   );

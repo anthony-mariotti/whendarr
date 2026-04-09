@@ -1,4 +1,4 @@
-import type { CalendarItem } from '@whendarr/shared';
+import type { CalendarEvent, CalendarQuery } from '@whendarr/shared';
 
 class WhendarrApi {
   private base: string;
@@ -37,7 +37,14 @@ class WhendarrApi {
   }
 
   calendar = {
-    get: () => this.request<{ data: CalendarItem[]; raw: unknown }>('/calendar')
+    get: (params?: CalendarQuery) => {
+      const searchParams = new URLSearchParams();
+      if (params?.month) searchParams.set('month', String(params.month));
+      if (params?.tz) searchParams.set('tz', String(params.tz));
+      return this.request<{ data: CalendarEvent[]; raw: unknown }>(
+        searchParams.size > 0 ? `/calendar?${searchParams.toString()}` : '/calendar'
+      );
+    }
   };
 }
 

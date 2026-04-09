@@ -1,31 +1,37 @@
 import type { Dayjs } from 'dayjs';
 import type { FastifyInstance, FastifyPluginAsync } from 'fastify';
-import { z } from 'zod';
-import type { MovieItem } from '@whendarr/shared';
+import { calendarQuerySchema, type MovieItem } from '@whendarr/shared';
 
 export async function registerCalendarRoute(instance: FastifyInstance) {
   await instance.register(calendarV1, { prefix: '/api/v1/calendar' });
 }
 
-const calendarV1Schema = z.object({
-  start: z.string().optional(),
-  end: z.string().optional()
-});
+const calendarV1: FastifyPluginAsync = async (instance: FastifyInstance) => {
+  instance.get('/', async (request) => {
+    const query = await calendarQuerySchema.safeParseAsync(request.query);
+    instance.assert(query.success, 400, query.error?.issues?.at(0)?.message);
 
-const calendarV1: FastifyPluginAsync = async (instance) => {
-  instance.get('/', async (request, reply) => {
-    const query = calendarV1Schema.safeParse(request.query);
-    if (!query.success) {
-      return reply.badRequest('Invalid query parameters');
-    }
+    const start = query.data.month
+      ? instance
+          .dayjs(query.data.month, 'YYYY-MM-DD')
+          .startOf('month')
+          .startOf('week')
+          .startOf('date')
+      : instance.dayjs
+          .utc()
+          .startOf('month')
+          .startOf('week')
+          .tz(query.data.tz ?? 'UTC', false)
+          .startOf('date');
 
-    const start = query.data.start
-      ? instance.dayjs(query.data.start)
-      : instance.dayjs.utc().startOf('month').hour(0).minute(0).second(0).millisecond(0);
-
-    const end = query.data.end
-      ? instance.dayjs(query.data.end)
-      : instance.dayjs.utc().endOf('month').hour(23).minute(59).second(59).millisecond(999);
+    const end = query.data.month
+      ? instance.dayjs(query.data.month, 'YYYY-MM-DD').endOf('month').endOf('week').endOf('date')
+      : instance.dayjs
+          .utc()
+          .endOf('month')
+          .endOf('week')
+          .tz(query.data.tz ?? 'UTC', false)
+          .endOf('date');
 
     const radarrEndpoint = `https://radarrplaceholderforcommiting/api/v3/calendar?start=${start.toISOString()}&end=${end.toISOString()}`;
     instance.log.info({ service: 'radarr', fetch: { url: radarrEndpoint } });
@@ -44,8 +50,13 @@ const calendarV1: FastifyPluginAsync = async (instance) => {
     }
 
     const radarr = (await response.json()) as IRadarrCalendarItem[];
-    const mapped = radarr.flatMap((movie) => mapMovieToEntries(instance, movie, start, end));
+    const mapped = radarr.flatMap((movie) =>
+      mapMovieToEntries(instance, movie, start, end, query.data.tz ?? 'UTC')
+    );
     return {
+      tz: query.data.tz ?? 'UTC',
+      start: start.toISOString(),
+      end: end.toISOString(),
       data: mapped,
       raw: radarr
     };
@@ -79,7 +90,8 @@ function mapMovieToEntries(
   instance: FastifyInstance,
   movie: IRadarrCalendarItem,
   start: Dayjs,
-  end: Dayjs
+  end: Dayjs,
+  tz: string
 ) {
   const entries: MovieItem[] = [];
 
@@ -89,7 +101,7 @@ function mapMovieToEntries(
       title: movie.title,
       release: 'cinema',
       available: movie.hasFile ?? false,
-      date: movie.inCinemas,
+      date: instance.dayjs.utc(movie.inCinemas).tz(tz, true).toISOString(),
       certification: movie.certification ?? 'NOT RATED',
       overview: movie.overview
     });
@@ -101,19 +113,19 @@ function mapMovieToEntries(
       title: movie.title,
       release: 'digital',
       available: movie.hasFile ?? false,
-      date: movie.digitalRelease,
+      date: instance.dayjs.utc(movie.digitalRelease).tz(tz, true).toISOString(),
       certification: movie.certification ?? 'NOT RATED',
       overview: movie.overview
     });
   }
 
-  if (movie.physicalRelease && isInRange(instance, movie.digitalRelease, start, end)) {
+  if (movie.physicalRelease && isInRange(instance, movie.physicalRelease, start, end)) {
     entries.push({
       type: 'movie',
       title: movie.title,
       release: 'physical',
       available: movie.hasFile ?? false,
-      date: movie.physicalRelease,
+      date: instance.dayjs.utc(movie.physicalRelease).tz(tz, true).toISOString(),
       certification: movie.certification ?? 'NOT RATED',
       overview: movie.overview
     });

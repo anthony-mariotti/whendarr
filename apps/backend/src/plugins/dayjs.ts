@@ -6,6 +6,8 @@ import utcPlugin from 'dayjs/plugin/utc.js';
 import relativeTimePlugin from 'dayjs/plugin/relativeTime.js';
 import isBetweenPlugin from 'dayjs/plugin/isBetween.js';
 import timezonePlugin from 'dayjs/plugin/timezone.js';
+import customParseFormatPlugin from 'dayjs/plugin/customParseFormat.js';
+
 import type { FastifyInstance } from 'fastify';
 
 declare module 'fastify' {
@@ -20,6 +22,7 @@ function dayjsPlugin(instance: FastifyInstance) {
   dayjs.extend(relativeTimePlugin);
   dayjs.extend(isBetweenPlugin);
   dayjs.extend(timezonePlugin);
+  dayjs.extend(customParseFormatPlugin);
 
   // @ts-ignore
   instance.decorate('dayjs', dayjs);
