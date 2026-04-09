@@ -1,12 +1,22 @@
+import type { FastifyInstance } from 'fastify';
+
+const RadarrApiRoutes = {
+  calendar: {
+    get: '/api/v3/calendar'
+  }
+} as const;
+
 export interface RadarrApiOptions {
   endpoint: string;
   key: string;
   headers?: Record<string, string>;
+  instance?: FastifyInstance;
 }
 
 export class RadarrApi {
   private endpoint: string;
   private headers: Record<string, string>;
+  private instance: FastifyInstance | undefined;
 
   constructor(options: RadarrApiOptions) {
     this.endpoint = options.endpoint;
@@ -16,11 +26,33 @@ export class RadarrApi {
       'User-Agent': 'Whendarr/0.0.1',
       ...options.headers
     };
+
+    this.instance = options.instance;
   }
 
-  private get = async <T>(url: string): Promise<RadarrResponse<T>> => {
-    const response = await fetch(url, {
-      headers: this.headers
+  calendar = async (params: CalendarParams) => {
+    return this.get<CalendarResponse[]>(RadarrApiRoutes.calendar.get, params);
+  };
+
+  private get = async <T>(url: string, params?: unknown): Promise<RadarrResponse<T>> => {
+    const response = await fetch(
+      `${this.endpoint}${params ? `${url}?${this.toSearchParams(params).toString()}` : url}`,
+      {
+        headers: this.headers
+      }
+    );
+
+    this.instance?.log.debug({
+      service: 'radarr',
+      fetch: {
+        method: 'GET',
+        endpoint: url,
+        params,
+        response: {
+          ok: response.ok,
+          status: response.status
+        }
+      }
     });
 
     if (!response.ok) {
@@ -36,19 +68,23 @@ export class RadarrApi {
     };
   };
 
-  calendar = async (params: CalendarParams) => {
-    const query = new URLSearchParams();
-    if (params.start) query.set('start', params.start);
-    if (params.end) query.set('end', params.end);
-    if (params.unmonitored) query.set('unmonitored', `${params.unmonitored}`);
-    if (params.tags) query.set('tags', params.tags);
+  private toSearchParams(params: unknown): URLSearchParams;
+  private toSearchParams(params: undefined): undefined;
+  private toSearchParams(params: unknown): URLSearchParams | undefined {
+    if (params === undefined || typeof params !== 'object' || params === null) {
+      return undefined;
+    }
 
-    return this.get<CalendarResponse[]>(
-      query.size > 0
-        ? `${this.endpoint}/api/v3/calendar?${query}`
-        : `${this.endpoint}/api/v3/calendar`
-    );
-  };
+    const query = new URLSearchParams();
+
+    for (const [key, value] of Object.entries(params)) {
+      if (value !== undefined && value !== null) {
+        query.set(key, String(value));
+      }
+    }
+
+    return query;
+  }
 }
 
 export interface CalendarParams {
