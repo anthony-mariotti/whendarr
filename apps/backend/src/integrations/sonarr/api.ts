@@ -116,7 +116,7 @@ export interface SonarrCalendarResponse {
   episodeNumber?: number;
   title: string;
   airDate?: string;
-  airDateUtc?: string;
+  airDateUtc: string;
   runtime?: number;
   overview?: string;
   hasFile?: boolean;
