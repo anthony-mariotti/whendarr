@@ -109,14 +109,71 @@ type SonarrResponseFailed = Response & {
 export type SonarrResponse<T> = SonarrResponseSuccess<T> | SonarrResponseFailed;
 
 export interface SonarrCalendarResponse {
-  isAvailable?: boolean;
+  seriesId?: number;
+  tvdbId?: string;
+  episodeFileId?: number;
+  seasonNumber?: number;
+  episodeNumber?: number;
   title: string;
-  status: string;
-  hasFile?: boolean;
-  inCinemas?: string;
-  physicalRelease?: string;
-  digitalRelease?: string;
-  releaseDate?: string;
-  certification?: string;
+  airDate?: string;
+  airDateUtc?: string;
+  runtime?: number;
   overview?: string;
+  hasFile?: boolean;
+  monitored?: boolean;
+  unverifiedSceneNumbering?: boolean;
+  series?: {
+    title?: string;
+    sortTitle?: string;
+    status?: string;
+    ended?: boolean;
+    overvew?: string;
+    network?: string;
+    airTime?: string;
+    images?: [
+      {
+        coverType?: string;
+        remoteUrl?: string;
+      }
+    ];
+    originalLanguage?: {
+      id?: number;
+      name?: string;
+    };
+    seasons?: [
+      {
+        seasonNumber?: number;
+        monitored?: boolean;
+      }
+    ];
+    year?: number;
+    path?: string;
+    qualityProfileId?: number;
+    seasonFolder?: boolean;
+    monitored?: boolean;
+    monitorNewItems?: string;
+    useSceneNumbering?: boolean;
+    runtime?: number;
+    tvdbId?: string;
+    tvRageId?: string;
+    tvMazeId?: string;
+    tmdbId?: string;
+    firstAired?: string;
+    lastAired?: string;
+    seriesType?: string;
+    cleanTitle?: string;
+    imdbId?: string;
+    titleSlug?: string;
+    certification?: string;
+    genres?: [string];
+    tags?: [number];
+    added?: string;
+    ratings?: {
+      votes?: number;
+      value?: number;
+    };
+    languageProfileId?: number;
+    id?: number;
+  };
+  id?: number;
 }

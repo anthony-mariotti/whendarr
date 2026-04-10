@@ -1,6 +1,6 @@
 import type { CalendarEvent, ReleaseType } from '@whendarr/shared';
 import dayjs, { Dayjs } from 'dayjs';
-import { Disc3, Popcorn, Laptop } from 'lucide-react';
+import { Disc3, Popcorn, Laptop, Tv } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 
 function getMonthDays(date: Dayjs): Dayjs[] {
@@ -77,7 +77,7 @@ interface CalendarDayProps {
 }
 
 function CalendarDay({ day, events }: CalendarDayProps) {
-  const dayEvents = events?.filter((e) => day.isSame(dayjs.tz(e.date), 'day'));
+  const dayEvents = events?.filter((e) => day.isSame(dayjs(e.date), 'day'));
   return (
     <div className="relative flex h-full w-full flex-1 flex-col overflow-hidden border-l border-black last:border-r">
       <h2 className="text-center">
@@ -135,8 +135,27 @@ function CalendarEvent({ event }: CalendarEventProps) {
   }
 
   if (event.type === 'episode') {
+    if (event.available) {
+      return (
+        <div className="bg-accent flex items-center space-x-1 border-l-4 border-green-500 p-1 text-sm">
+          <EpisodeIcon />
+          <h3 className="pointer-events-none truncate">{event?.title}</h3>
+        </div>
+      );
+    }
+
+    if (dayjs(event.date).isAfter(dayjs())) {
+      return (
+        <div className="bg-accent flex items-center space-x-1 border-l-4 border-blue-500 p-1 text-sm">
+          <EpisodeIcon />
+          <h3 className="pointer-events-none truncate">{event?.title}</h3>
+        </div>
+      );
+    }
+
     return (
-      <div className="pointer-events-none flex border-l-4 border-amber-500 bg-amber-100 p-1 text-sm">
+      <div className="bg-accent flex items-center space-x-1 border-l-4 border-red-500 p-1 text-sm">
+        <EpisodeIcon />
         <h3 className="truncate">{event?.title}</h3>
       </div>
     );
@@ -162,6 +181,19 @@ function MovieReleaseIcon({ release }: { release: ReleaseType }) {
       <TooltipTrigger>{icon()}</TooltipTrigger>
       <TooltipContent side="left" className="capitalize">
         {release}
+      </TooltipContent>
+    </Tooltip>
+  );
+}
+
+function EpisodeIcon() {
+  return (
+    <Tooltip>
+      <TooltipTrigger>
+        <Tv size={16} />
+      </TooltipTrigger>
+      <TooltipContent side="left" className="capitalize">
+        Episode
       </TooltipContent>
     </Tooltip>
   );
