@@ -30,12 +30,12 @@
   },
   "devDependencies": {
     "@rolldown/plugin-babel": "^0.2.2",
-    "@tailwindcss/postcss": "^4.2.2",
-    "@types/react": "^19.2.14",
-    "@types/react-dom": "^19.2.3",
+    "@tailwindcss/postcss": "catalog:tailwind",
+    "@types/react": "catalog:react19",
+    "@types/react-dom": "catalog:react19",
     "@vitejs/plugin-react": "^6.0.1",
     "@whendarr/tsconfig": "workspace:*",
-    "tailwindcss": "^4.2.2",
+    "tailwindcss": "catalog:tailwind",
     "typescript": "catalog:",
     "vite": "catalog:"
   }

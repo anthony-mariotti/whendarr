@@ -25,12 +25,28 @@ catalogs:
       specifier: ^4.3.6
       version: 4.3.6
   react19:
+    '@types/react':
+      specifier: ^19.2.14
+      version: 19.2.14
+    '@types/react-dom':
+      specifier: ^19.2.3
+      version: 19.2.3
     react:
       specifier: ^19.2.4
       version: 19.2.4
     react-dom:
       specifier: ^19.2.4
       version: 19.2.4
+  tailwind:
+    '@tailwindcss/postcss':
+      specifier: ^4.2.2
+      version: 4.2.2
+    prettier-plugin-tailwindcss:
+      specifier: ^0.7.2
+      version: 0.7.2
+    tailwindcss:
+      specifier: ^4.2.2
+      version: 4.2.2
 
 importers:
 
@@ -43,7 +59,7 @@ importers:
         specifier: ^24.12.2
         version: 24.12.2
       '@types/react':
-        specifier: ^19.2.14
+        specifier: catalog:react19
         version: 19.2.14
       '@whendarr/shared':
         specifier: workspace:*
@@ -76,7 +92,7 @@ importers:
         specifier: ^3.7.4
         version: 3.7.4
       prettier-plugin-tailwindcss:
-        specifier: ^0.7.2
+        specifier: catalog:tailwind
         version: 0.7.2(prettier@3.7.4)
       turbo:
         specifier: ^2.9.4
@@ -186,13 +202,13 @@ importers:
         specifier: ^0.2.2
         version: 0.2.2(@babel/core@7.29.0)(@babel/runtime@7.29.2)(rolldown@1.0.0-rc.13)(vite@8.0.7(@types/node@24.12.2)(esbuild@0.27.7)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.3))
       '@tailwindcss/postcss':
-        specifier: ^4.2.2
+        specifier: catalog:tailwind
         version: 4.2.2
       '@types/react':
-        specifier: ^19.2.14
+        specifier: catalog:react19
         version: 19.2.14
       '@types/react-dom':
-        specifier: ^19.2.3
+        specifier: catalog:react19
         version: 19.2.3(@types/react@19.2.14)
       '@vitejs/plugin-react':
         specifier: ^6.0.1
@@ -201,7 +217,7 @@ importers:
         specifier: workspace:*
         version: link:../../packages/tsconfig
       tailwindcss:
-        specifier: ^4.2.2
+        specifier: catalog:tailwind
         version: 4.2.2
       typescript:
         specifier: 'catalog:'

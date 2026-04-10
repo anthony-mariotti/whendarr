@@ -12,7 +12,7 @@
     "@whendarr/shared": "workspace:*",
     "@eslint/js": "^9.39.4",
     "@types/node": "^24.12.2",
-    "@types/react": "^19.2.14",
+    "@types/react": "catalog:react19",
     "eslint": "^9.39.4",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react": "^7.37.5",
@@ -22,7 +22,7 @@
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
     "prettier": "^3.7.4",
-    "prettier-plugin-tailwindcss": "^0.7.2",
+    "prettier-plugin-tailwindcss": "catalog:tailwind",
     "turbo": "^2.9.4",
     "typescript": "catalog:",
     "typescript-eslint": "^8.58.0"
