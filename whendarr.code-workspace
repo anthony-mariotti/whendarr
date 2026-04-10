@@ -35,5 +35,8 @@
     "markdownlint.config": {
       "no-inline-html": false
     },
+    "[typescriptreact]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    }
   }
 }

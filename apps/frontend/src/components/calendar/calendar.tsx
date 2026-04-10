@@ -1,7 +1,7 @@
 import type { CalendarEvent, ReleaseType } from '@whendarr/shared';
 import dayjs, { Dayjs } from 'dayjs';
 import { Disc3, Popcorn, Laptop, Tv } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 import {
   Dialog,
   DialogContent,
@@ -9,7 +9,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger
-} from './ui/dialog';
+} from '../ui/dialog';
+import { Separator } from '../ui/separator';
+import clsx from 'clsx';
 
 function getMonthDays(date: Dayjs): Dayjs[] {
   const start = date.startOf('month').startOf('week');
@@ -114,6 +116,7 @@ function CalendarEvent({ event }: CalendarEventProps) {
         <DialogHeader>
           <DialogTitle>{event?.title}</DialogTitle>
           <DialogDescription>{event?.overview}</DialogDescription>
+          <Separator />
         </DialogHeader>
       </DialogContent>
     </Dialog>
@@ -124,48 +127,56 @@ interface CalendarEventTriggerProps {
   event?: CalendarEvent;
 }
 
+const statusClasses = {
+  available: 'border-green-500',
+  unavailable: 'border-red-500',
+  partial: 'border-orange-500',
+  future: 'border-blue-500',
+  untracked: 'border-gray-500'
+} as const;
+
+function generateBorderColor(event: CalendarEvent) {
+  if (dayjs(event.date).isAfter(dayjs())) {
+    return statusClasses.future;
+  }
+
+  if (event.type === 'movie') {
+    if (event.available) {
+      return statusClasses.available;
+    }
+
+    if (event.release === 'cinema') {
+      return statusClasses.untracked;
+    }
+
+    return statusClasses.unavailable;
+  }
+
+  if (event.type === 'show') {
+    if (event.available === 'available') {
+      return statusClasses.available;
+    }
+
+    if (event.available === 'partial') {
+      return statusClasses.partial;
+    }
+
+    return statusClasses.unavailable;
+  }
+
+  return statusClasses.unavailable;
+}
+
 function CalendarEventTrigger({ event, ...props }: CalendarEventTriggerProps) {
   if (!event) return <></>;
 
   if (event.type === 'movie') {
-    if (event.available) {
-      return (
-        <div
-          className="bg-accent flex items-center space-x-1 border-l-4 border-green-500 p-1 text-sm"
-          {...props}
-        >
-          <MovieReleaseIcon release={event.release} />
-          <h3 className="cursor-pointer truncate">{event?.title}</h3>
-        </div>
-      );
-    }
-
-    if (event.release === 'cinema') {
-      return (
-        <div
-          className="bg-accent flex items-center space-x-1 border-l-4 border-gray-500 p-1 text-sm"
-          {...props}
-        >
-          <MovieReleaseIcon release={event.release} />
-          <h3 className="cursor-pointer truncate">{event?.title}</h3>
-        </div>
-      );
-    }
-
-    if (dayjs(event.date).isAfter(dayjs())) {
-      return (
-        <div
-          className="bg-accent flex items-center space-x-1 border-l-4 border-blue-500 p-1 text-sm"
-          {...props}
-        >
-          <MovieReleaseIcon release={event.release} />
-          <h3 className="cursor-pointer truncate">{event?.title}</h3>
-        </div>
-      );
-    }
     return (
       <div
-        className="bg-accent flex items-center space-x-1 border-l-4 border-red-500 p-1 text-sm"
+        className={clsx(
+          'bg-accent flex items-center space-x-1 border-l-4 p-1 text-sm',
+          generateBorderColor(event)
+        )}
         {...props}
       >
         <MovieReleaseIcon release={event.release} />
@@ -175,45 +186,12 @@ function CalendarEventTrigger({ event, ...props }: CalendarEventTriggerProps) {
   }
 
   if (event.type === 'show') {
-    if (event.available === 'available') {
-      return (
-        <div
-          className="bg-accent flex items-center space-x-1 border-l-4 border-green-500 p-1 text-sm"
-          {...props}
-        >
-          <EpisodeIcon />
-          <h3 className="cursor-pointer truncate">{event.title}</h3>
-        </div>
-      );
-    }
-
-    if (event.available === 'partial') {
-      return (
-        <div
-          className="bg-accent flex items-center space-x-1 border-l-4 border-orange-500 p-1 text-sm"
-          {...props}
-        >
-          <EpisodeIcon />
-          <h3 className="cursor-pointer truncate">{event.title}</h3>
-        </div>
-      );
-    }
-
-    if (dayjs(event.date).isAfter(dayjs())) {
-      return (
-        <div
-          className="bg-accent flex items-center space-x-1 border-l-4 border-blue-500 p-1 text-sm"
-          {...props}
-        >
-          <EpisodeIcon />
-          <h3 className="cursor-pointer truncate">{event.title}</h3>
-        </div>
-      );
-    }
-
     return (
       <div
-        className="bg-accent flex items-center space-x-1 border-l-4 border-red-500 p-1 text-sm"
+        className={clsx(
+          'bg-accent flex items-center space-x-1 border-l-4 p-1 text-sm',
+          generateBorderColor(event)
+        )}
         {...props}
       >
         <EpisodeIcon />
