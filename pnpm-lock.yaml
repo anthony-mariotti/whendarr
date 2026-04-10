@@ -21,9 +21,6 @@ catalogs:
     vite:
       specifier: ^8.0.4
       version: 8.0.7
-    zod:
-      specifier: ^4.3.6
-      version: 4.3.6
   react19:
     '@types/react':
       specifier: ^19.2.14
@@ -41,9 +38,6 @@ catalogs:
     '@tailwindcss/postcss':
       specifier: ^4.2.2
       version: 4.2.2
-    prettier-plugin-tailwindcss:
-      specifier: ^0.7.2
-      version: 0.7.2
     tailwindcss:
       specifier: ^4.2.2
       version: 4.2.2
