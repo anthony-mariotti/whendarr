@@ -1,6 +1,13 @@
 import type { RadarrCalendarResponse } from '@/integrations/radarr/api.js';
 import type { SonarrCalendarResponse } from '@/integrations/sonarr/api.js';
-import type { EpisodeGroup, EpisodeItem, EventItem, MovieItem } from '@whendarr/shared';
+import type {
+  EpisodeItem,
+  EventItem,
+  MovieItem,
+  ShowAvailability,
+  ShowItem,
+  ShowStatus
+} from '@whendarr/shared';
 import dayjs from 'dayjs';
 
 export async function retrieveCalendar(
@@ -11,7 +18,7 @@ export async function retrieveCalendar(
 ): Promise<EventItem[]> {
   const promise = new Promise<EventItem[]>((resolve) => {
     const mappedRadarr = radarr.flatMap((movie) => mapMovie(movie, start, end));
-    const mappedSonarr = mapEpisodeAndGroup(sonarr);
+    const mappedSonarr = mapEpisodeToShow(sonarr);
 
     resolve([...mappedRadarr, ...mappedSonarr]);
   });
@@ -72,56 +79,57 @@ function mapMovie(
   return entries;
 }
 
-function mapEpisodeAndGroup(episodes: SonarrCalendarResponse[]): (EpisodeItem | EpisodeGroup)[] {
-  const grouped = new Map<string, EpisodeItem | EpisodeGroup>();
+function mapEpisodeToShow(episodes: SonarrCalendarResponse[]): ShowItem[] {
+  const shows = new Map<string, ShowItem>();
+
   for (const episode of episodes) {
-    if (!episode.airDateUtc) continue;
-
-    const seriesId = episode.series?.id ?? 0;
-
-    const date = episode.airDateUtc.split('T')[0];
-    const key = `${seriesId}-${date}`;
-
-    if (!grouped.has(key)) {
-      grouped.set(key, mapEpisode(episode, false));
+    const key = `${episode.seriesId}-${episode.airDateUtc.split('T')[0]}`;
+    const show = shows.get(key);
+    if (show) {
+      show.episodes.push(mapEpisode(episode));
+      show.available = mapAvailability(show.episodes);
+      shows.set(key, show);
+      continue;
     }
 
-    const group = grouped.get(key);
-    if (group && group?.grouped === true) {
-      group.available ||= episode.hasFile ?? false;
-      group.episodes.push(mapEpisode(episode, false));
-    }
+    shows.set(key, mapShow(episode));
   }
 
-  return Array.from(grouped.values());
+  return Array.from(shows.values());
 }
 
-function mapEpisode(episode: SonarrCalendarResponse, group: false): EpisodeItem;
-function mapEpisode(episode: SonarrCalendarResponse, group: true): EpisodeGroup;
-function mapEpisode(episode: SonarrCalendarResponse, group: boolean): EpisodeItem | EpisodeGroup {
-  const base = {
-    type: 'episode',
-    title: episode.title ?? 'Unknown',
-    available: episode.hasFile ?? false,
-    date: episode.airDateUtc,
-    overview: episode.overview,
-    series: {
-      id: episode.series?.id ?? 0,
-      title: episode.series?.title ?? 'Unknown',
-      certification: episode.series?.certification ?? 'NOT RATED'
-    }
-  };
-
-  if (group) {
-    return {
-      ...base,
-      grouped: true,
-      episodes: []
-    } as EpisodeGroup;
-  }
+function mapShow(item: SonarrCalendarResponse): ShowItem {
+  const show = item.series;
+  const episode = mapEpisode(item);
 
   return {
-    ...base,
-    grouped: false
-  } as EpisodeItem;
+    type: 'show',
+    title: show?.title ?? 'Unknown',
+    overview: show?.overview,
+    date: item.airDateUtc,
+    available: episode.available ? 'available' : 'unavailable',
+    certification: show?.certification ?? 'NOT RATED',
+    status: (show?.status?.toLowerCase() ?? 'unknown') as ShowStatus,
+    episodes: [episode]
+  };
+}
+
+function mapEpisode(episode: SonarrCalendarResponse): EpisodeItem {
+  return {
+    title: episode.title,
+    season: episode.seasonNumber ?? 0,
+    number: episode.episodeNumber ?? 0,
+    overview: episode.overview,
+    available: episode.hasFile ?? false
+  };
+}
+
+function mapAvailability(episodes: EpisodeItem[]): ShowAvailability {
+  const allAvailable = episodes.every((x) => x.available);
+  const allUnavailable = episodes.every((x) => !x.available);
+
+  if (allAvailable) return 'available';
+  if (allUnavailable) return 'unavailable';
+
+  return 'partial';
 }

@@ -109,7 +109,7 @@ type SonarrResponseFailed = Response & {
 export type SonarrResponse<T> = SonarrResponseSuccess<T> | SonarrResponseFailed;
 
 export interface SonarrCalendarResponse {
-  seriesId?: number;
+  seriesId: number;
   tvdbId?: string;
   episodeFileId?: number;
   seasonNumber?: number;
@@ -127,7 +127,7 @@ export interface SonarrCalendarResponse {
     sortTitle?: string;
     status?: string;
     ended?: boolean;
-    overvew?: string;
+    overview?: string;
     network?: string;
     airTime?: string;
     images?: [

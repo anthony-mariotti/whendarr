@@ -174,15 +174,27 @@ function CalendarEventTrigger({ event, ...props }: CalendarEventTriggerProps) {
     );
   }
 
-  if (event.type === 'episode') {
-    if (event.available) {
+  if (event.type === 'show') {
+    if (event.available === 'available') {
       return (
         <div
           className="bg-accent flex items-center space-x-1 border-l-4 border-green-500 p-1 text-sm"
           {...props}
         >
           <EpisodeIcon />
-          <h3 className="cursor-pointer truncate">{event?.series.title}</h3>
+          <h3 className="cursor-pointer truncate">{event.title}</h3>
+        </div>
+      );
+    }
+
+    if (event.available === 'partial') {
+      return (
+        <div
+          className="bg-accent flex items-center space-x-1 border-l-4 border-orange-500 p-1 text-sm"
+          {...props}
+        >
+          <EpisodeIcon />
+          <h3 className="cursor-pointer truncate">{event.title}</h3>
         </div>
       );
     }
@@ -194,7 +206,7 @@ function CalendarEventTrigger({ event, ...props }: CalendarEventTriggerProps) {
           {...props}
         >
           <EpisodeIcon />
-          <h3 className="cursor-pointer truncate">{event?.series.title}</h3>
+          <h3 className="cursor-pointer truncate">{event.title}</h3>
         </div>
       );
     }
@@ -205,7 +217,7 @@ function CalendarEventTrigger({ event, ...props }: CalendarEventTriggerProps) {
         {...props}
       >
         <EpisodeIcon />
-        <h3 className="cursor-pointer truncate">{event?.series.title}</h3>
+        <h3 className="cursor-pointer truncate">{event.title}</h3>
       </div>
     );
   }
