@@ -23,6 +23,7 @@
   },
   "devDependencies": {
     "@whendarr/tsconfig": "workspace:*",
-    "zod": "^4.3.6"
+    "zod": "catalog:",
+    "typescript": "catalog:"
   }
 }

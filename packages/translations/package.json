@@ -21,13 +21,13 @@
     "lint": "eslint src/"
   },
   "dependencies": {
-    "i18next": "^26.0.3",
-    "react-i18next": "^17.0.2"
+    "i18next": "catalog:",
+    "react-i18next": "catalog:"
   },
   "devDependencies": {
     "@whendarr/tsconfig": "workspace:*",
     "tsx": "^4.21.0",
-    "typescript": "^6.0.2",
-    "vite": "^8.0.7"
+    "typescript": "catalog:",
+    "vite": "catalog:"
   }
 }
