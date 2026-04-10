@@ -2,6 +2,14 @@ import type { CalendarEvent, ReleaseType } from '@whendarr/shared';
 import dayjs, { Dayjs } from 'dayjs';
 import { Disc3, Popcorn, Laptop, Tv } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
+} from './ui/dialog';
 
 function getMonthDays(date: Dayjs): Dayjs[] {
   const start = date.startOf('month').startOf('week');
@@ -97,39 +105,71 @@ interface CalendarEventProps {
 }
 
 function CalendarEvent({ event }: CalendarEventProps) {
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <CalendarEventTrigger event={event} />
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{event?.title}</DialogTitle>
+          <DialogDescription>{event?.overview}</DialogDescription>
+        </DialogHeader>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+interface CalendarEventTriggerProps {
+  event?: CalendarEvent;
+}
+
+function CalendarEventTrigger({ event, ...props }: CalendarEventTriggerProps) {
   if (!event) return <></>;
 
   if (event.type === 'movie') {
     if (event.available) {
       return (
-        <div className="bg-accent flex items-center space-x-1 border-l-4 border-green-500 p-1 text-sm">
+        <div
+          className="bg-accent flex items-center space-x-1 border-l-4 border-green-500 p-1 text-sm"
+          {...props}
+        >
           <MovieReleaseIcon release={event.release} />
-          <h3 className="pointer-events-none truncate">{event?.title}</h3>
+          <h3 className="cursor-pointer truncate">{event?.title}</h3>
         </div>
       );
     }
 
     if (event.release === 'cinema') {
       return (
-        <div className="bg-accent flex items-center space-x-1 border-l-4 border-gray-500 p-1 text-sm">
+        <div
+          className="bg-accent flex items-center space-x-1 border-l-4 border-gray-500 p-1 text-sm"
+          {...props}
+        >
           <MovieReleaseIcon release={event.release} />
-          <h3 className="pointer-events-none truncate">{event?.title}</h3>
+          <h3 className="cursor-pointer truncate">{event?.title}</h3>
         </div>
       );
     }
 
     if (dayjs(event.date).isAfter(dayjs())) {
       return (
-        <div className="bg-accent flex items-center space-x-1 border-l-4 border-blue-500 p-1 text-sm">
+        <div
+          className="bg-accent flex items-center space-x-1 border-l-4 border-blue-500 p-1 text-sm"
+          {...props}
+        >
           <MovieReleaseIcon release={event.release} />
-          <h3 className="pointer-events-none truncate">{event?.title}</h3>
+          <h3 className="cursor-pointer truncate">{event?.title}</h3>
         </div>
       );
     }
     return (
-      <div className="bg-accent flex items-center space-x-1 border-l-4 border-red-500 p-1 text-sm">
+      <div
+        className="bg-accent flex items-center space-x-1 border-l-4 border-red-500 p-1 text-sm"
+        {...props}
+      >
         <MovieReleaseIcon release={event.release} />
-        <h3 className="pointer-events-none truncate">{event?.title}</h3>
+        <h3 className="cursor-pointer truncate">{event?.title}</h3>
       </div>
     );
   }
@@ -137,26 +177,35 @@ function CalendarEvent({ event }: CalendarEventProps) {
   if (event.type === 'episode') {
     if (event.available) {
       return (
-        <div className="bg-accent flex items-center space-x-1 border-l-4 border-green-500 p-1 text-sm">
+        <div
+          className="bg-accent flex items-center space-x-1 border-l-4 border-green-500 p-1 text-sm"
+          {...props}
+        >
           <EpisodeIcon />
-          <h3 className="pointer-events-none truncate">{event?.title}</h3>
+          <h3 className="cursor-pointer truncate">{event?.title}</h3>
         </div>
       );
     }
 
     if (dayjs(event.date).isAfter(dayjs())) {
       return (
-        <div className="bg-accent flex items-center space-x-1 border-l-4 border-blue-500 p-1 text-sm">
+        <div
+          className="bg-accent flex items-center space-x-1 border-l-4 border-blue-500 p-1 text-sm"
+          {...props}
+        >
           <EpisodeIcon />
-          <h3 className="pointer-events-none truncate">{event?.title}</h3>
+          <h3 className="cursor-pointer truncate">{event?.title}</h3>
         </div>
       );
     }
 
     return (
-      <div className="bg-accent flex items-center space-x-1 border-l-4 border-red-500 p-1 text-sm">
+      <div
+        className="bg-accent flex items-center space-x-1 border-l-4 border-red-500 p-1 text-sm"
+        {...props}
+      >
         <EpisodeIcon />
-        <h3 className="truncate">{event?.title}</h3>
+        <h3 className="cursor-pointer truncate">{event?.title}</h3>
       </div>
     );
   }
