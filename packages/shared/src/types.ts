@@ -10,17 +10,37 @@ export interface EventItem {
   title: string;
   available: boolean;
   date: string;
-  certification: string;
   overview?: string;
 }
 
 export interface MovieItem extends EventItem {
   type: 'movie';
   release: ReleaseType;
+  certification: string;
 }
 
-export interface EpisodeItem extends EventItem {
+export interface EpisodeBase extends EventItem {
   type: 'episode';
+  series: {
+    id: number;
+    title: string;
+    certification: string;
+  };
+}
+
+export interface EpisodeItem extends EpisodeBase {
+  type: 'episode';
+  series: {
+    id: number;
+    title: string;
+    certification: string;
+  };
+  grouped: false;
+}
+
+export interface EpisodeGroup extends EpisodeBase {
+  grouped: true;
+  episodes: EpisodeItem[];
 }
 
 export type CalendarEvent = MovieItem | EpisodeItem;

@@ -110,7 +110,7 @@ function CalendarEvent({ event }: CalendarEventProps) {
       <DialogTrigger asChild>
         <CalendarEventTrigger event={event} />
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>{event?.title}</DialogTitle>
           <DialogDescription>{event?.overview}</DialogDescription>
@@ -182,7 +182,7 @@ function CalendarEventTrigger({ event, ...props }: CalendarEventTriggerProps) {
           {...props}
         >
           <EpisodeIcon />
-          <h3 className="cursor-pointer truncate">{event?.title}</h3>
+          <h3 className="cursor-pointer truncate">{event?.series.title}</h3>
         </div>
       );
     }
@@ -194,7 +194,7 @@ function CalendarEventTrigger({ event, ...props }: CalendarEventTriggerProps) {
           {...props}
         >
           <EpisodeIcon />
-          <h3 className="cursor-pointer truncate">{event?.title}</h3>
+          <h3 className="cursor-pointer truncate">{event?.series.title}</h3>
         </div>
       );
     }
@@ -205,7 +205,7 @@ function CalendarEventTrigger({ event, ...props }: CalendarEventTriggerProps) {
         {...props}
       >
         <EpisodeIcon />
-        <h3 className="cursor-pointer truncate">{event?.title}</h3>
+        <h3 className="cursor-pointer truncate">{event?.series.title}</h3>
       </div>
     );
   }

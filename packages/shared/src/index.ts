@@ -2,6 +2,7 @@ export type {
   // Media
   MovieItem,
   EpisodeItem,
+  EpisodeGroup,
   MediaType,
   ReleaseType,
   // Calendar
