@@ -50,7 +50,7 @@ function Toolbar() {
         <Button
           variant={'outline'}
           size={'icon-lg'}
-          onClick={nextMonth}
+          onClick={prevMonth}
           aria-label={t('common:actions.previousMonth')}
         >
           <ChevronLeft />
@@ -58,7 +58,7 @@ function Toolbar() {
         <Button
           variant={'outline'}
           size={'icon-lg'}
-          onClick={prevMonth}
+          onClick={nextMonth}
           aria-label={t('common:actions.nextMonth')}
         >
           <ChevronRight />
