@@ -1,4 +1,4 @@
-import { config as base } from './base';
+import { config as base } from './base.js';
 
 import globals from 'globals';
 
@@ -12,10 +12,15 @@ import pluginReactHooks from 'eslint-plugin-react-hooks';
  * */
 export const config = [
   ...base,
-  ...pluginReact.configs.recommended,
   {
+    plugins: {
+      react: pluginReact
+    },
+    rules: {
+      ...pluginReact.configs.recommended.rules
+    },
     languageOptions: {
-      ...pluginReact.configs.flat.recommended.languageOptions,
+      ...pluginReact.configs.recommended.languageOptions,
       globals: {
         ...globals.serviceworker,
         ...globals.browser
