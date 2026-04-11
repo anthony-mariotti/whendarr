@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, InfoIcon, Settings2Icon } from 'lucide-react';
+import { ChevronLeft, ChevronRight, FunnelIcon, InfoIcon, Settings2Icon } from 'lucide-react';
 import { Button } from './ui/button';
 import dayjs from 'dayjs';
 import {
@@ -11,6 +11,16 @@ import {
 } from './ui/select';
 import { useTranslation } from 'react-i18next';
 import { ModeToggle } from './mode-toggle';
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger
+} from './ui/dropdown-menu';
+import { ButtonGroup } from './ui/button-group';
 
 type Props = {
   selectedMonth: dayjs.Dayjs;
@@ -24,23 +34,26 @@ function Toolbar({ selectedMonth, onPrevMonth, onNextMonth, onToday }: Props) {
 
   return (
     <div className="flex min-h-16 items-center space-x-2 px-4 py-2">
-      <Select defaultValue="movies">
-        <SelectTrigger size="default" aria-label={t('common:actions.filter')}>
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectGroup>
-            <SelectItem value="movies">{t('common:media.movie_plural')}</SelectItem>
-            <SelectItem value="episodes">{t('common:media.tv_show_plural')}</SelectItem>
-          </SelectGroup>
-        </SelectContent>
-      </Select>
-      <Button variant={'outline'} onClick={onToday}>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant={'outline'} size={'icon-lg'}>
+            <FunnelIcon />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuGroup>
+            <DropdownMenuLabel>Media</DropdownMenuLabel>
+            <DropdownMenuCheckboxItem>{t('common:media.movie_plural')}</DropdownMenuCheckboxItem>
+            <DropdownMenuCheckboxItem>{t('common:media.tv_show_plural')}</DropdownMenuCheckboxItem>
+          </DropdownMenuGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <Button variant={'outline'} onClick={onToday} size={'lg'}>
         {t('common:time.today')}
       </Button>
-      <div>
+      <ButtonGroup>
         <Button
-          variant={'ghost'}
+          variant={'outline'}
           size={'icon-lg'}
           onClick={onPrevMonth}
           aria-label={t('common:actions.previousMonth')}
@@ -48,14 +61,14 @@ function Toolbar({ selectedMonth, onPrevMonth, onNextMonth, onToday }: Props) {
           <ChevronLeft />
         </Button>
         <Button
-          variant={'ghost'}
+          variant={'outline'}
           size={'icon-lg'}
           onClick={onNextMonth}
           aria-label={t('common:actions.nextMonth')}
         >
           <ChevronRight />
         </Button>
-      </div>
+      </ButtonGroup>
       <div>
         <h1 className="text-xl font-bold">{selectedMonth.format('MMMM YYYY')}</h1>
       </div>
