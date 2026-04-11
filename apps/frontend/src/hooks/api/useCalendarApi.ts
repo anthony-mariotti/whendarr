@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getClientTimezone } from '@whendarr/shared';
 import type dayjs from 'dayjs';
 
-export function useCalendar(params?: { month?: dayjs.Dayjs }) {
+export function useCalendarApi(params?: { month?: dayjs.Dayjs }) {
   const tz = getClientTimezone();
   const month = params?.month?.format('YYYY-MM-DD');
   return useQuery({

@@ -1,27 +1,18 @@
-import dayjs from 'dayjs';
 import { Calendar } from '@/components/calendar';
 import { Toolbar } from '@/components/toolbar';
-import { useCalendar } from '@/hooks/api/useCalendar';
-import { useState } from 'react';
+import { useCalendarApi } from '@/hooks/api/useCalendarApi';
 import { Separator } from '@/components/ui/separator';
+import { useCalendar } from './components/calendar/calendar';
 
 function App() {
-  const [selectedMonth, setSelectedMonth] = useState(dayjs());
-
-  const { data, isLoading } = useCalendar({
-    month: selectedMonth.startOf('month')
-  });
+  const { month } = useCalendar();
+  const { data, isLoading } = useCalendarApi({ month });
 
   return (
     <div className="relative flex h-full w-full flex-col">
-      <Toolbar
-        selectedMonth={selectedMonth}
-        onPrevMonth={() => setSelectedMonth((m) => m.subtract(1, 'month'))}
-        onNextMonth={() => setSelectedMonth((m) => m.add(1, 'month'))}
-        onToday={() => setSelectedMonth(dayjs())}
-      />
+      <Toolbar />
       <Separator />
-      <Calendar selectedMonth={selectedMonth} events={data?.data} isLoading={isLoading} />
+      <Calendar events={data?.data} isLoading={isLoading} />
     </div>
   );
 }

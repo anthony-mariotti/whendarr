@@ -20,6 +20,64 @@ import { Disc3Icon, LaptopIcon, PopcornIcon, TvIcon } from 'lucide-react';
 import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
 import { ExpandableText } from '../expandableText';
+import { createContext, useContext, useState } from 'react';
+
+type CalendarState = {
+  month: dayjs.Dayjs;
+  filter: {
+    movies: boolean;
+    show: boolean;
+  };
+  prevMonth: () => void;
+  nextMonth: () => void;
+  today: () => void;
+};
+
+const initialState: CalendarState = {
+  month: dayjs(),
+  filter: {
+    movies: true,
+    show: true
+  },
+  prevMonth: () => null,
+  nextMonth: () => null,
+  today: () => null
+};
+
+const CalendarProviderContext = createContext<CalendarState>(initialState);
+
+type CalendarProviderProps = {
+  children: React.ReactNode;
+};
+
+export function CalendarProvider({ children, ...props }: CalendarProviderProps) {
+  const [month, setMonth] = useState<dayjs.Dayjs>(dayjs());
+
+  const value: CalendarState = {
+    month,
+    filter: {
+      movies: true,
+      show: true
+    },
+    prevMonth: () => setMonth(month.subtract(1, 'month')),
+    nextMonth: () => setMonth(month.add(1, 'month')),
+    today: () => setMonth(dayjs())
+  };
+
+  return (
+    <CalendarProviderContext.Provider {...props} value={value}>
+      {children}
+    </CalendarProviderContext.Provider>
+  );
+}
+
+export const useCalendar = () => {
+  const context = useContext(CalendarProviderContext);
+  if (context === undefined) {
+    throw new Error('useCalendar must be used within a <CalendarProvider>');
+  }
+  return context;
+};
 
 function getMonthDays(date: Dayjs): Dayjs[] {
   const start = date.startOf('month').startOf('week');
@@ -45,13 +103,13 @@ function chunk(array: Dayjs[], size: number) {
 }
 
 interface Props {
-  selectedMonth: dayjs.Dayjs;
   events?: CalendarEvent[];
   isLoading?: boolean;
 }
 
-function Calendar({ selectedMonth, events, isLoading }: Props) {
-  const days = getMonthDays(selectedMonth);
+function Calendar({ events, isLoading }: Props) {
+  const { month } = useCalendar();
+  const days = getMonthDays(month);
   const weeks = chunk(days, 7);
 
   return (

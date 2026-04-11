@@ -1,14 +1,5 @@
-import { ChevronLeft, ChevronRight, FunnelIcon, InfoIcon, Settings2Icon } from 'lucide-react';
+import { ChevronLeft, ChevronRight, FunnelIcon, SettingsIcon } from 'lucide-react';
 import { Button } from './ui/button';
-import dayjs from 'dayjs';
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from './ui/select';
 import { useTranslation } from 'react-i18next';
 import { ModeToggle } from './mode-toggle';
 import {
@@ -16,21 +7,15 @@ import {
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuGroup,
-  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger
 } from './ui/dropdown-menu';
 import { ButtonGroup } from './ui/button-group';
+import { useCalendar } from './calendar/calendar';
 
-type Props = {
-  selectedMonth: dayjs.Dayjs;
-  onPrevMonth: () => void;
-  onNextMonth: () => void;
-  onToday: () => void;
-};
-
-function Toolbar({ selectedMonth, onPrevMonth, onNextMonth, onToday }: Props) {
+function Toolbar() {
   const { t } = useTranslation(['common']);
+  const { month, nextMonth, prevMonth, today } = useCalendar();
 
   return (
     <div className="flex min-h-16 items-center space-x-2 px-4 py-2">
@@ -48,14 +33,14 @@ function Toolbar({ selectedMonth, onPrevMonth, onNextMonth, onToday }: Props) {
           </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
-      <Button variant={'outline'} onClick={onToday} size={'lg'}>
+      <Button variant={'outline'} onClick={today} size={'lg'}>
         {t('common:time.today')}
       </Button>
       <ButtonGroup>
         <Button
           variant={'outline'}
           size={'icon-lg'}
-          onClick={onPrevMonth}
+          onClick={nextMonth}
           aria-label={t('common:actions.previousMonth')}
         >
           <ChevronLeft />
@@ -63,14 +48,14 @@ function Toolbar({ selectedMonth, onPrevMonth, onNextMonth, onToday }: Props) {
         <Button
           variant={'outline'}
           size={'icon-lg'}
-          onClick={onNextMonth}
+          onClick={prevMonth}
           aria-label={t('common:actions.nextMonth')}
         >
           <ChevronRight />
         </Button>
       </ButtonGroup>
       <div>
-        <h1 className="text-xl font-bold">{selectedMonth.format('MMMM YYYY')}</h1>
+        <h1 className="text-xl font-bold">{month.format('MMMM YYYY')}</h1>
       </div>
       <div className="flex-1" />
       <ModeToggle />
@@ -97,7 +82,7 @@ function Toolbar({ selectedMonth, onPrevMonth, onNextMonth, onToday }: Props) {
         </a>
       </Button>
       <Button variant={'ghost'} size={'icon-lg'} aria-label={t('common:actions.openSettings')}>
-        <Settings2Icon />
+        <SettingsIcon />
       </Button>
     </div>
   );

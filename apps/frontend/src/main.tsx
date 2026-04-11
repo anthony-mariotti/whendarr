@@ -11,6 +11,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { ThemeProvider } from '@/components/theme-provider';
+import { CalendarProvider } from './components/calendar/calendar';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -34,10 +35,12 @@ void i18nReady.then(() => {
     <StrictMode>
       <ThemeProvider defaultTheme="dark" storageKey="whendarr-theme">
         <QueryClientProvider client={queryClient}>
-          <TooltipProvider>
-            <App />
-            <ReactQueryDevtools initialIsOpen={false} />
-          </TooltipProvider>
+          <CalendarProvider>
+            <TooltipProvider>
+              <App />
+              <ReactQueryDevtools initialIsOpen={false} />
+            </TooltipProvider>
+          </CalendarProvider>
         </QueryClientProvider>
       </ThemeProvider>
     </StrictMode>
