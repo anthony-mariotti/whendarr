@@ -14,17 +14,19 @@ import { ButtonGroup } from './ui/button-group';
 import { useCalendar } from './calendar/calendar';
 import { useCalendarApi } from '@/hooks/api/useCalendarApi';
 import { Spinner } from './ui/spinner';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 
 function Toolbar() {
   const { t } = useTranslation(['common']);
   const { month, filter, nextMonth, prevMonth, today, setFilter } = useCalendar();
   const { isLoading } = useCalendarApi();
+  const { desktop } = useMediaQuery();
 
   return (
-    <div className="flex min-h-16 items-center space-x-2 px-4 py-2">
+    <div className="bg-background fixed bottom-0 z-10 flex min-h-16 w-full items-center space-x-2 border-t-2 px-4 py-2 sm:relative sm:bottom-auto sm:border-t-0">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant={'outline'} size={'icon-lg'}>
+          <Button variant={'outline'} size={desktop ? 'icon-lg' : 'icon'}>
             <FunnelIcon />
             <span className="sr-only">{t('common:actions.filterCalendar')}</span>
           </Button>
@@ -47,26 +49,29 @@ function Toolbar() {
           </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
-      <Button variant={'outline'} onClick={today} size={'lg'}>
+      <Button variant={'outline'} onClick={today} size={'lg'} className="hidden sm:flex">
         {t('common:time.today')}
       </Button>
       <ButtonGroup>
-        <Button variant={'outline'} size={'icon-lg'} onClick={prevMonth}>
+        <Button variant={'outline'} size={desktop ? 'icon-lg' : 'icon'} onClick={prevMonth}>
           <ChevronLeft />
           <span className="sr-only">{t('common:actions.previousMonth')}</span>
         </Button>
-        <Button variant={'outline'} size={'icon-lg'} onClick={nextMonth}>
+        <Button variant={'outline'} size={desktop ? 'icon-lg' : 'icon'} onClick={nextMonth}>
           <ChevronRight />
           <span className="sr-only">{t('common:actions.nextMonth')}</span>
         </Button>
       </ButtonGroup>
       <div className="flex items-center space-x-2">
-        <h1 className="text-xl font-bold">{month.format('MMMM YYYY')}</h1>
+        <h1 className="text-xl font-bold">
+          {desktop && month.format('MMMM YYYY')}
+          {!desktop && month.format('MMM YYYY')}
+        </h1>
         {isLoading && <Spinner className="size-6" />}
       </div>
       <div className="flex-1" />
       <ModeToggle />
-      <Button variant={'ghost'} size={'icon-lg'} asChild>
+      <Button variant={'ghost'} className="hidden sm:flex" asChild>
         <a href="https://github.com/anthony-mariotti/whendarr" target="_blank">
           <svg
             width="98"
@@ -85,7 +90,7 @@ function Toolbar() {
           <span className="sr-only">{t('common:actions.viewOnGitHub')}</span>
         </a>
       </Button>
-      <Button variant={'ghost'} size={'icon-lg'}>
+      <Button variant={'ghost'} size={desktop ? 'icon-lg' : 'icon'}>
         <SettingsIcon />
         <span className="sr-only">{t('common:actions.openSettings')}</span>
       </Button>

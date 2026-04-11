@@ -20,8 +20,9 @@ import { Disc3Icon, LaptopIcon, PopcornIcon, TvIcon } from 'lucide-react';
 import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
 import { ExpandableText } from '../expandableText';
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import { useCalendarApi } from '@/hooks/api/useCalendarApi';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 
 type CalendarState = {
   month: dayjs.Dayjs;
@@ -112,14 +113,24 @@ function chunk(array: Dayjs[], size: number) {
 function Calendar() {
   const { month } = useCalendar();
   const { data: events, isLoading } = useCalendarApi();
+  const { desktop } = useMediaQuery();
+  const [weekdays, setWeekdays] = useState<dayjs.WeekdayNames>(dayjs.weekdaysShort());
+
+  useEffect(() => {
+    if (desktop) {
+      setWeekdays(dayjs.weekdays());
+    } else {
+      setWeekdays(dayjs.weekdaysShort());
+    }
+  }, [desktop]);
 
   const days = getMonthDays(month);
   const weeks = chunk(days, 7);
 
   return (
-    <div className={clsx('relative flex h-full flex-col', { 'blur-xs': isLoading })}>
+    <div className={clsx('relative mb-16 flex h-full flex-col sm:mb-0', { 'blur-xs': isLoading })}>
       <div className="flex">
-        {dayjs.weekdaysShort().map((d) => (
+        {weekdays.map((d) => (
           <div key={d} className="m-0 flex-1 p-3 text-center text-lg text-ellipsis">
             <h1 className="font-semibold">{d}</h1>
           </div>
@@ -141,7 +152,7 @@ interface CalendarWeekProps {
 
 function CalendarWeek({ week, events }: CalendarWeekProps) {
   return (
-    <div className="flex h-full w-full flex-1 flex-col border-t border-black last:border-b">
+    <div className="border-border flex h-full w-full flex-1 flex-col border-t last:border-b">
       <div className="flex h-full w-full">
         {week.map((day, j) => {
           return <CalendarDay key={j} day={day} events={events} />;
@@ -159,7 +170,7 @@ interface CalendarDayProps {
 function CalendarDay({ day, events }: CalendarDayProps) {
   const dayEvents = events?.filter((e) => day.isSame(dayjs(e.date), 'day'));
   return (
-    <div className="relative flex h-full w-full flex-1 flex-col overflow-hidden border-l border-black last:border-r">
+    <div className="border-border relative flex h-full w-full flex-1 flex-col overflow-hidden border-l last:border-r">
       <h2 className="text-center">
         {day.date() === 1 ? `${day.format('MMM')} ${day.format('D')}` : day.format('D')}
       </h2>
