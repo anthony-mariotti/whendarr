@@ -6,6 +6,10 @@
     "movie": "Movie",
     "movie_plural": "Movies",
     "tv_show": "TV Show",
-    "tv_show_plural": "TV Shows"
+    "tv_show_plural": "TV Shows",
+    "episode": "Episode",
+    "cinema": "Cinema",
+    "digital": "Digital",
+    "physical": "Physical"
   }
 }

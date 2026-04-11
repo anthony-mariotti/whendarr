@@ -1,7 +1,11 @@
-import type { CalendarEvent, ReleaseType } from '@whendarr/shared';
+import type {
+  CalendarEvent,
+  EpisodeItem,
+  MovieItem,
+  ReleaseType,
+  ShowItem
+} from '@whendarr/shared';
 import dayjs, { Dayjs } from 'dayjs';
-import { Disc3, Popcorn, Laptop, Tv } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 import {
   Dialog,
   DialogContent,
@@ -11,7 +15,10 @@ import {
   DialogTrigger
 } from '../ui/dialog';
 import { Separator } from '../ui/separator';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
+import { Disc3Icon, LaptopIcon, PopcornIcon, TvIcon } from 'lucide-react';
 import clsx from 'clsx';
+import { useTranslation } from 'react-i18next';
 
 function getMonthDays(date: Dayjs): Dayjs[] {
   const start = date.startOf('month').startOf('week');
@@ -103,21 +110,17 @@ function CalendarDay({ day, events }: CalendarDayProps) {
 }
 
 interface CalendarEventProps {
-  event?: CalendarEvent;
+  event: CalendarEvent;
 }
 
 function CalendarEvent({ event }: CalendarEventProps) {
   return (
     <Dialog>
-      <DialogTrigger asChild>
-        <CalendarEventTrigger event={event} />
-      </DialogTrigger>
+      <CalendarEventTrigger event={event} />
+
       <DialogContent className="sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle>{event?.title}</DialogTitle>
-          <DialogDescription>{event?.overview}</DialogDescription>
-          <Separator />
-        </DialogHeader>
+        <CalendarDialogHeader title={event.title} overview={event.overview} />
+        <CalendarDialogContent event={event} />
       </DialogContent>
     </Dialog>
   );
@@ -127,7 +130,101 @@ interface CalendarEventTriggerProps {
   event?: CalendarEvent;
 }
 
-const statusClasses = {
+function CalendarEventTrigger({ event, ...props }: CalendarEventTriggerProps) {
+  if (!event) return <></>;
+
+  if (event.type === 'movie') {
+    return (
+      <DialogTrigger asChild>
+        <Movie event={event} {...props} />
+      </DialogTrigger>
+    );
+  }
+
+  if (event.type === 'show') {
+    return (
+      <DialogTrigger asChild>
+        <Show event={event} {...props} />
+      </DialogTrigger>
+    );
+  }
+
+  return <></>;
+}
+
+interface CalendarDialogContentProps {
+  event: CalendarEvent;
+}
+
+function CalendarDialogContent({ event, ...props }: CalendarDialogContentProps) {
+  switch (event?.type) {
+    case 'movie':
+      return <MovieDetail event={event} />;
+    case 'show':
+      return (
+        <>
+          {event.episodes.map((episode, i) => (
+            <Episode key={i} episode={episode} />
+          ))}
+        </>
+      );
+  }
+}
+
+interface CalendarDialogHeaderProps {
+  title: string;
+  overview?: string;
+}
+
+function CalendarDialogHeader({ title, overview }: CalendarDialogHeaderProps) {
+  return (
+    <DialogHeader>
+      <DialogTitle>{title}</DialogTitle>
+      <DialogDescription>{overview}</DialogDescription>
+      <Separator />
+    </DialogHeader>
+  );
+}
+
+interface MovieProps {
+  event: MovieItem;
+}
+
+function Movie({ event, ...props }: MovieProps) {
+  const { t } = useTranslation(['common']);
+  const release = event.release;
+
+  return (
+    <div
+      className={clsx(
+        'bg-accent flex items-center space-x-1 border-l-4 p-1 text-sm',
+        movieBorderColor(event)
+      )}
+      {...props}
+    >
+      <Tooltip>
+        <TooltipTrigger>
+          <MovieReleaseIcon release={release} />
+        </TooltipTrigger>
+        <TooltipContent side="left">{t(`common:media:${release}`)}</TooltipContent>
+      </Tooltip>
+      <h3 className="cursor-pointer truncate">{event.title}</h3>
+    </div>
+  );
+}
+
+function MovieReleaseIcon({ release }: { release: ReleaseType }) {
+  switch (release) {
+    case 'cinema':
+      return <PopcornIcon size={16} />;
+    case 'digital':
+      return <LaptopIcon size={16} />;
+    case 'physical':
+      return <Disc3Icon size={16} />;
+  }
+}
+
+export const BORDER_COLORS = {
   available: 'border-green-500',
   unavailable: 'border-red-500',
   partial: 'border-orange-500',
@@ -135,107 +232,78 @@ const statusClasses = {
   untracked: 'border-gray-500'
 } as const;
 
-function generateBorderColor(event: CalendarEvent) {
+function movieBorderColor(event: MovieItem) {
   if (dayjs(event.date).isAfter(dayjs())) {
-    return statusClasses.future;
+    return BORDER_COLORS.future;
   }
 
-  if (event.type === 'movie') {
-    if (event.available) {
-      return statusClasses.available;
-    }
-
-    if (event.release === 'cinema') {
-      return statusClasses.untracked;
-    }
-
-    return statusClasses.unavailable;
+  if (event.available) {
+    return BORDER_COLORS.available;
   }
 
-  if (event.type === 'show') {
-    if (event.available === 'available') {
-      return statusClasses.available;
-    }
-
-    if (event.available === 'partial') {
-      return statusClasses.partial;
-    }
-
-    return statusClasses.unavailable;
+  if (event.release === 'cinema') {
+    return BORDER_COLORS.untracked;
   }
 
-  return statusClasses.unavailable;
+  return BORDER_COLORS.unavailable;
 }
 
-function CalendarEventTrigger({ event, ...props }: CalendarEventTriggerProps) {
-  if (!event) return <></>;
+interface ShowProps {
+  event: ShowItem;
+}
 
-  if (event.type === 'movie') {
-    return (
-      <div
-        className={clsx(
-          'bg-accent flex items-center space-x-1 border-l-4 p-1 text-sm',
-          generateBorderColor(event)
-        )}
-        {...props}
-      >
-        <MovieReleaseIcon release={event.release} />
-        <h3 className="cursor-pointer truncate">{event?.title}</h3>
-      </div>
-    );
+function Show({ event, ...props }: ShowProps) {
+  const { t } = useTranslation(['common']);
+
+  return (
+    <div
+      className={clsx(
+        'bg-accent flex items-center space-x-1 border-l-4 p-1 text-sm',
+        showBorderColor(event)
+      )}
+      {...props}
+    >
+      <Tooltip>
+        <TooltipTrigger>
+          <TvIcon size={16} />
+        </TooltipTrigger>
+        <TooltipContent side="left">{t(`common:media:episode`)}</TooltipContent>
+      </Tooltip>
+      <h3 className="cursor-pointer truncate">{event.title}</h3>
+    </div>
+  );
+}
+
+function showBorderColor(event: ShowItem) {
+  if (dayjs(event.date).isAfter(dayjs())) {
+    return BORDER_COLORS.future;
   }
 
-  if (event.type === 'show') {
-    return (
-      <div
-        className={clsx(
-          'bg-accent flex items-center space-x-1 border-l-4 p-1 text-sm',
-          generateBorderColor(event)
-        )}
-        {...props}
-      >
-        <EpisodeIcon />
-        <h3 className="cursor-pointer truncate">{event.title}</h3>
-      </div>
-    );
+  if (event.available === 'available') {
+    return BORDER_COLORS.available;
   }
 
+  if (event.available === 'partial') {
+    return BORDER_COLORS.partial;
+  }
+
+  return BORDER_COLORS.unavailable;
+}
+
+interface EpisodeProps {
+  episode: EpisodeItem;
+}
+
+function Episode({ episode, ...props }: EpisodeProps) {
+  return <p>{episode.title}</p>;
+}
+
+interface MovieDetailProps {
+  event: MovieItem;
+}
+
+function MovieDetail({ ...props }: MovieDetailProps) {
   return <></>;
-}
-
-function MovieReleaseIcon({ release }: { release: ReleaseType }) {
-  function icon() {
-    switch (release) {
-      case 'cinema':
-        return <Popcorn size={16} />;
-      case 'digital':
-        return <Laptop size={16} />;
-      case 'physical':
-        return <Disc3 size={16} />;
-    }
-  }
-
-  return (
-    <Tooltip>
-      <TooltipTrigger>{icon()}</TooltipTrigger>
-      <TooltipContent side="left" className="capitalize">
-        {release}
-      </TooltipContent>
-    </Tooltip>
-  );
-}
-
-function EpisodeIcon() {
-  return (
-    <Tooltip>
-      <TooltipTrigger>
-        <Tv size={16} />
-      </TooltipTrigger>
-      <TooltipContent side="left" className="capitalize">
-        Episode
-      </TooltipContent>
-    </Tooltip>
-  );
 }
 
 export { Calendar };
