@@ -31,6 +31,7 @@ type CalendarState = {
   prevMonth: () => void;
   nextMonth: () => void;
   today: () => void;
+  setFilter: (filter: Partial<CalendarState['filter']>) => void;
 };
 
 const initialState: CalendarState = {
@@ -41,7 +42,8 @@ const initialState: CalendarState = {
   },
   prevMonth: () => null,
   nextMonth: () => null,
-  today: () => null
+  today: () => null,
+  setFilter: () => null
 };
 
 const CalendarProviderContext = createContext<CalendarState>(initialState);
@@ -51,17 +53,21 @@ type CalendarProviderProps = {
 };
 
 export function CalendarProvider({ children, ...props }: CalendarProviderProps) {
-  const [month, setMonth] = useState<dayjs.Dayjs>(dayjs());
+  const [month, setMonth] = useState<dayjs.Dayjs>(initialState.month);
+  const [filters, setFilters] = useState<CalendarState['filter']>(initialState.filter);
 
   const value: CalendarState = {
     month,
-    filter: {
-      movies: true,
-      show: true
-    },
+    filter: filters,
     prevMonth: () => setMonth(month.subtract(1, 'month')),
     nextMonth: () => setMonth(month.add(1, 'month')),
-    today: () => setMonth(dayjs())
+    today: () => setMonth(dayjs()),
+    setFilter: (filter: Partial<CalendarState['filter']>) => {
+      setFilters({
+        ...filters,
+        ...filter
+      });
+    }
   };
 
   return (

@@ -15,7 +15,7 @@ import { useCalendar } from './calendar/calendar';
 
 function Toolbar() {
   const { t } = useTranslation(['common']);
-  const { month, nextMonth, prevMonth, today } = useCalendar();
+  const { month, filter, nextMonth, prevMonth, today, setFilter } = useCalendar();
 
   return (
     <div className="flex min-h-16 items-center space-x-2 px-4 py-2">
@@ -28,8 +28,18 @@ function Toolbar() {
         <DropdownMenuContent>
           <DropdownMenuGroup>
             <DropdownMenuLabel>Media</DropdownMenuLabel>
-            <DropdownMenuCheckboxItem>{t('common:media.movie_plural')}</DropdownMenuCheckboxItem>
-            <DropdownMenuCheckboxItem>{t('common:media.tv_show_plural')}</DropdownMenuCheckboxItem>
+            <DropdownMenuCheckboxItem
+              checked={filter.movies}
+              onCheckedChange={(value) => setFilter({ movies: value })}
+            >
+              {t('common:media.movie_plural')}
+            </DropdownMenuCheckboxItem>
+            <DropdownMenuCheckboxItem
+              checked={filter.show}
+              onCheckedChange={(value) => setFilter({ show: value })}
+            >
+              {t('common:media.tv_show_plural')}
+            </DropdownMenuCheckboxItem>
           </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
