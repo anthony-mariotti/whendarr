@@ -23,6 +23,7 @@ function Toolbar() {
         <DropdownMenuTrigger asChild>
           <Button variant={'outline'} size={'icon-lg'}>
             <FunnelIcon />
+            <span className="sr-only">{t('common:actions.filterCalendar')}</span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
@@ -47,21 +48,13 @@ function Toolbar() {
         {t('common:time.today')}
       </Button>
       <ButtonGroup>
-        <Button
-          variant={'outline'}
-          size={'icon-lg'}
-          onClick={prevMonth}
-          aria-label={t('common:actions.previousMonth')}
-        >
+        <Button variant={'outline'} size={'icon-lg'} onClick={prevMonth}>
           <ChevronLeft />
+          <span className="sr-only">{t('common:actions.previousMonth')}</span>
         </Button>
-        <Button
-          variant={'outline'}
-          size={'icon-lg'}
-          onClick={nextMonth}
-          aria-label={t('common:actions.nextMonth')}
-        >
+        <Button variant={'outline'} size={'icon-lg'} onClick={nextMonth}>
           <ChevronRight />
+          <span className="sr-only">{t('common:actions.nextMonth')}</span>
         </Button>
       </ButtonGroup>
       <div>
@@ -70,11 +63,7 @@ function Toolbar() {
       <div className="flex-1" />
       <ModeToggle />
       <Button variant={'ghost'} size={'icon-lg'} asChild>
-        <a
-          href="https://github.com/anthony-mariotti/whendarr"
-          target="_blank"
-          aria-label={t('common:actions.viewOnGitHub')}
-        >
+        <a href="https://github.com/anthony-mariotti/whendarr" target="_blank">
           <svg
             width="98"
             height="96"
@@ -89,10 +78,12 @@ function Toolbar() {
               />
             </g>
           </svg>
+          <span className="sr-only">{t('common:actions.viewOnGitHub')}</span>
         </a>
       </Button>
-      <Button variant={'ghost'} size={'icon-lg'} aria-label={t('common:actions.openSettings')}>
+      <Button variant={'ghost'} size={'icon-lg'}>
         <SettingsIcon />
+        <span className="sr-only">{t('common:actions.openSettings')}</span>
       </Button>
     </div>
   );
