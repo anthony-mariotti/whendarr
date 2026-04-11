@@ -4,14 +4,17 @@ import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
+  DropdownMenuGroup,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { useTheme } from '@/components/theme-provider';
+import { useTheme, type Theme } from '@/components/theme-provider';
 import { useTranslation } from 'react-i18next';
 
 export function ModeToggle() {
-  const { setTheme } = useTheme();
+  const { setTheme, theme } = useTheme();
   const { t } = useTranslation(['setting']);
 
   return (
@@ -20,19 +23,24 @@ export function ModeToggle() {
         <Button variant="ghost" size="icon">
           <Sun className="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
           <Moon className="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
-          <span className="sr-only">Toggle theme</span>
+          <span className="sr-only">{t('setting:general.themeToggle')}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => setTheme('light')}>
-          {t('setting:general.themeLight')}
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme('dark')}>
-          {t('setting:general.themeDark')}
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme('system')}>
-          {t('setting:general.themeSystem')}
-        </DropdownMenuItem>
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>{t('setting:general.theme')}</DropdownMenuLabel>
+          <DropdownMenuRadioGroup value={theme} onValueChange={(value) => setTheme(value as Theme)}>
+            <DropdownMenuRadioItem value="light">
+              {t('setting:general.themeLight')}
+            </DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="dark">
+              {t('setting:general.themeDark')}
+            </DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="system">
+              {t('setting:general.themeSystem')}
+            </DropdownMenuRadioItem>
+          </DropdownMenuRadioGroup>
+        </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
   );
