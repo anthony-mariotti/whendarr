@@ -119,7 +119,7 @@ function Calendar({ events, isLoading }: Props) {
   const weeks = chunk(days, 7);
 
   return (
-    <div className="flex h-full flex-col">
+    <div className={clsx('relative flex h-full flex-col', { 'blur-xs': isLoading })}>
       <div className="flex">
         {dayjs.weekdaysShort().map((d) => (
           <div key={d} className="m-0 flex-1 p-3 text-center text-lg text-ellipsis">
