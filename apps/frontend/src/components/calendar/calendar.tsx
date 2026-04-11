@@ -235,16 +235,16 @@ export const BORDER_COLORS = {
 } as const;
 
 function movieBorderColor(event: MovieItem) {
+  if (event.release === 'cinema') {
+    return BORDER_COLORS.untracked;
+  }
+
   if (dayjs(event.date).isAfter(dayjs())) {
     return BORDER_COLORS.future;
   }
 
   if (event.available) {
     return BORDER_COLORS.available;
-  }
-
-  if (event.release === 'cinema') {
-    return BORDER_COLORS.untracked;
   }
 
   return BORDER_COLORS.unavailable;
