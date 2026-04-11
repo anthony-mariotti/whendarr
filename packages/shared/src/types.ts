@@ -1,8 +1,7 @@
-const MEDIA_TYPES = ['movie', 'show'] as const;
+import type { MEDIA_TYPES, RELEASE_TYPES, SHOW_AVAILABILITY, SHOW_STATUS } from './constants.js';
 
 export type MediaType = (typeof MEDIA_TYPES)[number];
 
-const RELEASE_TYPES = ['cinema', 'digital', 'physical'] as const;
 export type ReleaseType = (typeof RELEASE_TYPES)[number];
 
 export interface EventItem {
@@ -19,10 +18,8 @@ export interface MovieItem extends EventItem {
   release: ReleaseType;
 }
 
-const SHOW_STATUS = ['deleted', 'continuing', 'ended', 'upcoming', 'unknown'] as const;
 export type ShowStatus = (typeof SHOW_STATUS)[number];
 
-const SHOW_AVAILABILITY = ['unavailable', 'partial', 'available'] as const;
 export type ShowAvailability = (typeof SHOW_AVAILABILITY)[number];
 
 export interface ShowItem extends EventItem {

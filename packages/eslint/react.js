@@ -13,9 +13,12 @@ import pluginReactHooks from 'eslint-plugin-react-hooks';
 export const config = [
   ...base,
   {
+    files: ['**/*.tsx', '**/*.jsx'],
     plugins: {
-      react: pluginReact
+      react: pluginReact,
+      'react-hooks': pluginReactHooks
     },
+    settings: { react: { version: 'detect' } },
     rules: {
       ...pluginReact.configs.recommended.rules
     },
@@ -25,14 +28,9 @@ export const config = [
         ...globals.serviceworker,
         ...globals.browser
       }
-    }
-  },
-  {
-    plugins: {
-      'react-hooks': pluginReactHooks
     },
-    settings: { react: { version: 'detect' } },
     rules: {
+      ...pluginReact.configs.recommended.rules,
       ...pluginReactHooks.configs.recommended.rules,
       // React scope no longer necessary with new JSX transform.
       'react/react-in-jsx-scope': 'off'

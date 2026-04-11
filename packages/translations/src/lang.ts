@@ -13,16 +13,50 @@ export function isLangSupported(lang: string): boolean {
   return lang in LANG_NAMES;
 }
 
-export async function detectLang(storage?: {
-  getItem: (key: string) => Promise<string | null>;
-}): Promise<string> {
-  try {
-    // TODO: Check stored preferences
-  } catch (error) {
-    console.warn('[i18n] Failed to get stored language', error);
+export function resolveLang(lang: string): string | null {
+  if (!lang || typeof lang !== 'string') return null;
+
+  const normalized = normalizeLangCode(lang);
+
+  if (normalized in LANG_NAMES) {
+    return normalized;
   }
 
-  // TODO: Check browser/device language
+  const base = normalized.split('-')[0];
+  if (!base) return null;
+
+  if (base === 'en') {
+    return 'en';
+  }
+
+  const match = Object.keys(LANG_NAMES).find((code) => code.startsWith(base + '-'));
+  return match ?? null;
+}
+
+function normalizeLangCode(code: string): string {
+  const trimmed = code.trim();
+  const [lang, region] = trimmed.split('-');
+  if (!region) return trimmed.toLowerCase();
+  return `${lang?.toLowerCase()}-${region.toUpperCase()}`;
+}
+
+export async function detectLang(): Promise<string> {
+  const detected = getSystemLang();
+  if (detected) return detected;
 
   return 'en';
+}
+
+export function getSystemLang(): string | null {
+  if (typeof navigator === 'undefined') return null;
+
+  const detected = navigator.languages || (navigator.language ? [navigator.language] : []);
+
+  for (const lang of detected) {
+    if (!lang) continue;
+    const found = resolveLang(lang);
+    if (found) return found;
+  }
+
+  return null;
 }

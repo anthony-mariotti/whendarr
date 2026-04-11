@@ -20,7 +20,7 @@ import { Disc3Icon, LaptopIcon, PopcornIcon, TvIcon } from 'lucide-react';
 import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
 import { ExpandableText } from '../expandableText';
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useState } from 'react';
 import { useCalendarApi } from '@/hooks/api/useCalendarApi';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 
@@ -114,15 +114,6 @@ function Calendar() {
   const { month } = useCalendar();
   const { data: events, isLoading } = useCalendarApi();
   const { desktop } = useMediaQuery();
-  const [weekdays, setWeekdays] = useState<dayjs.WeekdayNames>(dayjs.weekdaysShort());
-
-  useEffect(() => {
-    if (desktop) {
-      setWeekdays(dayjs.weekdays());
-    } else {
-      setWeekdays(dayjs.weekdaysShort());
-    }
-  }, [desktop]);
 
   const days = getMonthDays(month);
   const weeks = chunk(days, 7);
@@ -130,11 +121,18 @@ function Calendar() {
   return (
     <div className={clsx('relative mb-16 flex h-full flex-col sm:mb-0', { 'blur-xs': isLoading })}>
       <div className="flex">
-        {weekdays.map((d) => (
-          <div key={d} className="m-0 flex-1 p-3 text-center text-lg text-ellipsis">
-            <h1 className="font-semibold">{d}</h1>
-          </div>
-        ))}
+        {desktop &&
+          dayjs.weekdays().map((d) => (
+            <div key={d} className="m-0 flex-1 p-3 text-center text-lg text-ellipsis">
+              <h1 className="font-semibold">{d}</h1>
+            </div>
+          ))}
+        {!desktop &&
+          dayjs.weekdaysShort().map((d) => (
+            <div key={d} className="m-0 flex-1 p-3 text-center text-lg text-ellipsis">
+              <h1 className="font-semibold">{d}</h1>
+            </div>
+          ))}
       </div>
       <div className="flex flex-1 flex-col">
         {weeks.map((week, i) => (
@@ -229,7 +227,7 @@ interface CalendarDialogContentProps {
   event: CalendarEvent;
 }
 
-function CalendarDialogContent({ event, ...props }: CalendarDialogContentProps) {
+function CalendarDialogContent({ event }: CalendarDialogContentProps) {
   switch (event?.type) {
     case 'movie':
       return <MovieDetail event={event} />;
@@ -369,7 +367,7 @@ interface EpisodeProps {
   episode: EpisodeItem;
 }
 
-function Episode({ episode, ...props }: EpisodeProps) {
+function Episode({ episode }: EpisodeProps) {
   return <p>{episode.title}</p>;
 }
 
@@ -377,8 +375,8 @@ interface MovieDetailProps {
   event: MovieItem;
 }
 
-function MovieDetail({ ...props }: MovieDetailProps) {
-  return <></>;
+function MovieDetail({ event }: MovieDetailProps) {
+  return <div>{event.certification}</div>;
 }
 
 export { Calendar };

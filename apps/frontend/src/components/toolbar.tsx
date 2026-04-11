@@ -72,7 +72,7 @@ function Toolbar() {
       <div className="flex-1" />
       <ModeToggle />
       <Button variant={'ghost'} className="hidden sm:flex" asChild>
-        <a href="https://github.com/anthony-mariotti/whendarr" target="_blank">
+        <a href="https://github.com/anthony-mariotti/whendarr" target="_blank" rel="noreferrer">
           <svg
             width="98"
             height="96"

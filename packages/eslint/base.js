@@ -1,7 +1,10 @@
+import { globalIgnores } from 'eslint/config';
 import js from '@eslint/js';
-import eslintConfigPrettier from 'eslint-config-prettier';
-import tseslint from 'typescript-eslint';
-import turboPlugin from 'eslint-plugin-turbo';
+
+import configPrettier from 'eslint-config-prettier';
+import configTypescript from 'typescript-eslint';
+
+import pluginTurbo from 'eslint-plugin-turbo';
 
 /**
  * A shared ESLint configuration for the repository.
@@ -9,15 +12,21 @@ import turboPlugin from 'eslint-plugin-turbo';
  * @type {import("eslint").Linter.Config[]}
  * */
 export const config = [
+  globalIgnores(['**/dist/**', '**/node_modules/**', '**/.turbo/**', '**/coverage/**']),
   js.configs.recommended,
-  eslintConfigPrettier,
-  ...tseslint.configs.recommended,
+  configPrettier,
+  ...configTypescript.configs.recommended,
   {
     plugins: {
-      turbo: turboPlugin
+      turbo: pluginTurbo
     }
   },
   {
-    ignores: ['dist/**']
+    rules: {
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }
+      ]
+    }
   }
 ];

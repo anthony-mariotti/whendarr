@@ -9,11 +9,10 @@ interface ExpandableTextProps {
 }
 
 export function ExpandableText({ value, maxLength = 128, ...props }: ExpandableTextProps) {
-  if (!value) return <></>;
-
   const { t } = useTranslation(['common']);
-
   const [open, setOpen] = useState(false);
+
+  if (!value) return <></>;
 
   const segmenter = new Intl.Segmenter('en', { granularity: 'sentence' });
   const segments = Array.from(segmenter.segment(value)).map((s) => s.segment);
