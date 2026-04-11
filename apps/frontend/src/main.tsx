@@ -10,6 +10,7 @@ import { i18nReady } from '@/i18n';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { ThemeProvider } from './hooks/theme-provider';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -31,12 +32,14 @@ if (!root) {
 void i18nReady.then(() => {
   createRoot(root).render(
     <StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <App />
-          <ReactQueryDevtools initialIsOpen={false} />
-        </TooltipProvider>
-      </QueryClientProvider>
+      <ThemeProvider defaultTheme="dark" storageKey="whendarr-theme">
+        <QueryClientProvider client={queryClient}>
+          <TooltipProvider>
+            <App />
+            <ReactQueryDevtools initialIsOpen={false} />
+          </TooltipProvider>
+        </QueryClientProvider>
+      </ThemeProvider>
     </StrictMode>
   );
 });
