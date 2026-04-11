@@ -1,0 +1,63 @@
+# Dependencies - will be installed fresh in container
+**/node_modules
+.pnpm-store
+
+# Turbo cache - not needed in Docker build (root + per-package)
+**/.turbo
+
+# Git
+.git
+.gitignore
+.husky/
+
+# IDE and editor files
+.idea
+.vscode
+*.swp
+*.swo
+.DS_Store
+*.code-workspace
+
+# Test files and directories
+apps/e2e/
+apps/backend/test/
+**/__tests__/
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+
+# Testing artifacts
+**/coverage
+
+# Dev tooling config
+.editorconfig
+.prettierrc
+.prettierignore
+.lintstagedrc.json
+.tool-versions
+eslint.config.js
+tsconfig.eslint.json
+codecov.yml
+crowdin.yml
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Environment files - should be provided at runtime
+.env
+.env.local
+.env.*.local
+
+# Docker files (avoid recursion)
+docker-compose*.yml
+.dockerignore
+
+# Documentation
+docs/
+*.md
+
+# CI/CD
+.github/
