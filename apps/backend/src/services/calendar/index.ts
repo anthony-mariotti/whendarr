@@ -87,6 +87,8 @@ function mapEpisodeToShow(episodes: SonarrCalendarResponse[]): ShowItem[] {
     const show = shows.get(key);
     if (show) {
       show.episodes.push(mapEpisode(episode));
+      show.episodes = show.episodes.sort((a, b) => a.number - b.number);
+
       show.available = mapAvailability(show.episodes);
       shows.set(key, show);
       continue;
