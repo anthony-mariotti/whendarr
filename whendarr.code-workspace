@@ -37,6 +37,13 @@
     },
     "[typescriptreact]": {
       "editor.defaultFormatter": "esbenp.prettier-vscode"
-    }
+    },
+    "tailwindCSS.files.exclude": [
+      "**/.git/**",
+      "**/node_modules/**",
+      "**/.hg/**",
+      "**/.svn/**",
+      "**/components/ui/**"
+    ]
   }
 }
