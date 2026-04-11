@@ -33,7 +33,7 @@ updates:
       prefix: "ci"
 
   - package-ecosystem: "docker"
-    directory: /
+    directory: /docker
     schedule:
       interval: "monthly"
     open-pull-requests-limit: 3
