@@ -21,6 +21,7 @@ import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
 import { ExpandableText } from '../expandableText';
 import { createContext, useContext, useState } from 'react';
+import { useCalendarApi } from '@/hooks/api/useCalendarApi';
 
 type CalendarState = {
   month: dayjs.Dayjs;
@@ -108,13 +109,10 @@ function chunk(array: Dayjs[], size: number) {
   return result;
 }
 
-interface Props {
-  events?: CalendarEvent[];
-  isLoading?: boolean;
-}
-
-function Calendar({ events, isLoading }: Props) {
+function Calendar() {
   const { month } = useCalendar();
+  const { data: events, isLoading } = useCalendarApi();
+
   const days = getMonthDays(month);
   const weeks = chunk(days, 7);
 
@@ -129,7 +127,7 @@ function Calendar({ events, isLoading }: Props) {
       </div>
       <div className="flex flex-1 flex-col">
         {weeks.map((week, i) => (
-          <CalendarWeek key={i} week={week} events={events} />
+          <CalendarWeek key={i} week={week} events={events?.data} />
         ))}
       </div>
     </div>

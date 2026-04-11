@@ -1,14 +1,15 @@
+import { useCalendar } from '@/components/calendar/calendar';
 import { api } from '@/lib/api';
 import { useQuery } from '@tanstack/react-query';
 import { getClientTimezone } from '@whendarr/shared';
-import type dayjs from 'dayjs';
 
-export function useCalendarApi(params?: { month?: dayjs.Dayjs }) {
+export function useCalendarApi() {
+  const { month } = useCalendar();
   const tz = getClientTimezone();
-  const month = params?.month?.format('YYYY-MM-DD');
+
   return useQuery({
-    queryKey: ['calendar', month, tz],
-    queryFn: () => api.calendar.get({ month, tz }),
+    queryKey: ['calendar', month.format('YYYY-MM-DD'), tz],
+    queryFn: () => api.calendar.get({ month: month.format('YYYY-MM-DD'), tz }),
     staleTime: 1000 * 60 * 30 // 30 minutes
   });
 }
