@@ -1,3 +1,5 @@
+export { API_V1_BASE_PATH } from './constants.js';
+
 export type {
   // Media
   MovieItem,

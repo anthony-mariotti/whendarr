@@ -1,10 +1,12 @@
-import type { CalendarEvent, CalendarQuery } from '@whendarr/shared';
+import { API_V1_BASE_PATH, type CalendarEvent, type CalendarQuery } from '@whendarr/shared';
+import { BASE_PATH } from './basePath';
 
 class WhendarrApi {
   private base: string;
 
-  constructor(base: string = `http://localhost:5173/api/v1`) {
+  constructor(base: string = `${BASE_PATH}${API_V1_BASE_PATH}`) {
     this.base = base;
+    console.log(base);
   }
 
   private async request<T>(path: string, options: RequestInit = {}): Promise<T> {
