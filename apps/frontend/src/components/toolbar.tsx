@@ -12,10 +12,13 @@ import {
 } from './ui/dropdown-menu';
 import { ButtonGroup } from './ui/button-group';
 import { useCalendar } from './calendar/calendar';
+import { useCalendarApi } from '@/hooks/api/useCalendarApi';
+import { Spinner } from './ui/spinner';
 
 function Toolbar() {
   const { t } = useTranslation(['common']);
   const { month, filter, nextMonth, prevMonth, today, setFilter } = useCalendar();
+  const { isLoading } = useCalendarApi();
 
   return (
     <div className="flex min-h-16 items-center space-x-2 px-4 py-2">
@@ -57,8 +60,9 @@ function Toolbar() {
           <span className="sr-only">{t('common:actions.nextMonth')}</span>
         </Button>
       </ButtonGroup>
-      <div>
+      <div className="flex items-center space-x-2">
         <h1 className="text-xl font-bold">{month.format('MMMM YYYY')}</h1>
+        {isLoading && <Spinner className="size-6" />}
       </div>
       <div className="flex-1" />
       <ModeToggle />
