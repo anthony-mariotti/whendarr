@@ -18,8 +18,8 @@
   "scripts": {
     "dev": "tsc --watch",
     "build": "tsc",
-    "typecheck": "tsc --noEmit",
-    "lint": "eslint src/"
+    "lint": "eslint src/",
+    "check": "tsc --noEmit"
   },
   "devDependencies": {
     "@whendarr/tsconfig": "workspace:*",

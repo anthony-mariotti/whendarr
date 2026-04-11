@@ -17,8 +17,8 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "typecheck": "tsc --noEmit",
-    "lint": "eslint src/"
+    "lint": "eslint src/",
+    "check": "tsc --noEmit"
   },
   "dependencies": {
     "i18next": "catalog:",

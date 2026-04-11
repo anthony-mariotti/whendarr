@@ -5,7 +5,8 @@
   "type": "module",
   "main": "./dist/index.js",
   "scripts": {
-    "dev": "tsx watch src/index.ts"
+    "dev": "tsx watch src/index.ts",
+    "check": "tsc --noEmit"
   },
   "devDependencies": {
     "@whendarr/shared": "workspace:*",
