@@ -22,8 +22,10 @@
     "check": "tsc --noEmit"
   },
   "devDependencies": {
+    "@whendarr/eslint": "workspace:*",
     "@whendarr/tsconfig": "workspace:*",
-    "zod": "catalog:",
-    "typescript": "catalog:"
+    "eslint": "catalog:eslint",
+    "typescript": "catalog:",
+    "zod": "catalog:"
   }
 }

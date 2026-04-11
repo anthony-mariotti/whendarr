@@ -23,6 +23,10 @@
     {
       "name": "@whendarr/tsconfig",
       "path": "./packages/tsconfig"
+    },
+    {
+      "name": "@whendarr/eslint",
+      "path": "./packages/eslint"
     }
   ],
   "settings": {
