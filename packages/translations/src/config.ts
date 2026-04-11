@@ -5,16 +5,18 @@ import i18n, { type InitOptions } from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
 import commonEn from './locales/en/common.json' with { type: 'json' };
+import settingEn from './locales/en/setting.json' with { type: 'json' };
 import { getSupportedLang, type LangCode } from './lang.js';
 
 export const defaultNS = 'common';
-export const namespaces = ['common'] as const;
+export const namespaces = ['common', 'setting'] as const;
 
 export type Namespace = (typeof namespaces)[number];
 
 export const resources = {
   en: {
-    common: commonEn
+    common: commonEn,
+    setting: settingEn
   }
 } as const;
 
