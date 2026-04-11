@@ -19,6 +19,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 import { Disc3Icon, LaptopIcon, PopcornIcon, TvIcon } from 'lucide-react';
 import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
+import { ExpandableText } from '../expandableText';
 
 function getMonthDays(date: Dayjs): Dayjs[] {
   const start = date.startOf('month').startOf('week');
@@ -117,7 +118,6 @@ function CalendarEvent({ event }: CalendarEventProps) {
   return (
     <Dialog>
       <CalendarEventTrigger event={event} />
-
       <DialogContent className="sm:max-w-lg">
         <CalendarDialogHeader title={event.title} overview={event.overview} />
         <CalendarDialogContent event={event} />
@@ -180,7 +180,9 @@ function CalendarDialogHeader({ title, overview }: CalendarDialogHeaderProps) {
   return (
     <DialogHeader>
       <DialogTitle>{title}</DialogTitle>
-      <DialogDescription>{overview}</DialogDescription>
+      <DialogDescription asChild>
+        <ExpandableText value={overview} />
+      </DialogDescription>
       <Separator />
     </DialogHeader>
   );
