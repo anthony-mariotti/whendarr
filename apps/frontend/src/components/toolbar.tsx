@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, InfoIcon } from 'lucide-react';
+import { ChevronLeft, ChevronRight, InfoIcon, Settings2Icon } from 'lucide-react';
 import { Button } from './ui/button';
 import dayjs from 'dayjs';
 import {
@@ -25,7 +25,7 @@ function Toolbar({ selectedMonth, onPrevMonth, onNextMonth, onToday }: Props) {
   return (
     <div className="flex min-h-16 items-center space-x-2 px-4 py-2">
       <Select defaultValue="movies">
-        <SelectTrigger size="default">
+        <SelectTrigger size="default" aria-label={t('common:actions.filter')}>
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
@@ -39,10 +39,20 @@ function Toolbar({ selectedMonth, onPrevMonth, onNextMonth, onToday }: Props) {
         {t('common:time.today')}
       </Button>
       <div>
-        <Button variant={'ghost'} size={'icon-lg'} onClick={onPrevMonth}>
+        <Button
+          variant={'ghost'}
+          size={'icon-lg'}
+          onClick={onPrevMonth}
+          aria-label={t('common:actions.previousMonth')}
+        >
           <ChevronLeft />
         </Button>
-        <Button variant={'ghost'} size={'icon-lg'} onClick={onNextMonth}>
+        <Button
+          variant={'ghost'}
+          size={'icon-lg'}
+          onClick={onNextMonth}
+          aria-label={t('common:actions.nextMonth')}
+        >
           <ChevronRight />
         </Button>
       </div>
@@ -52,7 +62,11 @@ function Toolbar({ selectedMonth, onPrevMonth, onNextMonth, onToday }: Props) {
       <div className="flex-1" />
       <ModeToggle />
       <Button variant={'ghost'} size={'icon-lg'} asChild>
-        <a href="https://github.com/anthony-mariotti/whendarr" target="_blank">
+        <a
+          href="https://github.com/anthony-mariotti/whendarr"
+          target="_blank"
+          aria-label={t('common:actions.viewOnGitHub')}
+        >
           <svg
             width="98"
             height="96"
@@ -69,8 +83,8 @@ function Toolbar({ selectedMonth, onPrevMonth, onNextMonth, onToday }: Props) {
           </svg>
         </a>
       </Button>
-      <Button variant={'ghost'} size={'icon-lg'}>
-        <InfoIcon />
+      <Button variant={'ghost'} size={'icon-lg'} aria-label={t('common:actions.openSettings')}>
+        <Settings2Icon />
       </Button>
     </div>
   );

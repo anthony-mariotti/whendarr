@@ -1,7 +1,12 @@
 {
   "actions": {
     "showMore": "Show more",
-    "showLess": "Show less"
+    "showLess": "Show less",
+    "viewOnGitHub": "View on GitHub",
+    "openSettings": "Open settings",
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "filter": "Filter"
   },
   "time": {
     "today": "Today"
