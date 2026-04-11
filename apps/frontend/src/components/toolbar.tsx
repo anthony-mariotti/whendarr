@@ -10,6 +10,7 @@ import {
   SelectValue
 } from './ui/select';
 import { useTranslation } from 'react-i18next';
+import { ModeToggle } from './mode-toggle';
 
 type Props = {
   selectedMonth: dayjs.Dayjs;
@@ -49,6 +50,7 @@ function Toolbar({ selectedMonth, onPrevMonth, onNextMonth, onToday }: Props) {
         <h1 className="text-xl font-bold">{selectedMonth.format('MMMM YYYY')}</h1>
       </div>
       <div className="flex-1" />
+      <ModeToggle />
       <Button variant={'ghost'} size={'icon-lg'} asChild>
         <a href="https://github.com/anthony-mariotti/whendarr" target="_blank">
           <svg
