@@ -3,6 +3,7 @@ import { Calendar } from '@/components/calendar';
 import { Toolbar } from '@/components/toolbar';
 import { useCalendar } from '@/hooks/api/useCalendar';
 import { useState } from 'react';
+import { Separator } from '@/components/ui/separator';
 
 function App() {
   const [selectedMonth, setSelectedMonth] = useState(dayjs());
@@ -19,6 +20,7 @@ function App() {
         onNextMonth={() => setSelectedMonth((m) => m.add(1, 'month'))}
         onToday={() => setSelectedMonth(dayjs())}
       />
+      <Separator />
       <Calendar selectedMonth={selectedMonth} events={data?.data} isLoading={isLoading} />
     </div>
   );
