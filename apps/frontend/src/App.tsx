@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
-import { Calendar } from './components/calendar';
-import { Toolbar } from './components/toolbar';
-import { useCalendar } from './hooks/api/useCalendar';
+import { Calendar } from '@/components/calendar';
+import { Toolbar } from '@/components/toolbar';
+import { useCalendar } from '@/hooks/api/useCalendar';
 import { useState } from 'react';
 
 function App() {
