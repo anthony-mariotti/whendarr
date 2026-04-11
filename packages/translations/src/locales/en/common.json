@@ -1,4 +1,8 @@
 {
+  "actions": {
+    "showMore": "Show more",
+    "showLess": "Show less"
+  },
   "time": {
     "today": "Today"
   },
