@@ -177,7 +177,11 @@ export function readNumberFromEnvironment(
 }
 
 export function isDevelopment(): boolean {
-  return readStringFromEnvironment('NODE_ENV') === 'development';
+  return readStringFromEnvironment('NODE_ENV', { default: 'production' }) !== 'production';
+}
+
+export function isProduction(): boolean {
+  return readStringFromEnvironment('NODE_ENV', { default: 'production' }) === 'production';
 }
 
 export type ENVIRONMENT =
@@ -185,6 +189,7 @@ export type ENVIRONMENT =
   | 'LOG_LEVEL'
   | 'PORT'
   | 'HOST'
+  | 'BASE_PATH'
   | 'TRUSTED_PROXY'
   | 'TRUSTED_PROXY_HOP'
   | 'REDIS_URL'
