@@ -1,0 +1,4 @@
+preserve_hierarchy: true
+files:
+  - source: packages/translations/src/locales/en/*.json
+    translation: packages/translations/src/locales/%locale%/%original_file_name%
