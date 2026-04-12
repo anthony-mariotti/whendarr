@@ -10,11 +10,11 @@ RUN corepack enable && corepack prepare pnpm@${BUILD_PNPM_VERSION} --activate
 
 WORKDIR /build
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
-COPY apps/backend/package.json ./apps/backend
-COPY apps/frontend/package.json ./apps/frontend
-COPY packages/shared/package.json ./packages/shared
-COPY packages/translations/package.json ./packages/translations
-COPY packages/tsconfig/package.json ./packages/tsconfig
+COPY apps/backend/package.json ./apps/backend/
+COPY apps/frontend/package.json ./apps/frontend/
+COPY packages/shared/package.json ./packages/shared/
+COPY packages/translations/package.json ./packages/translations/
+COPY packages/tsconfig/package.json ./packages/tsconfig/
 
 RUN pnpm install --frozen-lockfile
 
