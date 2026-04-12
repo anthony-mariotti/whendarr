@@ -71,14 +71,14 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/health || exit 1
 
-LABEL org.opencontainers.image.source="https://github.com/anthony-mariotti/whendarr" \
-      org.opencontainers.image.url="https://github.com/anthony-mariotti/whendarr" \
-      org.opencontainers.image.title="Whendarr" \
-      org.opencontainers.image.description="Lightweight web calendar for Sonarr and Radarr that aggregates upcoming tv and movie releases" \
-      org.opencontainers.image.vendor="anthony-mariotti" \
-      org.opencontainers.image.licenses="AGPL-3.0" \
-      org.opencontainers.image.version="${BUILD_VERSION}" \
-      org.opencontainers.image.revision="${BUILD_COMMIT}" \
-      org.opencontainers.image.created="${BUILD_DATE}"
+LABEL org.opencontainers.image.source="https://github.com/anthony-mariotti/whendarr"
+LABEL org.opencontainers.image.url="https://github.com/anthony-mariotti/whendarr"
+LABEL org.opencontainers.image.title="Whendarr"
+LABEL org.opencontainers.image.description="Lightweight web calendar for Sonarr and Radarr that aggregates upcoming tv and movie releases"
+LABEL org.opencontainers.image.vendor="anthony-mariotti"
+LABEL org.opencontainers.image.licenses="AGPL-3.0"
+LABEL org.opencontainers.image.version="${BUILD_VERSION}"
+LABEL org.opencontainers.image.revision="${BUILD_COMMIT}"
+LABEL org.opencontainers.image.created="${BUILD_DATE}"
 
 CMD ["node", "apps/server/dist/index.js"]
