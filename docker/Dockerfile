@@ -60,9 +60,6 @@ COPY --from=builder /build/packages/shared/dist ./packages/shared/dist
 
 RUN pnpm install --prod --frozen-lockfile --ignore-scripts
 
-COPY docker/entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 whendarr
 
