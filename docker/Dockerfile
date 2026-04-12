@@ -30,7 +30,7 @@ ARG BUILD_COMMIT=
 ARG BUILD_DATE=
 ARG BUILD_PNPM_VERSION=10.33.0
 
-RUN corepack enable && corepack prepare pnpm@10.28.1 --activate
+RUN corepack enable && corepack prepare pnpm@${BUILD_PNPM_VERSION} --activate
 WORKDIR /srv/whendarr
 
 ARG BUST_CACHE
@@ -49,7 +49,7 @@ COPY --from=builder /build/package.json ./
 COPY --from=builder /build/pnpm-workspace.yaml ./
 COPY --from=builder /build/pnpm-lock.yaml ./
 
-COPY --from=builder /build/apps/backend/package.json ./backend/server/
+COPY --from=builder /build/apps/backend/package.json ./apps/backend/
 COPY --from=builder /build/apps/backend/dist ./apps/backend/dist
 
 COPY --from=builder /build/apps/frontend/dist ./apps/frontend/dist
