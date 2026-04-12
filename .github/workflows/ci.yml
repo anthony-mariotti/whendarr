@@ -106,3 +106,36 @@ jobs:
 
       - name: Build
         run: pnpm build
+
+  build-docker:
+    name: Build Docker
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [lint]
+    env:
+      IMAGE_NAME: ${{ github.repository_owner }}/whendarr
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux/amd64
+            runner: ubuntu-latest
+            arch: amd64
+          # - platform: linux/arm64
+          #   runner: ubuntu-24.04-arm
+          #   arch: arm64
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build Image (${{ matrix.platform }})
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ./docker/Dockerfile
+          platforms: ${{ matrix.platform }}
+          outputs: type=cacheonly
+          tags: ${{ env.IMAGE_NAME }}:build
