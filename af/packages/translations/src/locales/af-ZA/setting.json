@@ -1,0 +1,9 @@
+{
+  "general": {
+    "theme": "Theme",
+    "themeToggle": "Theme toggle",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "themeSystem": "System"
+  }
+}
