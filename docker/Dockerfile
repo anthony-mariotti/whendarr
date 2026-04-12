@@ -51,7 +51,6 @@ COPY --from=builder /build/pnpm-lock.yaml ./
 
 COPY --from=builder /build/apps/backend/package.json ./backend/server/
 COPY --from=builder /build/apps/backend/dist ./apps/backend/dist
-COPY --from=builder /build/apps/backend/scripts ./apps/backend/scripts
 
 COPY --from=builder /build/apps/frontend/dist ./apps/frontend/dist
 
