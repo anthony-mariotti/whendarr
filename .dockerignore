@@ -5,6 +5,10 @@
 # Turbo cache - not needed in Docker build (root + per-package)
 **/.turbo
 
+# Build artifacts - must be rebuilt fresh in container
+**/dist
+**/*.tsbuildinfo
+
 # Git
 .git
 .gitignore
