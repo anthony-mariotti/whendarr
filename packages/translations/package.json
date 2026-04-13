@@ -25,6 +25,7 @@
     "react-i18next": "catalog:"
   },
   "devDependencies": {
+    "@types/node": "^25.6.0",
     "@whendarr/eslint": "workspace:*",
     "@whendarr/tsconfig": "workspace:*",
     "eslint": "catalog:eslint",
