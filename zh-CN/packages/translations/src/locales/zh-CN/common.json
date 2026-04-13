@@ -1,0 +1,24 @@
+{
+  "actions": {
+    "showMore": "Show more",
+    "showLess": "Show less",
+    "viewOnGitHub": "View on GitHub",
+    "openSettings": "Open settings",
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "filterCalendar": "Filter calendar"
+  },
+  "time": {
+    "today": "Today"
+  },
+  "media": {
+    "movie": "Movie",
+    "movie_plural": "Movies",
+    "tv_show": "TV Show",
+    "tv_show_plural": "TV Shows",
+    "episode": "Episode",
+    "cinema": "Cinema",
+    "digital": "Digital",
+    "physical": "Physical"
+  }
+}
