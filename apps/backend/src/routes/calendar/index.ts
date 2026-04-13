@@ -1,7 +1,6 @@
-import type { Dayjs } from 'dayjs';
 import type { FastifyInstance, FastifyPluginAsync } from 'fastify';
-import { calendarQuerySchema, type MovieItem } from '@whendarr/shared';
-import { retrieveCalendar } from '@/services/calendar/index.js';
+import { calendarQuerySchema } from '@whendarr/shared';
+import { retrieveCalendar } from '../../services/calendar/index.js';
 
 export async function registerCalendarRoute(instance: FastifyInstance) {
   await instance.register(calendarV1, { prefix: '/api/v1/calendar' });

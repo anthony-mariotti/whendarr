@@ -81,4 +81,4 @@ LABEL org.opencontainers.image.version="${BUILD_VERSION}"
 LABEL org.opencontainers.image.revision="${BUILD_COMMIT}"
 LABEL org.opencontainers.image.created="${BUILD_DATE}"
 
-CMD ["node", "apps/server/dist/index.js"]
+CMD ["node", "apps/backend/dist/index.js"]

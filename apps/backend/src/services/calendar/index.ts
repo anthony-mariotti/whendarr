@@ -1,5 +1,5 @@
-import type { RadarrCalendarResponse } from '@/integrations/radarr/api.js';
-import type { SonarrCalendarResponse } from '@/integrations/sonarr/api.js';
+import type { RadarrCalendarResponse } from '../../integrations/radarr/api.js';
+import type { SonarrCalendarResponse } from '../../integrations/sonarr/api.js';
 import type {
   EpisodeItem,
   EventItem,

@@ -113,6 +113,9 @@ importers:
       '@fastify/static':
         specifier: ^9.1.0
         version: 9.1.0
+      '@whendarr/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       dayjs:
         specifier: 'catalog:'
         version: 1.11.20
@@ -135,9 +138,6 @@ importers:
       '@whendarr/eslint':
         specifier: workspace:*
         version: link:../../packages/eslint
-      '@whendarr/shared':
-        specifier: workspace:*
-        version: link:../../packages/shared
       '@whendarr/tsconfig':
         specifier: workspace:*
         version: link:../../packages/tsconfig
@@ -273,6 +273,10 @@ importers:
         version: 8.58.0(eslint@9.39.4(jiti@2.6.1))(typescript@6.0.2)
 
   packages/shared:
+    dependencies:
+      zod:
+        specifier: 'catalog:'
+        version: 4.3.6
     devDependencies:
       '@whendarr/eslint':
         specifier: workspace:*
@@ -286,9 +290,6 @@ importers:
       typescript:
         specifier: 'catalog:'
         version: 6.0.2
-      zod:
-        specifier: 'catalog:'
-        version: 4.3.6
 
   packages/translations:
     dependencies:

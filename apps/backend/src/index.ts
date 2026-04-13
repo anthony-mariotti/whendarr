@@ -4,16 +4,17 @@ import {
   isProduction,
   readNumberFromEnvironment,
   readStringFromEnvironment
-} from '@/utils/environment.js';
-import { registerCalendarRoute } from '@/routes/calendar/index.js';
-import { registerServerRoute } from '@/routes/server/index.js';
+} from './utils/environment.js';
+import { registerCalendarRoute } from './routes/calendar/index.js';
+import { registerServerRoute } from './routes/server/index.js';
 
-import redisPlugin, { redisConnect, redisConnectTest } from '@/plugins/redis.js';
-import dayjsPlugin from '@/plugins/dayjs.js';
-import radarrPlugin from '@/plugins/radarr.js';
-import sonarrPlugin from '@/plugins/sonarr.js';
+import redisPlugin, { redisConnect, redisConnectTest } from './plugins/redis.js';
+import dayjsPlugin from './plugins/dayjs.js';
+import radarrPlugin from './plugins/radarr.js';
+import sonarrPlugin from './plugins/sonarr.js';
 
-import { registerHealthRoute } from '@/routes/health/index.js';
+import { registerHealthRoute } from './routes/health/index.js';
+
 import fastifySensible from '@fastify/sensible';
 import fastifyStatic from '@fastify/static';
 
@@ -40,7 +41,7 @@ async function build() {
   const instance = Fastify({
     logger: {
       level: readStringFromEnvironment('LOG_LEVEL', { default: 'info' }),
-      transport: !isDevelopment()
+      transport: isDevelopment()
         ? { target: 'pino-pretty', options: { colorize: true } }
         : undefined
     },
@@ -108,7 +109,6 @@ async function build() {
   if (isProduction() && existsSync(frontend)) {
     const index = resolve(frontend, 'index.html');
     const cachedIndex = readFileSync(index, 'utf-8');
-    instance.log.info({ index, cachedIndex });
 
     await instance.register(fastifyStatic, {
       root: index,

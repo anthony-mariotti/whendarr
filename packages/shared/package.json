@@ -25,7 +25,9 @@
     "@whendarr/eslint": "workspace:*",
     "@whendarr/tsconfig": "workspace:*",
     "eslint": "catalog:eslint",
-    "typescript": "catalog:",
+    "typescript": "catalog:"
+  },
+  "dependencies": {
     "zod": "catalog:"
   }
 }
