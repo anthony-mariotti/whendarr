@@ -45,19 +45,10 @@ ENV APP_TAG=${BUILD_TAG}
 ENV APP_COMMIT=${BUILD_COMMIT}
 ENV APP_BUILD_DATE=${BUILD_DATE}
 
-COPY --from=builder /build/package.json ./
-COPY --from=builder /build/pnpm-workspace.yaml ./
-COPY --from=builder /build/pnpm-lock.yaml ./
+COPY --from=builder /build/apps/backend/dist ./
+COPY --from=builder /build/apps/frontend/dist ./frontend
 
-COPY --from=builder /build/apps/backend/package.json ./apps/backend/
-COPY --from=builder /build/apps/backend/dist ./apps/backend/dist
-
-COPY --from=builder /build/apps/frontend/dist ./apps/frontend/dist
-
-COPY --from=builder /build/packages/shared/package.json ./packages/shared/
-COPY --from=builder /build/packages/shared/dist ./packages/shared/dist
-
-RUN pnpm install --prod --frozen-lockfile --ignore-scripts
+RUN find . -name "*.map" -type f -delete
 
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 whendarr
@@ -81,4 +72,4 @@ LABEL org.opencontainers.image.version="${BUILD_VERSION}"
 LABEL org.opencontainers.image.revision="${BUILD_COMMIT}"
 LABEL org.opencontainers.image.created="${BUILD_DATE}"
 
-CMD ["node", "apps/backend/dist/index.js"]
+CMD ["node", "index.js"]

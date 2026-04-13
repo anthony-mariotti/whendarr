@@ -25,11 +25,5 @@
   "engines": {
     "node": ">=18",
     "pnpm": ">=10.0.0"
-  },
-  "onlyBuiltDependencies": [
-    "esbuild"
-  ],
-  "ignoredBuiltDependencies": [
-    "msw"
-  ]
+  }
 }

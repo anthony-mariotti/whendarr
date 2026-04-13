@@ -1,0 +1,10 @@
+name: whendarr
+services:
+  whendarr:
+    container_name: whendarr_development
+    image: ghcr.io/anthony-mariotti/whendarr:dev
+    pull_policy: 'never'
+    env_file: ../.env.production.local
+    ports:
+      - 8675:3000
+    # command: sleep infinity # debug file structure

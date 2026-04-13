@@ -1,4 +1,11 @@
 import Fastify from 'fastify';
+import fastifySensible from '@fastify/sensible';
+import fastifyStatic from '@fastify/static';
+import redisPlugin, { redisConnect, redisConnectTest } from './plugins/redis.js';
+import dayjsPlugin from './plugins/dayjs.js';
+import radarrPlugin from './plugins/radarr.js';
+import sonarrPlugin from './plugins/sonarr.js';
+
 import {
   isDevelopment,
   isProduction,
@@ -7,27 +14,14 @@ import {
 } from './utils/environment.js';
 import { registerCalendarRoute } from './routes/calendar/index.js';
 import { registerServerRoute } from './routes/server/index.js';
-
-import redisPlugin, { redisConnect, redisConnectTest } from './plugins/redis.js';
-import dayjsPlugin from './plugins/dayjs.js';
-import radarrPlugin from './plugins/radarr.js';
-import sonarrPlugin from './plugins/sonarr.js';
-
 import { registerHealthRoute } from './routes/health/index.js';
 
-import fastifySensible from '@fastify/sensible';
-import fastifyStatic from '@fastify/static';
-
-import { dirname, resolve } from 'path';
-import { config } from 'dotenv';
-import { fileURLToPath } from 'url';
+import { resolve } from 'path';
 import { existsSync, readFileSync } from 'fs';
 
-// Fix: ERR_AMBIGUOUS_MODULE_SYNTAX
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+import { config } from 'dotenv';
 
-const PROJECT_ROOT = resolve(__dirname, '../../..');
+const PROJECT_ROOT = resolve(process.cwd(), isDevelopment() ? '../..' : '');
 config({ path: resolve(PROJECT_ROOT, '.env'), quiet: true });
 
 const PORT = readNumberFromEnvironment('PORT', 10, { default: 3000 });
@@ -105,15 +99,23 @@ async function build() {
   await registerCalendarRoute(instance);
 
   // Serve Frontend
-  const frontend = resolve(PROJECT_ROOT, 'apps/frontend/dist');
-  if (isProduction() && existsSync(frontend)) {
+  const frontend = resolve(PROJECT_ROOT, isDevelopment() ? 'apps/frontend/dist' : 'frontend');
+  const exists = existsSync(frontend);
+  if (isProduction() && exists) {
+    instance.log.info(
+      { frontend, isProduction: isProduction(), exists },
+      'Serving frontend via static file for production'
+    );
+
     const index = resolve(frontend, 'index.html');
     const cachedIndex = readFileSync(index, 'utf-8');
 
     await instance.register(fastifyStatic, {
-      root: index,
+      root: frontend,
       prefix: '/',
-      serve: false
+      serve: false,
+      redirect: true,
+      logLevel: 'trace'
     });
 
     instance.setNotFoundHandler(async (request, reply) => {
@@ -142,8 +144,6 @@ async function build() {
       const html = cachedIndex.replace('<head>', `<head>\n    <base href="${base}">`);
       return reply.type('text/html').send(html);
     });
-
-    instance.log.info('Serving frontend via static file for production');
   }
 
   return instance;
@@ -164,4 +164,6 @@ async function start() {
   }
 }
 
-await start();
+(async () => {
+  await start();
+})();

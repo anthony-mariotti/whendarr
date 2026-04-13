@@ -8,6 +8,7 @@
 # Build artifacts - must be rebuilt fresh in container
 **/dist
 **/*.tsbuildinfo
+**/*.js.map
 
 # Git
 .git

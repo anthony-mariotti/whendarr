@@ -176,10 +176,20 @@ export function readNumberFromEnvironment(
   return options?.default;
 }
 
+/**
+ * Determines if the `NODE_ENV` is development. Assumes that if the `NODE_ENV` is not set, then the current environment is development
+ *
+ * @returns `true` if development or not set, otherwise `false`
+ */
 export function isDevelopment(): boolean {
-  return readStringFromEnvironment('NODE_ENV', { default: 'production' }) !== 'production';
+  return readStringFromEnvironment('NODE_ENV', { default: 'development' }) !== 'production';
 }
 
+/**
+ * Determines if the `NODE_ENV` is production. Assumes that if the `NODE_ENV` is not set, then the current environment is production
+ *
+ * @returns `true` if production or not set, otherwise `false`
+ */
 export function isProduction(): boolean {
   return readStringFromEnvironment('NODE_ENV', { default: 'production' }) === 'production';
 }
