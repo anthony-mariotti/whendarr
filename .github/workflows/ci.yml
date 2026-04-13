@@ -138,4 +138,4 @@ jobs:
           file: ./docker/Dockerfile
           platforms: ${{ matrix.platform }}
           outputs: type=cacheonly
-          tags: ${{ env.IMAGE_NAME }}:build
+          tags: ${{ env.IMAGE_NAME }}:build-${{ matrix.arch }}
