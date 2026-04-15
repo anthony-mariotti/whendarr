@@ -1,10 +1,7 @@
 import Fastify from 'fastify';
 import fastifySensible from '@fastify/sensible';
 import fastifyStatic from '@fastify/static';
-import redisPlugin, { redisConnect, redisConnectTest } from './plugins/redis.js';
-import dayjsPlugin from './plugins/dayjs.js';
-import radarrPlugin from './plugins/radarr.js';
-import sonarrPlugin from './plugins/sonarr.js';
+import { redisConnect, redisConnectTest } from './plugins/redis.js';
 
 import {
   isDevelopment,
@@ -20,6 +17,9 @@ import { resolve } from 'path';
 import { existsSync, readFileSync } from 'fs';
 
 import { config } from 'dotenv';
+
+import { registerPlugins } from './plugins/index.js';
+import servicesPlugin from '@/services/index.js';
 
 const PROJECT_ROOT = resolve(process.cwd(), isDevelopment() ? '../..' : '');
 config({ path: resolve(PROJECT_ROOT, '.env'), quiet: true });
@@ -82,10 +82,8 @@ async function build() {
 
   await instance.register(fastifySensible);
 
-  await instance.register(redisPlugin);
-  await instance.register(dayjsPlugin);
-  await instance.register(radarrPlugin);
-  await instance.register(sonarrPlugin);
+  await registerPlugins(instance);
+  await instance.register(servicesPlugin);
 
   const redisReady = await redisConnectTest();
   if (!redisReady) {

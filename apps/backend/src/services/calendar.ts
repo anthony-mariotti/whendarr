@@ -1,5 +1,5 @@
-import type { RadarrCalendarResponse } from '../../integrations/radarr/api.js';
-import type { SonarrCalendarResponse } from '../../integrations/sonarr/api.js';
+import type { RadarrCalendarResponse } from '@/integrations/radarr/api.js';
+import type { SonarrCalendarResponse } from '@/integrations/sonarr/api.js';
 import type {
   EpisodeItem,
   EventItem,
@@ -9,21 +9,43 @@ import type {
   ShowStatus
 } from '@whendarr/shared';
 import dayjs from 'dayjs';
+import { REDIS_KEYS } from './cache.js';
+import type { FastifyInstance } from 'fastify';
 
-export async function retrieveCalendar(
-  radarr: RadarrCalendarResponse[],
-  sonarr: SonarrCalendarResponse[],
-  start: dayjs.Dayjs,
-  end: dayjs.Dayjs
-): Promise<EventItem[]> {
-  const promise = new Promise<EventItem[]>((resolve) => {
+export class CalendarService {
+  private instance: FastifyInstance;
+
+  constructor(instance: FastifyInstance) {
+    this.instance = instance;
+  }
+
+  async cached(start: dayjs.Dayjs, end: dayjs.Dayjs) {
+    const cached = await this.instance.redis.get(REDIS_KEYS.CALENDAR_RANGE(start, end));
+    if (cached) {
+      return JSON.parse(cached) as EventItem[];
+    }
+
+    return undefined;
+  }
+
+  async map(
+    radarr: RadarrCalendarResponse[],
+    sonarr: SonarrCalendarResponse[],
+    start: dayjs.Dayjs,
+    end: dayjs.Dayjs
+  ): Promise<EventItem[]> {
     const mappedRadarr = radarr.flatMap((movie) => mapMovie(movie, start, end));
     const mappedSonarr = mapEpisodeToShow(sonarr);
 
-    resolve([...mappedRadarr, ...mappedSonarr]);
-  });
+    const converged = [...mappedRadarr, ...mappedSonarr];
+    this.instance.redis.setex(
+      REDIS_KEYS.CALENDAR_RANGE(start, end),
+      300,
+      JSON.stringify(converged)
+    );
 
-  return promise;
+    return converged;
+  }
 }
 
 function isInRange(dateString: string | undefined, start: dayjs.Dayjs, end: dayjs.Dayjs) {

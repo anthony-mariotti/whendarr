@@ -2,6 +2,7 @@ import type { FastifyInstance, FastifyPluginAsync } from 'fastify';
 import { readNumberFromEnvironment, readStringFromEnvironment } from '../utils/environment.js';
 import { Redis, type RedisOptions } from 'ioredis';
 import fastifyPlugin from 'fastify-plugin';
+import { setCachePrefix } from '../services/cache.js';
 
 declare module 'fastify' {
   interface FastifyInstance {
@@ -23,6 +24,11 @@ const build = (
 
   if (!endpoint) {
     endpoint = 'redis://localhost:6379';
+  }
+
+  const prefix = readStringFromEnvironment('REDIS_PREFIX');
+  if (prefix) {
+    setCachePrefix(prefix);
   }
 
   const redis = new Redis(endpoint, {

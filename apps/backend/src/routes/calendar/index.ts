@@ -1,6 +1,5 @@
 import type { FastifyInstance, FastifyPluginAsync } from 'fastify';
 import { calendarQuerySchema } from '@whendarr/shared';
-import { retrieveCalendar } from '../../services/calendar/index.js';
 
 export async function registerCalendarRoute(instance: FastifyInstance) {
   await instance.register(calendarV1, { prefix: '/api/v1/calendar' });
@@ -25,6 +24,16 @@ const calendarV1: FastifyPluginAsync = async (instance: FastifyInstance) => {
       ? instance.dayjs(query.data.month, 'YYYY-MM-DD').endOf('month').endOf('week').endOf('date')
       : instance.dayjs.utc().endOf('month').endOf('week').tz(tz, true);
 
+    const cached = await instance.services.calendar.cached(start, end);
+    if (cached) {
+      return {
+        tz,
+        start,
+        end,
+        data: cached
+      };
+    }
+
     const [radarrResponse, sonarrResponse] = await Promise.all([
       instance.radarr.calendar({ start: start.toISOString(), end: end.toISOString() }),
       instance.sonarr.calendar({
@@ -42,7 +51,12 @@ const calendarV1: FastifyPluginAsync = async (instance: FastifyInstance) => {
       return reply.badGateway(`Sonarr API failed with status ${sonarrResponse.status}`);
     }
 
-    const calendar = await retrieveCalendar(radarrResponse.data, sonarrResponse.data, start, end);
+    const calendar = await instance.services.calendar.map(
+      radarrResponse.data,
+      sonarrResponse.data,
+      start,
+      end
+    );
 
     return {
       tz,
