@@ -53,8 +53,6 @@ cp .env.example .env
 pnpm dev
 ```
 
-SvelteKit typically starts at `localhost:5173`
-
 ## Contributing
 
 Contributions are welcome! Please:
