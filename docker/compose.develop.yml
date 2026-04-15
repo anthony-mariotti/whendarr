@@ -1,0 +1,18 @@
+name: whendarr
+services:
+  valkey:
+    profiles:
+      - valkey
+    image: ghcr.io/valkey-io/valkey:latest
+    ports:
+      - 6379:6379
+
+  whendarr:
+    profiles:
+      - whendarr
+    container_name: whendarr_development
+    image: ghcr.io/anthony-mariotti/whendarr:dev
+    pull_policy: 'never'
+    env_file: ../.env.production.local
+    ports:
+      - 8675:3000
