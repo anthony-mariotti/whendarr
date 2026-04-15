@@ -16,7 +16,7 @@ import {
 } from '../ui/dialog';
 import { Separator } from '../ui/separator';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
-import { Disc3Icon, LaptopIcon, PopcornIcon, TvIcon } from 'lucide-react';
+import { Disc3Icon, LaptopIcon, FilmIcon, TvIcon } from 'lucide-react';
 import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
 import { ExpandableText } from '../expandableText';
@@ -289,7 +289,7 @@ function Movie({ event, ...props }: MovieProps) {
 function MovieReleaseIcon({ release }: { release: ReleaseType }) {
   switch (release) {
     case 'cinema':
-      return <PopcornIcon size={16} />;
+      return <FilmIcon size={16} />;
     case 'digital':
       return <LaptopIcon size={16} />;
     case 'physical':
@@ -340,7 +340,7 @@ function Show({ event, ...props }: ShowProps) {
         <TooltipTrigger>
           <TvIcon size={16} />
         </TooltipTrigger>
-        <TooltipContent side="left">{t(`common:media:episode`)}</TooltipContent>
+        <TooltipContent side="left">{t(`common:media:tv_show`)}</TooltipContent>
       </Tooltip>
       <h3 className="cursor-pointer truncate">{event.title}</h3>
     </div>
