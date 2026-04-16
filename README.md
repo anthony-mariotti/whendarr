@@ -7,12 +7,24 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/anthony-mariotti/whendarr/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/anthony-mariotti/whendarr/ci.yml?branch=main&style=flat-square&label=CI" alt="CI Status" /></a>
-  <a href="https://github.com/anthony-mariotti/whendarr/releases"><img src="https://img.shields.io/github/v/release/anthony-mariotti/whendarr?style=flat-square&color=a86add" alt="Latest Release" /></a>
-  <a href="https://ghcr.io/anthony-mariotti/whendarr"><img src="https://img.shields.io/badge/ghcr.io-whendarr-blue?style=flat-square&logo=docker&logoColor=white" alt="Docker" /></a>
-  <a href="https://github.com/anthony-mariotti/whendarr/blob/main/LICENSE.md"><img src="https://img.shields.io/github/license/anthony-mariotti/whendarr?style=flat-square" alt="License" /></a>
-  <a href="https://docs.whendarr.com"><img src="https://img.shields.io/badge/docs-whendarr.com-a86add?style=flat-square" alt="Documentation" /></a>
-  <a title="Crowdin" target="_blank" href="https://crowdin.com"><img src="https://badges.crowdin.net/whendarr/localized.svg" alt="Crowdin"></a>
+  <a href="https://github.com/anthony-mariotti/whendarr/actions/workflows/ci.yml">
+    <img src="https://img.shields.io/github/actions/workflow/status/anthony-mariotti/whendarr/ci.yml?branch=main&style=flat-square&label=CI" alt="CI Status" />
+  </a>
+  <a href="https://github.com/anthony-mariotti/whendarr/releases">
+    <img src="https://img.shields.io/github/v/release/anthony-mariotti/whendarr?style=flat-square&color=a86add" alt="Latest Release" />
+  </a>
+  <a href="https://ghcr.io/anthony-mariotti/whendarr">
+    <img src="https://img.shields.io/badge/ghcr.io-whendarr-blue?style=flat-square&logo=docker&logoColor=white" alt="Docker" />
+  </a>
+  <a href="https://github.com/anthony-mariotti/whendarr/blob/main/LICENSE.md">
+    <img src="https://img.shields.io/github/license/anthony-mariotti/whendarr?style=flat-square" alt="License" />
+  </a>
+  <a href="https://docs.whendarr.com">
+    <img src="https://img.shields.io/badge/docs-whendarr.com-a86add?style=flat-square" alt="Documentation" />
+  </a>
+  <a title="Crowdin" target="_blank" href="https://crowdin.com">
+    <img src="https://badges.crowdin.net/whendarr/localized.svg" alt="Crowdin">
+  </a>
 </p>
 
 Whendarr is an open source, self hosted calendar that aggregates release data from *arr services into a simple monthly interface.
