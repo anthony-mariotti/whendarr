@@ -37,7 +37,6 @@
     "@vitejs/plugin-react": "^6.0.1",
     "@whendarr/eslint": "workspace:*",
     "@whendarr/tsconfig": "workspace:*",
-    "eslint": "catalog:eslint",
     "tailwindcss": "catalog:tailwind",
     "typescript": "catalog:",
     "vite": "catalog:"

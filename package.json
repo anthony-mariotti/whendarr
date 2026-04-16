@@ -13,6 +13,8 @@
     "docker:valkey:up": "docker compose -f docker/compose.develop.yml --profile valkey up -d"
   },
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "catalog:eslint",
+    "eslint": "catalog:eslint",
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
     "prettier": "^3.8.2",

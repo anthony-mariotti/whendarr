@@ -24,7 +24,6 @@
   "devDependencies": {
     "@whendarr/eslint": "workspace:*",
     "@whendarr/tsconfig": "workspace:*",
-    "eslint": "catalog:eslint",
     "typescript": "catalog:"
   },
   "dependencies": {
