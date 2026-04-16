@@ -1,15 +1,16 @@
 import type { FastifyInstance, FastifyPluginAsync } from 'fastify';
+import { Redis, type RedisOptions } from 'ioredis';
+import fastifyPlugin from 'fastify-plugin';
+import fs from 'fs';
+import type { ConnectionOptions } from 'tls';
+
 import {
   readBooleanFromEnvironment,
   readFromFileEnvironment,
   readNumberFromEnvironment,
   readStringFromEnvironment
 } from '../utils/environment.js';
-import { Redis, type RedisOptions, type StandaloneConnectionOptions } from 'ioredis';
-import fastifyPlugin from 'fastify-plugin';
 import { setCachePrefix } from '../services/cache.js';
-
-import fs from 'fs';
 
 declare module 'fastify' {
   interface FastifyInstance {
@@ -22,16 +23,14 @@ const build = (
   config: Pick<RedisOptions, 'maxRetriesPerRequest' | 'connectTimeout' | 'retryStrategy'>
 ) => {
   let endpoint = buildRedisEndpoint(instance);
-  let options: StandaloneConnectionOptions | undefined;
+  let tls: ConnectionOptions | undefined;
 
   if (!endpoint) {
     endpoint = `redis://localhost:6379`;
   }
 
   if (endpoint.startsWith('rediss://')) {
-    options = {
-      tls: buildTlsOptions(instance)
-    };
+    tls = buildTlsOptions(instance);
   }
 
   const prefix = readStringFromEnvironment('REDIS_PREFIX');
@@ -51,7 +50,7 @@ const build = (
       }
       return false;
     },
-    ...options?.tls
+    tls
   });
 
   return redis;
@@ -149,35 +148,33 @@ function buildRedisEndpoint(instance: FastifyInstance) {
   }
 }
 
-function buildTlsOptions(instance: FastifyInstance) {
+function buildTlsOptions(instance: FastifyInstance): ConnectionOptions {
   try {
     const rejectUnauthorized = readBooleanFromEnvironment('REDIS_TLS_REJECT_UNAUTHORIZED', {
-      default: false
+      default: true
     });
 
     const caPath = readFromFileEnvironment('REDIS_TLS_CA');
     const certPath = readFromFileEnvironment('REDIS_TLS_CERT');
     const keyPath = readFromFileEnvironment('REDIS_TLS_KEY');
 
-    const options: StandaloneConnectionOptions = {
-      tls: {
-        rejectUnauthorized
-      }
+    const tls: ConnectionOptions = {
+      rejectUnauthorized
     };
 
     if (caPath) {
-      options.tls!.ca = fs.readFileSync(caPath);
+      tls.ca = fs.readFileSync(caPath);
     }
 
     if (certPath) {
-      options.tls!.cert = fs.readFileSync(certPath);
+      tls.cert = fs.readFileSync(certPath);
     }
 
     if (keyPath) {
-      options.tls!.key = fs.readFileSync(keyPath);
+      tls.key = fs.readFileSync(keyPath);
     }
 
-    return options.tls;
+    return tls;
   } catch (err) {
     instance.log.fatal(err, 'Failed to initialize redis TLS options');
     process.exit(1);
