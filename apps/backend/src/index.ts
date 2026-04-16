@@ -85,7 +85,7 @@ async function build() {
   await registerPlugins(instance);
   await instance.register(servicesPlugin);
 
-  const redisReady = await redisConnectTest();
+  const redisReady = await redisConnectTest(instance);
   if (!redisReady) {
     instance.log.warn({ redis: { ready: redisReady } }, 'Redis unavailable');
   } else {

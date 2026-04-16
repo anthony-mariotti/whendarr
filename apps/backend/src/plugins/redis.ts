@@ -1,8 +1,15 @@
 import type { FastifyInstance, FastifyPluginAsync } from 'fastify';
-import { readNumberFromEnvironment, readStringFromEnvironment } from '../utils/environment.js';
-import { Redis, type RedisOptions } from 'ioredis';
+import {
+  readBooleanFromEnvironment,
+  readFromFileEnvironment,
+  readNumberFromEnvironment,
+  readStringFromEnvironment
+} from '../utils/environment.js';
+import { Redis, type RedisOptions, type StandaloneConnectionOptions } from 'ioredis';
 import fastifyPlugin from 'fastify-plugin';
 import { setCachePrefix } from '../services/cache.js';
+
+import fs from 'fs';
 
 declare module 'fastify' {
   interface FastifyInstance {
@@ -11,19 +18,20 @@ declare module 'fastify' {
 }
 
 const build = (
+  instance: FastifyInstance,
   config: Pick<RedisOptions, 'maxRetriesPerRequest' | 'connectTimeout' | 'retryStrategy'>
 ) => {
-  let endpoint = readStringFromEnvironment('REDIS_URL');
-  if (!endpoint) {
-    const host = readStringFromEnvironment('REDIS_HOST');
-    const port = readNumberFromEnvironment('REDIS_PORT');
-    if (!host || !port || port <= 0) {
-      endpoint = undefined;
-    }
-  }
+  let endpoint = buildRedisEndpoint(instance);
+  let options: StandaloneConnectionOptions | undefined;
 
   if (!endpoint) {
-    endpoint = 'redis://localhost:6379';
+    endpoint = `redis://localhost:6379`;
+  }
+
+  if (endpoint.startsWith('rediss://')) {
+    options = {
+      tls: buildTlsOptions(instance)
+    };
   }
 
   const prefix = readStringFromEnvironment('REDIS_PREFIX');
@@ -42,14 +50,15 @@ const build = (
         return true;
       }
       return false;
-    }
+    },
+    ...options?.tls
   });
 
   return redis;
 };
 
 const redisPlugin: FastifyPluginAsync = async (instance) => {
-  const redis = build({
+  const redis = build(instance, {
     retryStrategy: (times: number) => {
       const delay = Math.max(times * 50, 2000);
       return delay;
@@ -80,9 +89,9 @@ export async function redisConnect(instance: FastifyInstance): Promise<void> {
 
 function noop() {}
 
-export async function redisConnectTest(): Promise<boolean> {
+export async function redisConnectTest(instance: FastifyInstance): Promise<boolean> {
   try {
-    const redis = build({
+    const redis = build(instance, {
       connectTimeout: 5000,
       maxRetriesPerRequest: 1,
       retryStrategy: () => null
@@ -105,3 +114,72 @@ export async function redisConnectTest(): Promise<boolean> {
 export default fastifyPlugin(redisPlugin, {
   name: 'redis'
 });
+
+function buildRedisEndpoint(instance: FastifyInstance) {
+  try {
+    const redisUrl = readFromFileEnvironment('REDIS_URL');
+
+    if (redisUrl) {
+      return redisUrl;
+    } else {
+      const host = readStringFromEnvironment('REDIS_HOST', { default: 'localhost' });
+      const port = readNumberFromEnvironment('REDIS_PORT', 10, { default: 6379 });
+
+      const username = readFromFileEnvironment('REDIS_USERNAME');
+      const password = readFromFileEnvironment('REDIS_PASSWORD');
+
+      const useTls = readBooleanFromEnvironment('REDIS_TLS') || port === 6380;
+
+      const protocol = useTls ? 'rediss' : 'redis';
+
+      let auth = '';
+      if (username && password) {
+        auth = `${encodeURIComponent(username)}:${encodeURIComponent(password)}@`;
+      } else if (password) {
+        auth = `:${encodeURIComponent(password)}@`;
+      } else if (username) {
+        auth = `${encodeURIComponent(username)}@`;
+      }
+
+      return `${protocol}://${auth}${host}:${port}`;
+    }
+  } catch (err) {
+    instance.log.error(err, 'Failed to build redis endpoint url');
+    return undefined;
+  }
+}
+
+function buildTlsOptions(instance: FastifyInstance) {
+  try {
+    const rejectUnauthorized = readBooleanFromEnvironment('REDIS_TLS_REJECT_UNAUTHORIZED', {
+      default: false
+    });
+
+    const caPath = readFromFileEnvironment('REDIS_TLS_CA');
+    const certPath = readFromFileEnvironment('REDIS_TLS_CERT');
+    const keyPath = readFromFileEnvironment('REDIS_TLS_KEY');
+
+    const options: StandaloneConnectionOptions = {
+      tls: {
+        rejectUnauthorized
+      }
+    };
+
+    if (caPath) {
+      options.tls!.ca = fs.readFileSync(caPath);
+    }
+
+    if (certPath) {
+      options.tls!.cert = fs.readFileSync(certPath);
+    }
+
+    if (keyPath) {
+      options.tls!.key = fs.readFileSync(keyPath);
+    }
+
+    return options.tls;
+  } catch (err) {
+    instance.log.fatal(err, 'Failed to initialize redis TLS options');
+    process.exit(1);
+  }
+}
