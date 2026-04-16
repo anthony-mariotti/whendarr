@@ -7,6 +7,8 @@
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check": "turbo run check",
+    "test": "turbo run test",
+    "test:coverage": "turbo run test:coverage",
     "docker:whendarr:up": "docker compose -f docker/compose.develop.yml --profile whendarr up -d",
     "docker:valkey:up": "docker compose -f docker/compose.develop.yml --profile valkey up -d"
   },
