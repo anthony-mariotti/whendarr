@@ -34,22 +34,13 @@ const TRUSTED_PROXY_HOP = readNumberFromEnvironment('TRUSTED_PROXY_HOP');
 async function build() {
   const instance = Fastify({
     logger: {
+      // "fatal" | "error" | "warn" | "info" | "debug" | "trace"
       level: readStringFromEnvironment('LOG_LEVEL', { default: 'info' }),
       transport: isDevelopment()
         ? { target: 'pino-pretty', options: { colorize: true } }
         : undefined
     },
-    trustProxy: (address, hop) => {
-      if (!TRUSTED_PROXY) {
-        return true;
-      }
-
-      if (TRUSTED_PROXY_HOP !== undefined) {
-        return address === TRUSTED_PROXY || hop === TRUSTED_PROXY_HOP;
-      }
-
-      return address === TRUSTED_PROXY;
-    },
+    trustProxy: TRUSTED_PROXY ?? TRUSTED_PROXY_HOP,
     rewriteUrl: (req) => {
       const url = req.url ?? '/';
       if (BASE_PATH) {
