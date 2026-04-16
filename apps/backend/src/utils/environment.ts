@@ -55,17 +55,18 @@ export function readFromFileEnvironment(
   variable: ENVIRONMENT,
   options: EnvironmentOptions<string> = { required: false }
 ): string | undefined {
-  const path = process.env[`${variable}_FILE`];
+  const filePath = process.env[`${variable}_FILE`];
+  const hasFilePath = filePath !== undefined && filePath !== '';
 
-  if (path) {
+  if (hasFilePath) {
     try {
-      const value = fs.readFileSync(path);
-      if (Buffer.isBuffer(value)) {
-        return value.toString('utf-8').trim();
-      }
-      return value;
+      const value = fs.readFileSync(filePath, 'utf-8');
+      return value.trim();
     } catch {
-      /* Fallback */
+      if (options.required) {
+        throw new Error(`Failed to read file for required environment variable: ${variable}_FILE`);
+      }
+      // Fallthrough to normal string hanlding
     }
   }
 
@@ -101,28 +102,31 @@ export function readStringFromEnvironment(
   variable: ENVIRONMENT,
   options: EnvironmentOptions<string> = { required: false }
 ): string | undefined {
-  const env = process.env[variable];
+  const value = process.env[variable];
 
-  if (env) {
-    if (env.startsWith('http')) {
-      try {
-        new URL(env);
-        if (env.endsWith('/')) {
-          return env.slice(0, -1);
-        }
-      } catch {
-        /* Not a URL */
-      }
+  const missing = value === undefined || value === '';
+
+  if (missing) {
+    if (options.required) {
+      throw new Error(`Missing required environment variable: ${variable}`);
     }
 
-    return process.env[variable];
+    return options.default;
   }
 
-  if (options?.required) {
-    throw new Error(`Missing required ${variable} environment variable.`);
+  if (value.startsWith('http')) {
+    try {
+      new URL(value);
+
+      if (value.endsWith('/')) {
+        return value.slice(0, -1);
+      }
+    } catch {
+      /* Not a URL */
+    }
   }
 
-  return options?.default;
+  return value;
 }
 
 export function readNumberFromEnvironment(variable: ENVIRONMENT): number | undefined;
@@ -161,37 +165,51 @@ export function readNumberFromEnvironment(
 ): number | undefined {
   const value = process.env[variable];
 
-  if (value) {
-    try {
-      return parseInt(value, radix);
-    } catch {
-      /* Fallback */
+  const isMissing = value === undefined || value === '';
+
+  if (isMissing) {
+    if (options.required) {
+      throw new Error(`Missing required environment variable: ${variable}`);
     }
+
+    return options.default;
   }
 
-  if (options?.required) {
-    throw new Error(`Missing required ${variable} environment variable.`);
+  const parsed = parseInt(value, radix);
+
+  if (Number.isNaN(parsed)) {
+    if (options.required) {
+      throw new Error(`Invalid number for environment variable: ${variable}`);
+    }
+
+    return options.default;
   }
 
-  return options?.default;
+  return parsed;
+}
+
+function getNodeEnv(): string {
+  const value = readStringFromEnvironment('NODE_ENV');
+  if (!value) return 'development';
+  return value.toLowerCase();
 }
 
 /**
- * Determines if the `NODE_ENV` is development. Assumes that if the `NODE_ENV` is not set, then the current environment is development
+ * Determines if the environment is development.
  *
- * @returns `true` if development or not set, otherwise `false`
+ * @returns `true` if NODE_ENV is "development" or not set
  */
 export function isDevelopment(): boolean {
-  return readStringFromEnvironment('NODE_ENV', { default: 'development' }) !== 'production';
+  return getNodeEnv() === 'development';
 }
 
 /**
- * Determines if the `NODE_ENV` is production. Assumes that if the `NODE_ENV` is not set, then the current environment is production
+ * Determines if the environment is production.
  *
- * @returns `true` if production or not set, otherwise `false`
+ * @returns `true` if NODE_ENV is "production"
  */
 export function isProduction(): boolean {
-  return readStringFromEnvironment('NODE_ENV', { default: 'production' }) === 'production';
+  return getNodeEnv() === 'production';
 }
 
 export type ENVIRONMENT =
