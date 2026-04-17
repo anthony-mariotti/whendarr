@@ -4,6 +4,7 @@
     "showLess": "Show less",
     "viewOnGitHub": "View on GitHub",
     "openSettings": "Open settings",
+    "openInformation": "Open information",
     "previousMonth": "Previous month",
     "nextMonth": "Next month",
     "filterCalendar": "Filter calendar"
@@ -20,5 +21,12 @@
     "cinema": "Cinema",
     "digital": "Digital",
     "physical": "Physical"
+  },
+  "labels": {
+    "whendarr": "Whendarr",
+    "version": "Version"
+  },
+  "descriptions": {
+    "whendarr": "An open source, self hosted calendar that aggregates release data from *arr services into a simple monthly interface."
   }
 }

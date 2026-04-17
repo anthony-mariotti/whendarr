@@ -1,4 +1,9 @@
-import { API_V1_BASE_PATH, type CalendarEvent, type CalendarQuery } from '@whendarr/shared';
+import {
+  API_V1_BASE_PATH,
+  type VesrionInfo,
+  type CalendarEvent,
+  type CalendarQuery
+} from '@whendarr/shared';
 import { BASE_PATH } from './basePath';
 
 class WhendarrApi {
@@ -47,6 +52,10 @@ class WhendarrApi {
         searchParams.size > 0 ? `/calendar?${searchParams.toString()}` : '/calendar'
       );
     }
+  };
+
+  version = {
+    get: () => this.request<VesrionInfo>('/version')
   };
 }
 

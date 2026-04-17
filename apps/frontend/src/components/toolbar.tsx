@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, FunnelIcon, SettingsIcon } from 'lucide-react';
+import { ChevronLeft, ChevronRight, FunnelIcon, InfoIcon } from 'lucide-react';
 import { Button } from './ui/button';
 import { useTranslation } from 'react-i18next';
 import { ModeToggle } from './mode-toggle';
@@ -15,11 +15,22 @@ import { useCalendar } from './calendar/calendar';
 import { useCalendarApi } from '@/hooks/api/useCalendarApi';
 import { Spinner } from './ui/spinner';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
+} from './ui/dialog';
+import { useVersionApi } from '@/hooks/api/useVesrionApi';
+import { Separator } from './ui/separator';
 
 function Toolbar() {
   const { t } = useTranslation(['common']);
   const { month, filter, nextMonth, prevMonth, today, setFilter } = useCalendar();
   const { isLoading } = useCalendarApi();
+  const { data } = useVersionApi();
   const { desktop } = useMediaQuery();
 
   return (
@@ -90,10 +101,29 @@ function Toolbar() {
           <span className="sr-only">{t('common:actions.viewOnGitHub')}</span>
         </a>
       </Button>
-      <Button variant={'ghost'} size={desktop ? 'icon-lg' : 'icon'}>
-        <SettingsIcon />
-        <span className="sr-only">{t('common:actions.openSettings')}</span>
-      </Button>
+      <Dialog>
+        <DialogTrigger asChild>
+          <Button variant={'ghost'} size={desktop ? 'icon-lg' : 'icon'}>
+            <InfoIcon />
+            <span className="sr-only">{t('common:actions.openInformation')}</span>
+          </Button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('common:labels.whendarr')}</DialogTitle>
+            <DialogDescription>{t('common:descriptions.whendarr')}</DialogDescription>
+          </DialogHeader>
+          <Separator />
+          <div className="flex">
+            <div className="grow">
+              <h3>{t('common:labels.version')}</h3>
+              <p className="text-muted-foreground *:[a]:hover:text-foreground text-sm *:[a]:underline *:[a]:underline-offset-3">
+                {data?.current.version} {data?.current.commit && `(${data.current.commit})`}
+              </p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
