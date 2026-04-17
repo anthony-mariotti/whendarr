@@ -9,7 +9,9 @@
     "check": "turbo run check",
     "test": "turbo run test",
     "test:coverage": "turbo run test:coverage",
+    "docker:build:local": "docker build -f docker/Dockerfile -t ghcr.io/anthony-mariotti/whendarr:dev .",
     "docker:whendarr:up": "docker compose -f docker/compose.develop.yml --profile whendarr up -d",
+    "docker:whendarr:down": "docker compose -f docker/compose.develop.yml --profile whendarr down -t 0",
     "docker:valkey:up": "docker compose -f docker/compose.develop.yml --profile valkey up -d"
   },
   "devDependencies": {
