@@ -20,6 +20,7 @@ import { config } from 'dotenv';
 
 import { registerPlugins } from './plugins/index.js';
 import servicesPlugin from '@/services/index.js';
+import { registerVersionRoute } from './routes/version.js';
 
 const PROJECT_ROOT = resolve(process.cwd(), isDevelopment() ? '../..' : '');
 config({ path: resolve(PROJECT_ROOT, '.env'), quiet: true });
@@ -86,6 +87,7 @@ async function build() {
   await registerHealthRoute(instance);
   await registerServerRoute(instance);
   await registerCalendarRoute(instance);
+  await registerVersionRoute(instance);
 
   // Serve Frontend
   const frontend = resolve(PROJECT_ROOT, isDevelopment() ? 'apps/frontend/dist' : 'frontend');

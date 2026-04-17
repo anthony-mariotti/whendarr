@@ -11,7 +11,9 @@ export type {
   ReleaseType,
   // Calendar
   EventItem,
-  CalendarEvent
+  CalendarEvent,
+  // Metadata
+  VesrionInfo
 } from './types.js';
 
 export { getClientTimezone } from './functions.js';

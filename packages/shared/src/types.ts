@@ -38,3 +38,24 @@ export interface EpisodeItem {
 }
 
 export type CalendarEvent = MovieItem | ShowItem;
+
+export interface VesrionInfo {
+  current: {
+    version: string;
+    tag: string | null;
+    commit: string | null;
+    date: string | null;
+    edge: boolean;
+  };
+  latest: {
+    version: string;
+    tag: string;
+    url: string;
+    published: string;
+    edgeRelease: boolean;
+    name: string | null;
+    notes: string | null;
+  } | null;
+  hasUpdate: boolean;
+  lastChecked: string | null;
+}

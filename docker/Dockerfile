@@ -36,7 +36,7 @@ WORKDIR /srv/whendarr
 ARG BUST_CACHE
 
 RUN echo "BUILD: ${BUILD_VERSION} (${BUILD_COMMIT}) - ${BUST_CACHE:-nocache}" \
-  && printf '{"version":"%s","tag":"%s","commit":"%s","buildDate":"%s"}\n' \
+  && printf '{"version":"%s","tag":"%s","commit":"%s","date":"%s"}\n' \
     "${APP_VERSION}" "${APP_TAG}" "${APP_COMMIT}" "${APP_BUILD_DATE}" > /srv/whendarr/.build.json
 
 ENV NODE_ENV=production
