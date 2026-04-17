@@ -144,7 +144,8 @@ function mapEpisode(episode: SonarrCalendarResponse): EpisodeItem {
     season: episode.seasonNumber ?? 0,
     number: episode.episodeNumber ?? 0,
     overview: episode.overview,
-    available: episode.hasFile ?? false
+    available: episode.hasFile ?? false,
+    date: episode.airDateUtc
   };
 }
 

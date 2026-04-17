@@ -23,6 +23,7 @@ import { ExpandableText } from '../expandableText';
 import { createContext, useContext, useState } from 'react';
 import { useCalendarApi } from '@/hooks/api/useCalendarApi';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { Card, CardDescription, CardHeader, CardTitle } from '../ui/card';
 
 type CalendarState = {
   month: dayjs.Dayjs;
@@ -191,7 +192,10 @@ function CalendarEvent({ event }: CalendarEventProps) {
       <CalendarEventTrigger event={event} />
       <DialogContent className="sm:max-w-lg">
         <CalendarDialogHeader title={event.title} overview={event.overview} />
-        <CalendarDialogContent event={event} />
+        <Separator />
+        <div className="no-scrollbar -mx-4 max-h-[40vh] space-y-2 overflow-y-auto px-4 py-px">
+          <CalendarDialogContent event={event} />
+        </div>
       </DialogContent>
     </Dialog>
   );
@@ -254,7 +258,6 @@ function CalendarDialogHeader({ title, overview }: CalendarDialogHeaderProps) {
       <DialogDescription asChild>
         <ExpandableText value={overview} />
       </DialogDescription>
-      <Separator />
     </DialogHeader>
   );
 }
@@ -368,7 +371,23 @@ interface EpisodeProps {
 }
 
 function Episode({ episode }: EpisodeProps) {
-  return <p>{episode.title}</p>;
+  return (
+    <Card>
+      <div className="flex">
+        <CardHeader className="grow">
+          <CardTitle>{episode.title}</CardTitle>
+          <CardDescription>
+            S{String(episode.season).padStart(2, '0')} E{String(episode.number).padStart(2, '0')}
+          </CardDescription>
+        </CardHeader>
+        {episode.date && (
+          <div className="flex items-center justify-center px-4">
+            <div>{dayjs(episode.date).format('hh:mm A')}</div>
+          </div>
+        )}
+      </div>
+    </Card>
+  );
 }
 
 interface MovieDetailProps {

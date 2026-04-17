@@ -35,6 +35,7 @@ export interface EpisodeItem {
   season: number;
   number: number;
   available: boolean;
+  date: string;
 }
 
 export type CalendarEvent = MovieItem | ShowItem;
