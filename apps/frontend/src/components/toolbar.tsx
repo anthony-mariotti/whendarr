@@ -37,7 +37,7 @@ function Toolbar() {
     <div className="bg-background fixed bottom-0 z-10 flex min-h-16 w-full items-center space-x-2 border-t-2 px-4 py-2 sm:relative sm:bottom-auto sm:border-t-0">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant={'outline'} size={desktop ? 'icon-lg' : 'icon'}>
+          <Button variant={'outline'} size={'icon-lg'}>
             <FunnelIcon />
             <span className="sr-only">{t('common:actions.filterCalendar')}</span>
           </Button>
@@ -64,11 +64,11 @@ function Toolbar() {
         {t('common:time.today')}
       </Button>
       <ButtonGroup>
-        <Button variant={'outline'} size={desktop ? 'icon-lg' : 'icon'} onClick={prevMonth}>
+        <Button variant={'outline'} size={'icon-lg'} onClick={prevMonth}>
           <ChevronLeft />
           <span className="sr-only">{t('common:actions.previousMonth')}</span>
         </Button>
-        <Button variant={'outline'} size={desktop ? 'icon-lg' : 'icon'} onClick={nextMonth}>
+        <Button variant={'outline'} size={'icon-lg'} onClick={nextMonth}>
           <ChevronRight />
           <span className="sr-only">{t('common:actions.nextMonth')}</span>
         </Button>
@@ -103,7 +103,7 @@ function Toolbar() {
       </Button>
       <Dialog>
         <DialogTrigger asChild>
-          <Button variant={'ghost'} size={desktop ? 'icon-lg' : 'icon'}>
+          <Button variant={'ghost'} size={'icon-lg'}>
             <InfoIcon />
             <span className="sr-only">{t('common:actions.openInformation')}</span>
           </Button>
