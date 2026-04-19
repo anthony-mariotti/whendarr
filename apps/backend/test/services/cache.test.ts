@@ -116,6 +116,7 @@ describe('CacheService', () => {
 
   afterEach(async () => {
     await redis.flushall();
+    redis.disconnect();
     setCachePrefix('whendarr');
     setCalendarTTL(300);
   });
@@ -217,22 +218,22 @@ describe('CacheService', () => {
   // -------------------------------------------------------------------------
 
   describe('enabled guard', () => {
-    it('getCalendar returns undefined when Redis is not ready', async () => {
-      const disconnectedRedis = new RedisMock();
-      Object.defineProperty(disconnectedRedis, 'status', { value: 'end', configurable: true });
-      const disabledCache = createCacheService(disconnectedRedis);
+    beforeEach(async () => {
+      Object.defineProperty(redis, 'status', { value: 'end', configurable: true });
+      cache = createCacheService(redis);
+    });
 
-      const result = await disabledCache.getCalendar(start, end);
+    afterEach(() => {
+      redis.disconnect();
+    });
+
+    it('getCalendar returns undefined when Redis is not ready', async () => {
+      const result = await cache.getCalendar(start, end);
       expect(result).toBeUndefined();
     });
 
     it('setCalendar does nothing when Redis is not ready', async () => {
-      const disconnectedRedis = new RedisMock();
-      Object.defineProperty(disconnectedRedis, 'status', { value: 'end', configurable: true });
-      const disabledCache = createCacheService(disconnectedRedis);
-
-      await disabledCache.setCalendar(start, end, sampleEvents);
-
+      await cache.setCalendar(start, end, sampleEvents);
       // Nothing should have been written — check against the connected cache
       const result = await cache.getCalendar(start, end);
       expect(result).toBeUndefined();
