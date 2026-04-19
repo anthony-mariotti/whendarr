@@ -41,10 +41,6 @@ updates:
           - "*"
     commit-message:
       prefix: "ci"
-    cooldown:
-      semver-major-days: 30
-      semver-minor-days: 14
-      semver-patch-days: 7
 
   - package-ecosystem: "docker"
     directory: /docker
@@ -56,8 +52,3 @@ updates:
         versions: ["21", "23", "25", "27", "29"]
     commit-message:
       prefix: "deps(docker)"
-    cooldown:
-      semver-major-days: 30
-      semver-minor-days: 14
-      semver-patch-days: 7
-
