@@ -25,6 +25,10 @@ updates:
         dependency-type: "development"
     commit-message:
       prefix: "deps"
+    cooldown:
+      semver-major-days: 60
+      semver-minor-days: 30
+      semver-patch-days: 7
 
   - package-ecosystem: "github-actions"
     directory: /
