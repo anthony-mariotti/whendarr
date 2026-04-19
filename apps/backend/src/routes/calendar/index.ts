@@ -1,5 +1,7 @@
 import type { FastifyInstance, FastifyPluginAsync } from 'fastify';
 import { calendarQuerySchema } from '@whendarr/shared';
+import { getCalendarService } from '@/services/calendar.js';
+import { getCacheService } from '@/services/cache.js';
 
 export async function registerCalendarRoute(instance: FastifyInstance) {
   await instance.register(calendarV1, { prefix: '/api/v1/calendar' });
@@ -10,21 +12,13 @@ const calendarV1: FastifyPluginAsync = async (instance: FastifyInstance) => {
     const query = await calendarQuerySchema.safeParseAsync(request.query);
     instance.assert(query.success, 400, query.error?.issues?.at(0)?.message);
 
-    const tz = query.data.tz ?? 'UTC';
+    const calendarService = getCalendarService();
 
-    const start = query.data.month
-      ? instance
-          .dayjs(query.data.month, 'YYYY-MM-DD')
-          .startOf('month')
-          .startOf('week')
-          .startOf('date')
-      : instance.dayjs.utc().startOf('month').startOf('week').tz(tz, true);
+    const { start, end, tz } = calendarService.resolveRange(query.data.month, query.data.tz);
 
-    const end = query.data.month
-      ? instance.dayjs(query.data.month, 'YYYY-MM-DD').endOf('month').endOf('week').endOf('date')
-      : instance.dayjs.utc().endOf('month').endOf('week').tz(tz, true);
+    const cacheService = getCacheService();
+    const cached = await cacheService.getCalendar(start, end);
 
-    const cached = await instance.services.calendar.cached(start, end);
     if (cached) {
       return {
         tz,
@@ -51,20 +45,15 @@ const calendarV1: FastifyPluginAsync = async (instance: FastifyInstance) => {
       return reply.badGateway(`Sonarr API failed with status ${sonarrResponse.status}`);
     }
 
-    const calendar = await instance.services.calendar.map(
-      radarrResponse.data,
-      sonarrResponse.data,
-      start,
-      end
-    );
+    const calendar = calendarService.map(radarrResponse.data, sonarrResponse.data, start, end);
+
+    await cacheService.setCalendar(start, end, calendar);
 
     return {
       tz,
       start: start,
       end: end,
-      data: calendar,
-      radarr: radarrResponse.data,
-      sonarr: sonarrResponse.data
+      data: calendar
     };
   });
 };

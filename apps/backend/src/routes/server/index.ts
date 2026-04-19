@@ -5,7 +5,7 @@ export async function registerServerRoute(instance: FastifyInstance) {
 }
 
 const serverV1: FastifyPluginAsync = async (app) => {
-  app.get('/', async (request) => {
+  app.get('/', async () => {
     return {
       data: 'test'
     };

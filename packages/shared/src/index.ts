@@ -9,6 +9,7 @@ export type {
   EpisodeItem,
   MediaType,
   ReleaseType,
+  MovieStatus,
   // Calendar
   EventItem,
   CalendarEvent,

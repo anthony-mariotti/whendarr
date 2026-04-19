@@ -8,44 +8,66 @@ import type {
   ShowItem,
   ShowStatus
 } from '@whendarr/shared';
+
 import dayjs from 'dayjs';
-import { REDIS_KEYS } from './cache.js';
-import type { FastifyInstance } from 'fastify';
 
-export class CalendarService {
-  private instance: FastifyInstance;
+export interface CalendarRange {
+  start: dayjs.Dayjs;
+  end: dayjs.Dayjs;
+  tz: string;
+}
 
-  constructor(instance: FastifyInstance) {
-    this.instance = instance;
-  }
-
-  async cached(start: dayjs.Dayjs, end: dayjs.Dayjs) {
-    const cached = await this.instance.redis.get(REDIS_KEYS.CALENDAR_RANGE(start, end));
-    if (cached) {
-      return JSON.parse(cached) as EventItem[];
-    }
-
-    return undefined;
-  }
-
-  async map(
+export interface ICalendarService {
+  resolveRange(month?: string, tz?: string): CalendarRange;
+  map(
     radarr: RadarrCalendarResponse[],
     sonarr: SonarrCalendarResponse[],
     start: dayjs.Dayjs,
     end: dayjs.Dayjs
-  ): Promise<EventItem[]> {
+  ): EventItem[];
+}
+
+let calendarService: ICalendarService;
+
+export class CalendarService implements ICalendarService {
+  constructor() {}
+
+  resolveRange(month?: string, tz?: string): CalendarRange {
+    const resolvedTz = tz ?? 'UTC';
+
+    if (month) {
+      return {
+        tz: resolvedTz,
+        start: dayjs(month, 'YYYY-MM-DD').startOf('month').startOf('week').startOf('date'),
+        end: dayjs(month, 'YYYY-MM-DD').endOf('month').endOf('week').endOf('date')
+      };
+    }
+
+    return {
+      tz: resolvedTz,
+      start: dayjs.utc().startOf('month').startOf('week').tz(resolvedTz, true),
+      end: dayjs.utc().endOf('month').endOf('week').tz(resolvedTz, true)
+    };
+  }
+
+  map(
+    radarr: RadarrCalendarResponse[],
+    sonarr: SonarrCalendarResponse[],
+    start: dayjs.Dayjs,
+    end: dayjs.Dayjs
+  ): EventItem[] {
     const mappedRadarr = radarr.flatMap((movie) => mapMovie(movie, start, end));
     const mappedSonarr = mapEpisodeToShow(sonarr);
-
-    const converged = [...mappedRadarr, ...mappedSonarr];
-    this.instance.redis.setex(
-      REDIS_KEYS.CALENDAR_RANGE(start, end),
-      300,
-      JSON.stringify(converged)
-    );
-
-    return converged;
+    return [...mappedRadarr, ...mappedSonarr];
   }
+}
+
+export function getCalendarService(): ICalendarService {
+  if (!calendarService) {
+    calendarService = new CalendarService();
+  }
+
+  return calendarService;
 }
 
 function isInRange(dateString: string | undefined, start: dayjs.Dayjs, end: dayjs.Dayjs) {

@@ -5,7 +5,7 @@ export async function registerHealthRoute(instance: FastifyInstance) {
 }
 
 const health: FastifyPluginAsync = async (app) => {
-  app.get('/health', async (request) => {
+  app.get('/health', async () => {
     return {
       status: 'ok'
     };

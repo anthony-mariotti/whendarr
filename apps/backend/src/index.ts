@@ -19,8 +19,8 @@ import { existsSync, readFileSync } from 'fs';
 import { config } from 'dotenv';
 
 import { registerPlugins } from './plugins/index.js';
-import servicesPlugin from '@/services/index.js';
 import { registerVersionRoute } from './routes/version.js';
+import { createCacheService } from './services/cache.js';
 
 const PROJECT_ROOT = resolve(process.cwd(), isDevelopment() ? '../..' : '');
 config({ path: resolve(PROJECT_ROOT, '.env'), quiet: true });
@@ -75,7 +75,6 @@ async function build() {
   await instance.register(fastifySensible);
 
   await registerPlugins(instance);
-  await instance.register(servicesPlugin);
 
   const redisReady = await redisConnectTest(instance);
   if (!redisReady) {
@@ -83,6 +82,8 @@ async function build() {
   } else {
     await redisConnect(instance);
   }
+
+  const _ = createCacheService(instance.redis);
 
   await registerHealthRoute(instance);
   await registerServerRoute(instance);

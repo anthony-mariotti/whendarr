@@ -1,4 +1,10 @@
-import type { MEDIA_TYPES, RELEASE_TYPES, SHOW_AVAILABILITY, SHOW_STATUS } from './constants.js';
+import type {
+  MEDIA_TYPES,
+  MOVIE_STATUS,
+  RELEASE_TYPES,
+  SHOW_AVAILABILITY,
+  SHOW_STATUS
+} from './constants.js';
 
 export type MediaType = (typeof MEDIA_TYPES)[number];
 
@@ -17,6 +23,8 @@ export interface MovieItem extends EventItem {
   available: boolean;
   release: ReleaseType;
 }
+
+export type MovieStatus = (typeof MOVIE_STATUS)[number];
 
 export type ShowStatus = (typeof SHOW_STATUS)[number];
 

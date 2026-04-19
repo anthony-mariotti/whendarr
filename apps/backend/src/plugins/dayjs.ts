@@ -24,7 +24,6 @@ function dayjsPlugin(instance: FastifyInstance) {
   dayjs.extend(timezonePlugin);
   dayjs.extend(customParseFormatPlugin);
 
-  // @ts-ignore
   instance.decorate('dayjs', dayjs);
 
   return dayjs;
