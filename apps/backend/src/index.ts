@@ -1,7 +1,9 @@
-import Fastify from 'fastify';
+import Fastify, { type FastifyInstance } from 'fastify';
 import fastifySensible from '@fastify/sensible';
 import fastifyStatic from '@fastify/static';
-import { redisConnect, redisConnectTest } from './plugins/redis.js';
+import { resolve } from 'path';
+import { existsSync, readFileSync } from 'fs';
+import { config } from 'dotenv';
 
 import {
   isDevelopment,
@@ -9,18 +11,13 @@ import {
   readNumberFromEnvironment,
   readStringFromEnvironment
 } from './utils/environment.js';
-import { registerCalendarRoute } from './routes/calendar/index.js';
-import { registerServerRoute } from './routes/server/index.js';
-import { registerHealthRoute } from './routes/health/index.js';
-
-import { resolve } from 'path';
-import { existsSync, readFileSync } from 'fs';
-
-import { config } from 'dotenv';
-
 import { registerPlugins } from './plugins/index.js';
-import { registerVersionRoute } from './routes/version.js';
+import { redisConnect, redisConnectTest } from './plugins/redis.js';
 import { createCacheService } from './services/cache.js';
+import { registerHealthRoute } from './routes/health/index.js';
+import { registerServerRoute } from './routes/server/index.js';
+import { registerCalendarRoute } from './routes/calendar/index.js';
+import { registerVersionRoute } from './routes/version.js';
 
 const PROJECT_ROOT = resolve(process.cwd(), isDevelopment() ? '../..' : '');
 config({ path: resolve(PROJECT_ROOT, '.env'), quiet: true });
@@ -32,10 +29,9 @@ const BASE_PATH =
 const TRUSTED_PROXY = readStringFromEnvironment('TRUSTED_PROXY');
 const TRUSTED_PROXY_HOP = readNumberFromEnvironment('TRUSTED_PROXY_HOP');
 
-async function build() {
-  const instance = Fastify({
+function createServer(): FastifyInstance {
+  return Fastify({
     logger: {
-      // "fatal" | "error" | "warn" | "info" | "debug" | "trace"
       level: readStringFromEnvironment('LOG_LEVEL', { default: 'info' }),
       transport: isDevelopment()
         ? { target: 'pino-pretty', options: { colorize: true } }
@@ -44,17 +40,89 @@ async function build() {
     trustProxy: TRUSTED_PROXY ?? TRUSTED_PROXY_HOP,
     rewriteUrl: (req) => {
       const url = req.url ?? '/';
-      if (BASE_PATH) {
-        if (url.startsWith(`${BASE_PATH}/`) || url === BASE_PATH) {
-          return url.slice(BASE_PATH.length) || '/';
-        }
+      if (BASE_PATH && (url.startsWith(`${BASE_PATH}/`) || url === BASE_PATH)) {
+        return url.slice(BASE_PATH.length) || '/';
       }
-
       return url;
     }
   });
+}
 
-  instance.log.debug(
+async function registerAppPlugins(app: FastifyInstance): Promise<void> {
+  app.log.info('Registering application plugins');
+  app.addHook('onRequest', async (request) => {
+    if (!request.headers['content-type']) {
+      delete request.headers['transfer-encoding'];
+    }
+  });
+
+  await app.register(fastifySensible);
+  await registerPlugins(app);
+
+  const redisReady = await redisConnectTest(app);
+  if (!redisReady) {
+    app.log.warn({ redis: { ready: false } }, 'Redis unavailable');
+  } else {
+    await redisConnect(app);
+  }
+
+  createCacheService(app.redis);
+}
+
+async function registerRoutes(app: FastifyInstance): Promise<void> {
+  app.log.info('Registering application routes');
+  await registerHealthRoute(app);
+  await registerServerRoute(app);
+  await registerCalendarRoute(app);
+  await registerVersionRoute(app);
+}
+
+async function serveFrontend(app: FastifyInstance): Promise<void> {
+  const frontend = resolve(PROJECT_ROOT, isDevelopment() ? 'apps/frontend/dist' : 'frontend');
+
+  if (!isProduction() || !existsSync(frontend)) return;
+  app.log.info('Serving frontend via static files');
+
+  const cachedIndex = readFileSync(resolve(frontend, 'index.html'), 'utf-8');
+  await app.register(fastifyStatic, {
+    root: frontend,
+    prefix: '/',
+    serve: false,
+    redirect: true,
+    logLevel: 'warn'
+  });
+
+  app.setNotFoundHandler(async (request, reply) => {
+    if (request.url.startsWith('/api/') || request.url === 'health') {
+      return reply.notFound();
+    }
+
+    if (BASE_PATH) {
+      const { originalUrl } = request;
+      if (!originalUrl.startsWith(`${BASE_PATH}/`) && originalUrl !== BASE_PATH) {
+        return reply.redirect(`${BASE_PATH}/`);
+      }
+    }
+
+    const urlPath = request.url.split('?')[0]!;
+    if (urlPath !== '/' && /\.\w+$/.test(urlPath)) {
+      const filePath = urlPath.slice(1);
+      const fullPath = resolve(frontend, filePath);
+      if (existsSync(fullPath)) {
+        return reply.sendFile(filePath);
+      }
+    }
+
+    const base = BASE_PATH ? `${BASE_PATH}/` : '/';
+    const html = cachedIndex.replace('<head>', `<head>\n    <base href="${base}">`);
+    return reply.type('text/html').send(html);
+  });
+}
+
+async function build(): Promise<FastifyInstance> {
+  const app = createServer();
+
+  app.log.info(
     {
       production: isProduction(),
       host: HOST,
@@ -63,99 +131,35 @@ async function build() {
       trustedProxy: TRUSTED_PROXY,
       trustedProxyHop: TRUSTED_PROXY_HOP
     },
-    'Initializing Backend'
+    'Initializing backend'
   );
 
-  instance.addHook('onRequest', async (request) => {
-    if (!request.headers['content-type']) {
-      delete request.headers['transfer-encoding'];
-    }
-  });
+  await registerAppPlugins(app);
+  await registerRoutes(app);
+  await serveFrontend(app);
 
-  await instance.register(fastifySensible);
-
-  await registerPlugins(instance);
-
-  const redisReady = await redisConnectTest(instance);
-  if (!redisReady) {
-    instance.log.warn({ redis: { ready: redisReady } }, 'Redis unavailable');
-  } else {
-    await redisConnect(instance);
-  }
-
-  const _ = createCacheService(instance.redis);
-
-  await registerHealthRoute(instance);
-  await registerServerRoute(instance);
-  await registerCalendarRoute(instance);
-  await registerVersionRoute(instance);
-
-  // Serve Frontend
-  const frontend = resolve(PROJECT_ROOT, isDevelopment() ? 'apps/frontend/dist' : 'frontend');
-  const exists = existsSync(frontend);
-  if (isProduction() && exists) {
-    instance.log.info(
-      { frontend, isProduction: isProduction(), exists },
-      'Serving frontend via static file for production'
-    );
-
-    const index = resolve(frontend, 'index.html');
-    const cachedIndex = readFileSync(index, 'utf-8');
-
-    await instance.register(fastifyStatic, {
-      root: frontend,
-      prefix: '/',
-      serve: false,
-      redirect: true,
-      logLevel: 'trace'
-    });
-
-    instance.setNotFoundHandler(async (request, reply) => {
-      if (request.url.startsWith('/api/') || request.url === 'health') {
-        return reply.notFound();
-      }
-
-      if (BASE_PATH) {
-        const { originalUrl } = request;
-        if (!originalUrl.startsWith(`${BASE_PATH}/`) && originalUrl !== BASE_PATH) {
-          return reply.redirect(`${BASE_PATH}/`);
-        }
-      }
-
-      const urlPath = request.url.split('?')[0]!;
-      if (urlPath !== '/' && /\.\w+$/.test(urlPath)) {
-        const filePath = urlPath.slice(1);
-        const fullPath = resolve(frontend, filePath);
-
-        if (existsSync(fullPath)) {
-          return reply.sendFile(filePath);
-        }
-      }
-
-      const base = BASE_PATH ? `${BASE_PATH}/` : '/';
-      const html = cachedIndex.replace('<head>', `<head>\n    <base href="${base}">`);
-      return reply.type('text/html').send(html);
-    });
-  }
-
-  return instance;
+  return app;
 }
 
-async function start() {
+async function start(): Promise<void> {
   try {
-    const instance = await build();
-    instance.listen({ port: PORT, host: HOST }, (err) => {
-      if (err) {
-        instance.log.error(err);
-        process.exit(1);
+    const app = await build();
+    app.listen(
+      {
+        port: PORT,
+        host: HOST
+      },
+      (err) => {
+        if (err) {
+          app.log.error(err);
+          process.exit(1);
+        }
       }
-    });
+    );
   } catch (err) {
-    console.error('Failed to start server.', err);
+    console.error('Failed to start server', err);
     process.exit(1);
   }
 }
 
-(async () => {
-  await start();
-})();
+start();
