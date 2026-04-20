@@ -1,0 +1,37 @@
+services:
+  traefik:
+    image: ghcr.io/traefik/traefik:latest
+    ports:
+      - 80:80
+      - 8080:8080
+    command:
+      - "--api.insecure=true"
+      - "--api.dashboard=true"
+      - "--api.disableDashboardAd=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--log.level=info"
+      - "--global.sendAnonymousUsage=false"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+  whendarr:
+    image: ghcr.io/anthony-mariotti/whendarr:next
+    env_file: ../.env.production.local
+    environment:
+      LOG_LEVEL: warn
+    labels:
+      traefik.enable: true
+      traefik.http.routers.whendarr-rtr.rule: Host(`localhost`)
+      traefik.http.routers.whendarr-rtr.service: whendarr-svc
+      traefik.http.services.whendarr-svc.loadbalancer.server.port: 3000
+
+  valkey:
+    image: ghcr.io/valkey-io/valkey:latest
+    restart: always
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
