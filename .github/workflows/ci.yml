@@ -10,6 +10,7 @@ on:
       - '.github/pull_request_template.md'
       - '.github/CODEOWNERS'
       - 'CONTRIBUTING.md'
+      - 'CODE_OF_CONDUCT.md'
       - 'LICENSE.md'
       - 'README.md'
   pull_request:
