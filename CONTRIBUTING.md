@@ -71,6 +71,22 @@ For new features or significant changes, please discuss your idea before writing
 
 Bug fixes can go straight to a PR, though an issue helps track the problem.
 
+## I Want To Contribute
+
+> ### Legal Notice <!-- omit in toc -->
+>
+> When contributing to this project, you must agree that you have authored 100% of the content, that you have the necessary rights to the content and that the content you contribute may be provided under the project licence.
+
+### Reporting Bugs
+
+A good bug report shouldn't leave others needing to chase you up for more information. Therefore, we ask you to investigate carefully, collect information and describe the issue in detail in your report. Please complete the following steps in advance to help us fix any potential bug as fast as possible.
+
+- Make sure that you are using the latest version.
+- Determine if your bug is really a bug and not an error on your side e.g. using incompatible environment components/versions (Make sure that you have read the [documentation](https://docs.whendarr.com).
+- To see if other users have experienced (and potentially already solved) the same issue you are having, check if there is not already a bug report existing for your bug or error in the [bug tracker](https://github.com/anthony-mariotti/whendarr/issues?q=label%3Abug).
+- Also make sure to search the internet (including Stack Overflow) to see if users outside of the GitHub community have discussed the issue.
+- Can you reliably reproduce the issue? And can you also reproduce it with older versions?
+
 ## Pull Requests
 
 Before submitting:
