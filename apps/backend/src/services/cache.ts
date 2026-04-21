@@ -2,6 +2,12 @@ import type { EventItem } from '@whendarr/shared';
 import type dayjs from 'dayjs';
 import { type Redis } from 'ioredis';
 
+declare module 'fastify' {
+  interface FastifyReply {
+    cached: boolean;
+  }
+}
+
 let cachePrefix = 'whendarr';
 let calendarTTL = 300;
 

@@ -20,6 +20,7 @@ const calendarV1: FastifyPluginAsync = async (instance: FastifyInstance) => {
     const cached = await cacheService.getCalendar(start, end);
 
     if (cached) {
+      reply.cached = true;
       return {
         tz,
         start,
