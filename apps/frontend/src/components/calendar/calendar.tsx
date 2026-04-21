@@ -29,7 +29,7 @@ type CalendarState = {
   month: dayjs.Dayjs;
   filter: {
     movies: boolean;
-    show: boolean;
+    shows: boolean;
   };
   prevMonth: () => void;
   nextMonth: () => void;
@@ -41,7 +41,7 @@ const initialState: CalendarState = {
   month: dayjs(),
   filter: {
     movies: true,
-    show: true
+    shows: true
   },
   prevMonth: () => null,
   nextMonth: () => null,
@@ -112,7 +112,7 @@ function chunk(array: Dayjs[], size: number) {
 }
 
 function Calendar() {
-  const { month } = useCalendar();
+  const { month, filter } = useCalendar();
   const { data: events, isLoading } = useCalendarApi();
   const { desktop } = useMediaQuery();
 
@@ -137,7 +137,7 @@ function Calendar() {
       </div>
       <div className="flex flex-1 flex-col">
         {weeks.map((week, i) => (
-          <CalendarWeek key={i} week={week} events={events?.data} />
+          <CalendarWeek key={i} week={week} events={events?.data} filter={filter} />
         ))}
       </div>
     </div>
@@ -147,14 +147,15 @@ function Calendar() {
 interface CalendarWeekProps {
   week: Dayjs[];
   events?: CalendarEvent[];
+  filter: CalendarState['filter'];
 }
 
-function CalendarWeek({ week, events }: CalendarWeekProps) {
+function CalendarWeek({ week, events, filter }: CalendarWeekProps) {
   return (
     <div className="border-border flex h-full w-full flex-1 flex-col border-t last:border-b">
       <div className="flex h-full w-full">
         {week.map((day, j) => {
-          return <CalendarDay key={j} day={day} events={events} />;
+          return <CalendarDay key={j} day={day} events={events} filter={filter} />;
         })}
       </div>
     </div>
@@ -164,10 +165,22 @@ function CalendarWeek({ week, events }: CalendarWeekProps) {
 interface CalendarDayProps {
   day: Dayjs;
   events?: CalendarEvent[];
+  filter: CalendarState['filter'];
 }
 
-function CalendarDay({ day, events }: CalendarDayProps) {
-  const dayEvents = events?.filter((e) => day.isSame(dayjs(e.date), 'day'));
+function CalendarDay({ day, events, filter }: CalendarDayProps) {
+  const dayEvents = events
+    ?.filter((e) => day.isSame(dayjs(e.date), 'day'))
+    .filter((event) => {
+      switch (event.type) {
+        case 'movie':
+          return filter.movies;
+        case 'show':
+          return filter.shows;
+        default:
+          return true;
+      }
+    });
   return (
     <div className="border-border relative flex h-full w-full flex-1 flex-col overflow-hidden border-l last:border-r">
       <h2 className="text-center">

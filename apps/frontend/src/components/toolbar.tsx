@@ -52,8 +52,8 @@ function Toolbar() {
               {t('common:media.movie_plural')}
             </DropdownMenuCheckboxItem>
             <DropdownMenuCheckboxItem
-              checked={filter.show}
-              onCheckedChange={(value) => setFilter({ show: value })}
+              checked={filter.shows}
+              onCheckedChange={(value) => setFilter({ shows: value })}
             >
               {t('common:media.tv_show_plural')}
             </DropdownMenuCheckboxItem>
