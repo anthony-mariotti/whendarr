@@ -118,6 +118,15 @@ async function serveFrontend(app: FastifyInstance): Promise<void> {
 async function build(): Promise<FastifyInstance> {
   const app = createServer();
 
+  switch (app.log.level) {
+    case 'trace':
+      app.log.trace('Server trace enabled');
+      break;
+    case 'debug':
+      app.log.debug('Server debug enabled');
+      break;
+  }
+
   app.log.info(
     {
       production: isProduction(),
