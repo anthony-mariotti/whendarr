@@ -21,7 +21,11 @@ function buildOptions(): FastifyLoggerOptions & LoggerOptions {
           }
         }),
     redact: {
-      paths: ['req.headers.authorization', 'req.headers.cookie'],
+      paths: [
+        'req.headers.authorization',
+        'req.headers.cookie',
+        'integration.req.headers.X-API-KEY'
+      ],
       censor: '[redacted]'
     },
     serializers: {

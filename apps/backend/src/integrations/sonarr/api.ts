@@ -1,3 +1,4 @@
+import { getCurrentVersion } from '@/utils/version.js';
 import type { FastifyInstance } from 'fastify';
 
 const SonarrApiRoutes = {
@@ -23,7 +24,7 @@ export class SonarrApi {
 
     this.headers = {
       'X-API-KEY': options.key,
-      'User-Agent': 'Whendarr/0.0.1',
+      'User-Agent': `Whendarr/${getCurrentVersion()}`,
       ...options.headers
     };
 
@@ -43,14 +44,18 @@ export class SonarrApi {
     );
 
     this.instance?.log.debug({
-      service: 'sonarr',
-      fetch: {
-        method: 'GET',
-        endpoint: url,
-        params,
-        response: {
+      integration: {
+        name: 'sonarr',
+        req: {
+          method: 'GET',
+          path: url,
+          query: params,
+          headers: this.headers
+        },
+        res: {
           ok: response.ok,
-          status: response.status
+          status: response.status,
+          length: response.headers.get('length')
         }
       }
     });
