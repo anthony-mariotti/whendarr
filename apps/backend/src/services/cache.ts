@@ -1,4 +1,4 @@
-import type { EventItem } from '@whendarr/shared';
+import type { CalendarEvent } from '@whendarr/shared';
 import type dayjs from 'dayjs';
 import { type Redis } from 'ioredis';
 
@@ -34,8 +34,8 @@ export const REDIS_KEYS = {
 };
 
 export interface ICacheService {
-  getCalendar(start: dayjs.Dayjs, end: dayjs.Dayjs): Promise<EventItem[] | undefined>;
-  setCalendar(start: dayjs.Dayjs, end: dayjs.Dayjs, data: EventItem[]): Promise<void>;
+  getCalendar(start: dayjs.Dayjs, end: dayjs.Dayjs): Promise<CalendarEvent[] | undefined>;
+  setCalendar(start: dayjs.Dayjs, end: dayjs.Dayjs, data: CalendarEvent[]): Promise<void>;
 }
 
 let cacheService: ICacheService;
@@ -47,14 +47,14 @@ class CacheService implements ICacheService {
     return this.redis.status === 'ready';
   }
 
-  async getCalendar(start: dayjs.Dayjs, end: dayjs.Dayjs): Promise<EventItem[] | undefined> {
+  async getCalendar(start: dayjs.Dayjs, end: dayjs.Dayjs): Promise<CalendarEvent[] | undefined> {
     if (!this.enabled) return undefined;
 
     const cached = await this.redis.get(REDIS_KEYS.CALENDAR_RANGE(start, end));
-    return cached ? (JSON.parse(cached) as EventItem[]) : undefined;
+    return cached ? (JSON.parse(cached) as CalendarEvent[]) : undefined;
   }
 
-  async setCalendar(start: dayjs.Dayjs, end: dayjs.Dayjs, data: EventItem[]): Promise<void> {
+  async setCalendar(start: dayjs.Dayjs, end: dayjs.Dayjs, data: CalendarEvent[]): Promise<void> {
     if (!this.enabled) return;
     await this.redis.setex(
       REDIS_KEYS.CALENDAR_RANGE(start, end),

@@ -3,7 +3,7 @@ import utc from 'dayjs/plugin/utc.js';
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { CalendarRange, ICalendarService } from '../../../src/services/calendar.js';
-import type { EventItem, MovieItem } from '@whendarr/shared';
+import type { CalendarEvent } from '@whendarr/shared';
 import type { RadarrApi, RadarrCalendarResponse } from '../../../src/integrations/radarr/api.js';
 import type { SonarrApi, SonarrCalendarResponse } from '../../../src/integrations/sonarr/api.js';
 import type { ICacheService } from '../../../src/services/cache.js';
@@ -37,7 +37,7 @@ const resolvedRange: CalendarRange = {
   end: dayjs.utc('2024-03-31')
 };
 
-const sampleEvents: EventItem[] = [
+const sampleEvents: CalendarEvent[] = [
   {
     type: 'movie',
     title: 'Test Movie',
@@ -46,7 +46,7 @@ const sampleEvents: EventItem[] = [
     date: '2024-03-15T00:00:00.000Z',
     certification: 'PG-13',
     overview: 'A test movie overview.'
-  } as MovieItem
+  }
 ];
 
 const radarrData: RadarrCalendarResponse[] = [

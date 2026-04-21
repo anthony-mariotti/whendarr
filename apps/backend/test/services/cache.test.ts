@@ -1,4 +1,4 @@
-import type { EventItem, MovieItem } from '@whendarr/shared';
+import type { CalendarEvent, MovieItem } from '@whendarr/shared';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc.js';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -19,7 +19,7 @@ dayjs.extend(utc);
 const start = dayjs.utc('2024-03-01');
 const end = dayjs.utc('2024-03-31');
 
-const sampleEvents: EventItem[] = [
+const sampleEvents: CalendarEvent[] = [
   {
     type: 'movie',
     title: 'Test Movie',
@@ -28,7 +28,7 @@ const sampleEvents: EventItem[] = [
     overview: 'A test movie',
     available: true,
     release: 'digital'
-  } as MovieItem
+  }
 ];
 
 // ---------------------------------------------------------------------------
@@ -176,7 +176,9 @@ describe('CacheService', () => {
     });
 
     it('overwrites a previously cached value', async () => {
-      const updated: EventItem[] = [{ ...sampleEvents[0], title: 'Updated Movie' } as MovieItem];
+      const updated: CalendarEvent[] = [
+        { ...sampleEvents[0], title: 'Updated Movie' } as MovieItem
+      ];
       await cache.setCalendar(start, end, sampleEvents);
       await cache.setCalendar(start, end, updated);
       const result = await cache.getCalendar(start, end);
@@ -187,7 +189,9 @@ describe('CacheService', () => {
       await cache.setCalendar(start, end, sampleEvents);
 
       setCachePrefix('other');
-      const otherEvents: EventItem[] = [{ ...sampleEvents[0], title: 'Other Movie' } as MovieItem];
+      const otherEvents: CalendarEvent[] = [
+        { ...sampleEvents[0], title: 'Other Movie' } as MovieItem
+      ];
       await cache.setCalendar(start, end, otherEvents);
 
       setCachePrefix('whendarr');

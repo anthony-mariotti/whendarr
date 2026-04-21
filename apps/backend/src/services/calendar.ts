@@ -1,8 +1,8 @@
 import type { RadarrCalendarResponse } from '@/integrations/radarr/api.js';
 import type { SonarrCalendarResponse } from '@/integrations/sonarr/api.js';
 import type {
+  CalendarEvent,
   EpisodeItem,
-  EventItem,
   MovieItem,
   ShowAvailability,
   ShowItem,
@@ -24,7 +24,7 @@ export interface ICalendarService {
     sonarr: SonarrCalendarResponse[],
     start: dayjs.Dayjs,
     end: dayjs.Dayjs
-  ): EventItem[];
+  ): CalendarEvent[];
 }
 
 let calendarService: ICalendarService;
@@ -55,7 +55,7 @@ export class CalendarService implements ICalendarService {
     sonarr: SonarrCalendarResponse[],
     start: dayjs.Dayjs,
     end: dayjs.Dayjs
-  ): EventItem[] {
+  ): CalendarEvent[] {
     const mappedRadarr = radarr.flatMap((movie) => mapMovie(movie, start, end));
     const mappedSonarr = mapEpisodeToShow(sonarr);
     return [...mappedRadarr, ...mappedSonarr];
