@@ -18,6 +18,7 @@ import { registerHealthRoute } from './routes/health/index.js';
 import { registerServerRoute } from './routes/server/index.js';
 import { registerCalendarRoute } from './routes/calendar/index.js';
 import { registerVersionRoute } from './routes/version.js';
+import { logger } from './utils/logger.js';
 
 const PROJECT_ROOT = resolve(process.cwd(), isDevelopment() ? '../..' : '');
 config({ path: resolve(PROJECT_ROOT, '.env'), quiet: true });
@@ -31,12 +32,7 @@ const TRUSTED_PROXY_HOP = readNumberFromEnvironment('TRUSTED_PROXY_HOP');
 
 function createServer(): FastifyInstance {
   return Fastify({
-    logger: {
-      level: readStringFromEnvironment('LOG_LEVEL', { default: 'info' }),
-      transport: isDevelopment()
-        ? { target: 'pino-pretty', options: { colorize: true } }
-        : undefined
-    },
+    loggerInstance: logger,
     trustProxy: TRUSTED_PROXY ?? TRUSTED_PROXY_HOP,
     rewriteUrl: (req) => {
       const url = req.url ?? '/';
@@ -49,7 +45,7 @@ function createServer(): FastifyInstance {
 }
 
 async function registerAppPlugins(app: FastifyInstance): Promise<void> {
-  app.log.info('Registering application plugins');
+  app.log.info('Server registering application plugins');
   app.addHook('onRequest', async (request) => {
     if (!request.headers['content-type']) {
       delete request.headers['transfer-encoding'];
@@ -61,7 +57,7 @@ async function registerAppPlugins(app: FastifyInstance): Promise<void> {
 
   const redisReady = await redisConnectTest(app);
   if (!redisReady) {
-    app.log.warn({ redis: { ready: false } }, 'Redis unavailable');
+    app.log.warn('Server caching unavailable');
   } else {
     await redisConnect(app);
   }
@@ -70,7 +66,7 @@ async function registerAppPlugins(app: FastifyInstance): Promise<void> {
 }
 
 async function registerRoutes(app: FastifyInstance): Promise<void> {
-  app.log.info('Registering application routes');
+  app.log.info('Server registering application routes');
   await registerHealthRoute(app);
   await registerServerRoute(app);
   await registerCalendarRoute(app);
@@ -81,7 +77,7 @@ async function serveFrontend(app: FastifyInstance): Promise<void> {
   const frontend = resolve(PROJECT_ROOT, isDevelopment() ? 'apps/frontend/dist' : 'frontend');
 
   if (!isProduction() || !existsSync(frontend)) return;
-  app.log.info('Serving frontend via static files');
+  app.log.info('Server serving frontend via static files');
 
   const cachedIndex = readFileSync(resolve(frontend, 'index.html'), 'utf-8');
   await app.register(fastifyStatic, {
