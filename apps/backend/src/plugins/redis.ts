@@ -18,6 +18,22 @@ declare module 'fastify' {
   }
 }
 
+const CONNECTION_ERROR_PATTERNS = [
+  'ECONNREFUSED',
+  'ECONNRESET',
+  'ENOTFOUND',
+  'ETIMEDOUT',
+  'NR_CLOSED',
+  'Connection is closed',
+  "Stream isn't writeable"
+] as const;
+
+function isConnectionError(err: Error): boolean {
+  return CONNECTION_ERROR_PATTERNS.some(
+    (pattern) => err.message.includes(pattern) || (err as NodeJS.ErrnoException).code === pattern
+  );
+}
+
 const build = (
   instance: FastifyInstance,
   config: Pick<RedisOptions, 'maxRetriesPerRequest' | 'connectTimeout' | 'retryStrategy'>
@@ -44,11 +60,7 @@ const build = (
     connectTimeout: config.connectTimeout,
     retryStrategy: config.retryStrategy,
     reconnectOnError: (err: Error) => {
-      const targetError = 'READONLY';
-      if (err.message.includes(targetError)) {
-        return true;
-      }
-      return false;
+      return err.message.includes('READONLY');
     },
     tls
   });
@@ -59,16 +71,48 @@ const build = (
 const redisPlugin: FastifyPluginAsync = async (instance) => {
   const redis = build(instance, {
     retryStrategy: (times: number) => {
-      const delay = Math.max(times * 50, 2000);
+      const delay = Math.min(1000 * 60, Math.round(Math.pow(1.2, times) * 750));
+
+      if (times > 20) return null;
+      instance.log.trace({ times, delay }, 'Server cache reconnecting...');
       return delay;
     }
   });
 
+  let hasWarnedDisconnect = false;
+
   redis.on('connect', () => {
-    instance.log.info('Redis Connected');
+    if (hasWarnedDisconnect) {
+      instance.log.info('Server caching reconnected');
+    } else {
+      instance.log.info('Server caching connected');
+    }
+    hasWarnedDisconnect = false;
+  });
+
+  redis.on('close', () => {
+    if (!hasWarnedDisconnect) {
+      hasWarnedDisconnect = true;
+      instance.log.warn('Server caching disconnected');
+    }
+  });
+
+  redis.on('reconnecting', () => {
+    // Supress
+  });
+
+  redis.on('end', (err: Error) => {
+    instance.log.warn({ err }, 'Server caching unavailable');
   });
 
   redis.on('error', (err: Error) => {
+    if (isConnectionError(err)) {
+      if (!hasWarnedDisconnect) {
+        hasWarnedDisconnect = true;
+        instance.log.warn({ err }, 'Server caching unavailable');
+      }
+      return;
+    }
     instance.log.error({ err }, 'Redis error');
   });
 
@@ -77,13 +121,23 @@ const redisPlugin: FastifyPluginAsync = async (instance) => {
   instance.addHook('onClose', async () => {
     if (redis.status === 'ready' || redis.status === 'connecting') {
       await redis.quit();
+    } else {
+      redis.disconnect();
     }
   });
 };
 
-export async function redisConnect(instance: FastifyInstance): Promise<void> {
-  if (instance.redis.status === 'ready') return;
-  await instance.redis.connect();
+export async function redisConnect(instance: FastifyInstance): Promise<boolean> {
+  if (instance.redis.status === 'ready') return true;
+
+  try {
+    await instance.redis.connect();
+    return true;
+  } catch (err) {
+    // If Redis isn't available at startup that's fine — we'll run without caching.
+    instance.log.warn({ err }, 'Server caching unavailable at startup');
+    return false;
+  }
 }
 
 function noop() {}
