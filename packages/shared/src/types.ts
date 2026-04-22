@@ -1,4 +1,5 @@
 import type {
+  HEALTH_STATUS,
   MEDIA_TYPES,
   MOVIE_STATUS,
   RELEASE_TYPES,
@@ -67,4 +68,21 @@ export interface VesrionInfo {
   } | null;
   hasUpdate: boolean;
   lastChecked: string | null;
+}
+
+export type HealthStatus = (typeof HEALTH_STATUS)[number];
+
+export interface ServiceHealthCheck {
+  status: HealthStatus;
+}
+
+export interface HealthCheck {
+  status: HealthStatus;
+  checks: {
+    redis: ServiceHealthCheck;
+    sonarr: ServiceHealthCheck;
+    radarr: ServiceHealthCheck;
+  };
+  uptime: number;
+  timestamp: number;
 }

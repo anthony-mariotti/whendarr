@@ -14,7 +14,10 @@ export type {
   EventItem,
   CalendarEvent,
   // Metadata
-  VesrionInfo
+  VesrionInfo,
+  HealthCheck,
+  HealthStatus,
+  ServiceHealthCheck
 } from './types.js';
 
 export { getClientTimezone } from './functions.js';

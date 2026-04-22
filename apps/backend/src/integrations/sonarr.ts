@@ -1,9 +1,13 @@
 import { getCurrentVersion } from '@/utils/version.js';
+import type { ServiceHealthCheck } from '@whendarr/shared';
 import type { FastifyInstance } from 'fastify';
 
 const SonarrApiRoutes = {
   calendar: {
     get: '/api/v3/calendar'
+  },
+  health: {
+    get: '/api/v3/health'
   }
 } as const;
 
@@ -33,6 +37,23 @@ export class SonarrApi {
 
   calendar = async (params: SonarrCalendarParams) => {
     return this.get<SonarrCalendarResponse[]>(SonarrApiRoutes.calendar.get, params);
+  };
+
+  health = async (): Promise<ServiceHealthCheck> => {
+    try {
+      const response = await fetch(`${this.endpoint}${SonarrApiRoutes.health.get}`, {
+        headers: this.headers,
+        signal: AbortSignal.timeout(5000)
+      });
+
+      return {
+        status: response.ok ? 'healthy' : 'unhealthy'
+      };
+    } catch {
+      return {
+        status: 'unhealthy'
+      };
+    }
   };
 
   private get = async <T>(url: string, params?: unknown): Promise<SonarrResponse<T>> => {

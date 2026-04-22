@@ -14,7 +14,7 @@ import {
 import { registerPlugins } from './plugins/index.js';
 import { redisConnect, redisConnectTest } from './plugins/redis.js';
 import { createCacheService } from './services/cache.js';
-import { registerHealthRoute } from './routes/health/index.js';
+import { registerHealthRoute } from './routes/health.js';
 import { registerServerRoute } from './routes/server/index.js';
 import { registerCalendarRoute } from './routes/calendar/index.js';
 import { registerVersionRoute } from './routes/version.js';

@@ -1,4 +1,4 @@
-import { SonarrApi, type SonarrApiOptions } from '../integrations/sonarr/api.js';
+import { SonarrApi, type SonarrApiOptions } from '../integrations/sonarr.js';
 import { readFromFileEnvironment } from '../utils/environment.js';
 import type { FastifyPluginAsync } from 'fastify';
 import fastifyPlugin from 'fastify-plugin';
