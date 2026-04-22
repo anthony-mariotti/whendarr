@@ -84,7 +84,7 @@ function mapMovie(
 
   // TODO: for some reason I have to add one day for the release types?
 
-  if (movie.inCinemas && isInRange(movie.inCinemas, start, end)) {
+  if (isInRange(movie.inCinemas, start, end)) {
     entries.push({
       type: 'movie',
       title: movie.title,
@@ -96,7 +96,7 @@ function mapMovie(
     });
   }
 
-  if (movie.digitalRelease && isInRange(movie.digitalRelease, start, end)) {
+  if (isInRange(movie.digitalRelease, start, end)) {
     entries.push({
       type: 'movie',
       title: movie.title,
@@ -108,7 +108,7 @@ function mapMovie(
     });
   }
 
-  if (movie.physicalRelease && isInRange(movie.physicalRelease, start, end)) {
+  if (isInRange(movie.physicalRelease, start, end)) {
     entries.push({
       type: 'movie',
       title: movie.title,

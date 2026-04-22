@@ -109,7 +109,7 @@ describe('CalendarService', () => {
   });
 
   // -------------------------------------------------------------------------
-  // map — general
+  // map
   // -------------------------------------------------------------------------
 
   describe('map', () => {
@@ -128,252 +128,347 @@ describe('CalendarService', () => {
       expect(types).toContain('movie');
       expect(types).toContain('show');
     });
-  });
 
-  // -------------------------------------------------------------------------
-  // map — movies
-  // -------------------------------------------------------------------------
+    describe('movies', () => {
+      it('maps a digital release within range', () => {
+        const radarr = [makeRadarrMovie({ digitalRelease: '2024-03-15T00:00:00Z', hasFile: true })];
 
-  describe('map — movies', () => {
-    it('maps a digital release within range', () => {
-      const radarr = [makeRadarrMovie({ digitalRelease: '2024-03-15T00:00:00Z', hasFile: true })];
+        const [result] = service.map(radarr, [], start, end);
 
-      const [result] = service.map(radarr, [], start, end);
+        expect(result).toMatchObject({
+          type: 'movie',
+          title: 'Test Movie',
+          release: 'digital',
+          available: true,
+          certification: 'PG-13'
+        });
+      });
 
-      expect(result).toMatchObject({
-        type: 'movie',
-        title: 'Test Movie',
-        release: 'digital',
-        available: true,
-        certification: 'PG-13'
+      it('maps a cinema release within range', () => {
+        const radarr = [makeRadarrMovie({ inCinemas: '2024-03-10T00:00:00Z' })];
+
+        const [result] = service.map(radarr, [], start, end);
+
+        expect(result).toMatchObject({ type: 'movie', release: 'cinema' });
+      });
+
+      it('maps a physical release within range', () => {
+        const radarr = [makeRadarrMovie({ physicalRelease: '2024-03-20T00:00:00Z' })];
+
+        const [result] = service.map(radarr, [], start, end);
+
+        expect(result).toMatchObject({ type: 'movie', release: 'physical' });
+      });
+
+      it('produce multiple entries with several releases within range', () => {
+        const radarr = [
+          makeRadarrMovie({
+            inCinemas: '2024-03-05T00:00:00Z',
+            digitalRelease: '2024-03-15T00:00:00Z',
+            physicalRelease: '2024-03-25T00:00:00Z'
+          })
+        ];
+
+        const result = service.map(radarr, [], start, end);
+
+        expect(result).toHaveLength(3);
+        const releases = result.map((r) => (r as MovieItem).release);
+        expect(releases).toContain('cinema');
+        expect(releases).toContain('digital');
+        expect(releases).toContain('physical');
+      });
+
+      it('excludes releases outside the date range', () => {
+        const radarr = [makeRadarrMovie({ digitalRelease: '2024-01-01T00:00:00Z' })];
+        const result = service.map(radarr, [], start, end);
+        expect(result).toHaveLength(0);
+      });
+
+      it('adds one day to the release date', () => {
+        const date = '2024-03-15T00:00:00Z';
+        const expected = dayjs(date).add(1, 'day').toISOString();
+        const radarr = [
+          makeRadarrMovie({
+            inCinemas: date,
+            digitalRelease: date,
+            physicalRelease: date
+          })
+        ];
+
+        const results = service.map(radarr, [], start, end);
+
+        expect(results).toHaveLength(3);
+        expect(results[0]?.date).toBe(expected);
+        expect(results[1]?.date).toBe(expected);
+        expect(results[2]?.date).toBe(expected);
+      });
+
+      it('returns no entries when all release dates are undefined', () => {
+        const radarr = [makeRadarrMovie()];
+        const result = service.map(radarr, [], start, end);
+        expect(result).toHaveLength(0);
+      });
+
+      describe('cinema release', () => {
+        it('marks available when movie hasFile', () => {
+          const radarr = [makeRadarrMovie({ inCinemas: '2024-03-10T00:00:00Z', hasFile: true })];
+          const movie = service.map(radarr, [], start, end)[0] as MovieItem;
+          expect(movie.available).toBe(true);
+        });
+
+        it('marks available false when movie hasFile is undefined', () => {
+          const radarr = [
+            makeRadarrMovie({ inCinemas: '2024-03-20T00:00:00Z', hasFile: undefined })
+          ];
+          const movie = service.map(radarr, [], start, end);
+          expect(movie[0]?.available).toBe(false);
+        });
+
+        it('marks release with explicit certification', () => {
+          const radarr = [
+            makeRadarrMovie({ inCinemas: '2024-03-10T00:00:00Z', certification: 'R' })
+          ];
+          const movie = service.map(radarr, [], start, end)[0] as MovieItem;
+          expect(movie.certification).toBe('R');
+        });
+
+        it('marks release as NOT RATED when certification is undefined', () => {
+          const radarr = [
+            makeRadarrMovie({ inCinemas: '2024-03-10T00:00:00Z', certification: undefined })
+          ];
+          const movie = service.map(radarr, [], start, end)[0] as MovieItem;
+          expect(movie.certification).toBe('NOT RATED');
+        });
+      });
+
+      describe('digital release', () => {
+        it('marks available when movie hasFile', () => {
+          const radarr = [
+            makeRadarrMovie({ digitalRelease: '2024-03-10T00:00:00Z', hasFile: true })
+          ];
+
+          const movie = service.map(radarr, [], start, end)[0] as MovieItem;
+
+          expect(movie.available).toBe(true);
+        });
+
+        it('marks available false when movie hasFile is undefined', () => {
+          const radarr = [
+            makeRadarrMovie({ digitalRelease: '2024-03-20T00:00:00Z', hasFile: undefined })
+          ];
+          const movie = service.map(radarr, [], start, end);
+          expect(movie[0]?.available).toBe(false);
+        });
+
+        it('marks release with explicit certification', () => {
+          const radarr = [
+            makeRadarrMovie({ digitalRelease: '2024-03-10T00:00:00Z', certification: 'R' })
+          ];
+
+          const movie = service.map(radarr, [], start, end)[0] as MovieItem;
+
+          expect(movie.certification).toBe('R');
+        });
+
+        it('marks release as NOT RATED when certification is undefined', () => {
+          const radarr = [
+            makeRadarrMovie({ digitalRelease: '2024-03-10T00:00:00Z', certification: undefined })
+          ];
+          const movie = service.map(radarr, [], start, end)[0] as MovieItem;
+          expect(movie.certification).toBe('NOT RATED');
+        });
+      });
+
+      describe('physical release', () => {
+        it('marks available when movie hasFile', () => {
+          const radarr = [
+            makeRadarrMovie({ physicalRelease: '2024-03-20T00:00:00Z', hasFile: true })
+          ];
+
+          const movie = service.map(radarr, [], start, end)[0] as MovieItem;
+
+          expect(movie.available).toBe(true);
+        });
+
+        it('marks available false when movie hasFile is undefined', () => {
+          const radarr = [
+            makeRadarrMovie({ physicalRelease: '2024-03-20T00:00:00Z', hasFile: undefined })
+          ];
+          const movie = service.map(radarr, [], start, end);
+          expect(movie[0]?.available).toBe(false);
+        });
+
+        it('marks release with explicit certification', () => {
+          const radarr = [
+            makeRadarrMovie({ physicalRelease: '2024-03-20T00:00:00Z', certification: 'R' })
+          ];
+
+          const movie = service.map(radarr, [], start, end)[0] as MovieItem;
+
+          expect(movie.certification).toBe('R');
+        });
+
+        it('marks release as NOT RATED when certification is undefined', () => {
+          const radarr = [
+            makeRadarrMovie({ physicalRelease: '2024-03-10T00:00:00Z', certification: undefined })
+          ];
+          const movie = service.map(radarr, [], start, end)[0] as MovieItem;
+          expect(movie.certification).toBe('NOT RATED');
+        });
       });
     });
 
-    it('maps a cinema release within range', () => {
-      const radarr = [makeRadarrMovie({ inCinemas: '2024-03-10T00:00:00Z' })];
+    describe('shows', () => {
+      it('maps a single episode to a show item', () => {
+        const [result] = service.map([], [makeSonarrEpisode()], start, end);
 
-      const [result] = service.map(radarr, [], start, end);
-
-      expect(result).toMatchObject({ type: 'movie', release: 'cinema' });
-    });
-
-    it('maps a physical release within range', () => {
-      const radarr = [makeRadarrMovie({ physicalRelease: '2024-03-20T00:00:00Z' })];
-
-      const [result] = service.map(radarr, [], start, end);
-
-      expect(result).toMatchObject({ type: 'movie', release: 'physical' });
-    });
-
-    it('produces multiple entries when a movie has several release types in range', () => {
-      const radarr = [
-        makeRadarrMovie({
-          inCinemas: '2024-03-05T00:00:00Z',
-          digitalRelease: '2024-03-15T00:00:00Z',
-          physicalRelease: '2024-03-25T00:00:00Z'
-        })
-      ];
-
-      const result = service.map(radarr, [], start, end);
-
-      expect(result).toHaveLength(3);
-      const releases = result.map((r) => (r as MovieItem).release);
-      expect(releases).toContain('cinema');
-      expect(releases).toContain('digital');
-      expect(releases).toContain('physical');
-    });
-
-    it('excludes releases outside the date range', () => {
-      const radarr = [makeRadarrMovie({ digitalRelease: '2024-01-01T00:00:00Z' })];
-
-      const result = service.map(radarr, [], start, end);
-
-      expect(result).toHaveLength(0);
-    });
-
-    it('adds one day to the release date', () => {
-      const radarr = [makeRadarrMovie({ digitalRelease: '2024-03-15T00:00:00Z' })];
-
-      const [result] = service.map(radarr, [], start, end);
-
-      expect((result as MovieItem).date).toBe(
-        dayjs('2024-03-15T00:00:00Z').add(1, 'day').toISOString()
-      );
-    });
-
-    it('defaults certification to NOT RATED when missing', () => {
-      const radarr = [
-        makeRadarrMovie({ digitalRelease: '2024-03-15T00:00:00Z', certification: undefined })
-      ];
-
-      const [result] = service.map(radarr, [], start, end);
-
-      expect((result as MovieItem).certification).toBe('NOT RATED');
-    });
-
-    it('defaults available to false when hasFile is undefined', () => {
-      const radarr = [
-        makeRadarrMovie({ digitalRelease: '2024-03-15T00:00:00Z', hasFile: undefined })
-      ];
-
-      const [result] = service.map(radarr, [], start, end);
-
-      expect((result as MovieItem).available).toBe(false);
-    });
-
-    it('returns no entries when all release dates are undefined', () => {
-      const radarr = [makeRadarrMovie()];
-
-      const result = service.map(radarr, [], start, end);
-
-      expect(result).toHaveLength(0);
-    });
-  });
-
-  // -------------------------------------------------------------------------
-  // map — shows
-  // -------------------------------------------------------------------------
-
-  describe('map — shows', () => {
-    it('maps a single episode to a show item', () => {
-      const [result] = service.map([], [makeSonarrEpisode()], start, end);
-
-      expect(result).toMatchObject({
-        type: 'show',
-        title: 'Test Show',
-        certification: 'TV-14',
-        status: 'continuing'
+        expect(result).toMatchObject({
+          type: 'show',
+          title: 'Test Show',
+          certification: 'TV-14',
+          status: 'continuing'
+        });
       });
-    });
 
-    it('maps episode fields correctly', () => {
-      const [show] = service.map([], [makeSonarrEpisode()], start, end);
+      it('maps episode fields correctly', () => {
+        const [show] = service.map([], [makeSonarrEpisode()], start, end);
 
-      expect((show as ShowItem).episodes[0]).toMatchObject({
-        title: 'Test Episode',
-        season: 1,
-        number: 1,
-        available: false
+        expect((show as ShowItem).episodes[0]).toMatchObject({
+          title: 'Test Episode',
+          season: 1,
+          number: 1,
+          available: false
+        });
       });
-    });
 
-    it('groups multiple episodes from the same show and air date into one ShowItem', () => {
-      const sonarr = [
-        makeSonarrEpisode({ episodeNumber: 1 }),
-        makeSonarrEpisode({ episodeNumber: 2 })
-      ];
+      it('groups multiple episodes from the same show and air date into one ShowItem', () => {
+        const sonarr = [
+          makeSonarrEpisode({ episodeNumber: 1 }),
+          makeSonarrEpisode({ episodeNumber: 2 })
+        ];
 
-      const result = service.map([], sonarr, start, end);
+        const result = service.map([], sonarr, start, end);
 
-      expect(result).toHaveLength(1);
-      expect((result[0] as ShowItem).episodes).toHaveLength(2);
-    });
+        expect(result).toHaveLength(1);
+        expect((result[0] as ShowItem).episodes).toHaveLength(2);
+      });
 
-    it('separates episodes from the same show that air on different dates', () => {
-      const sonarr = [
-        makeSonarrEpisode({ episodeNumber: 1, airDateUtc: '2024-03-15T00:00:00Z' }),
-        makeSonarrEpisode({ episodeNumber: 2, airDateUtc: '2024-03-22T00:00:00Z' })
-      ];
+      it('separates episodes from the same show that air on different dates', () => {
+        const sonarr = [
+          makeSonarrEpisode({ episodeNumber: 1, airDateUtc: '2024-03-15T00:00:00Z' }),
+          makeSonarrEpisode({ episodeNumber: 2, airDateUtc: '2024-03-22T00:00:00Z' })
+        ];
 
-      const result = service.map([], sonarr, start, end);
+        const result = service.map([], sonarr, start, end);
 
-      expect(result).toHaveLength(2);
-    });
+        expect(result).toHaveLength(2);
+      });
 
-    it('sorts grouped episodes by episode number', () => {
-      const sonarr = [
-        makeSonarrEpisode({ episodeNumber: 3 }),
-        makeSonarrEpisode({ episodeNumber: 1 }),
-        makeSonarrEpisode({ episodeNumber: 2 })
-      ];
+      it('sorts grouped episodes by episode number', () => {
+        const sonarr = [
+          makeSonarrEpisode({ episodeNumber: 3 }),
+          makeSonarrEpisode({ episodeNumber: 1 }),
+          makeSonarrEpisode({ episodeNumber: 2 })
+        ];
 
-      const [show] = service.map([], sonarr, start, end);
+        const [show] = service.map([], sonarr, start, end);
 
-      const numbers = (show as ShowItem).episodes.map((e: EpisodeItem) => e.number);
-      expect(numbers).toEqual([1, 2, 3]);
-    });
+        const numbers = (show as ShowItem).episodes.map((e: EpisodeItem) => e.number);
+        expect(numbers).toEqual([1, 2, 3]);
+      });
 
-    it('marks availability as available when all episodes have files', () => {
-      const sonarr = [
-        makeSonarrEpisode({ episodeNumber: 1, hasFile: true }),
-        makeSonarrEpisode({ episodeNumber: 2, hasFile: true })
-      ];
+      it('marks availability as available when all episodes have files', () => {
+        const sonarr = [
+          makeSonarrEpisode({ episodeNumber: 1, hasFile: true }),
+          makeSonarrEpisode({ episodeNumber: 2, hasFile: true })
+        ];
 
-      const [show] = service.map([], sonarr, start, end);
+        const [show] = service.map([], sonarr, start, end);
 
-      expect((show as ShowItem).available).toBe('available');
-    });
+        expect((show as ShowItem).available).toBe('available');
+      });
 
-    it('marks availability as partial when only some episodes have files', () => {
-      const sonarr = [
-        makeSonarrEpisode({ episodeNumber: 1, hasFile: true }),
-        makeSonarrEpisode({ episodeNumber: 2, hasFile: false })
-      ];
+      it('marks availability as partial when only some episodes have files', () => {
+        const sonarr = [
+          makeSonarrEpisode({ episodeNumber: 1, hasFile: true }),
+          makeSonarrEpisode({ episodeNumber: 2, hasFile: false })
+        ];
 
-      const [show] = service.map([], sonarr, start, end);
+        const [show] = service.map([], sonarr, start, end);
 
-      expect((show as ShowItem).available).toBe('partial');
-    });
+        expect((show as ShowItem).available).toBe('partial');
+      });
 
-    it('marks availability as unavailable when no episodes have files', () => {
-      const sonarr = [
-        makeSonarrEpisode({ episodeNumber: 1, hasFile: false }),
-        makeSonarrEpisode({ episodeNumber: 2, hasFile: false })
-      ];
+      it('marks availability as unavailable when no episodes have files', () => {
+        const sonarr = [
+          makeSonarrEpisode({ episodeNumber: 1, hasFile: false }),
+          makeSonarrEpisode({ episodeNumber: 2, hasFile: false })
+        ];
 
-      const [show] = service.map([], sonarr, start, end);
+        const [show] = service.map([], sonarr, start, end);
 
-      expect((show as ShowItem).available).toBe('unavailable');
-    });
+        expect((show as ShowItem).available).toBe('unavailable');
+      });
 
-    it('marks a single available episode as available', () => {
-      const [show] = service.map([], [makeSonarrEpisode({ hasFile: true })], start, end);
-      expect((show as ShowItem).available).toBe('available');
-    });
+      it('marks a single available episode as available', () => {
+        const [show] = service.map([], [makeSonarrEpisode({ hasFile: true })], start, end);
+        expect((show as ShowItem).available).toBe('available');
+      });
 
-    it('marks a single unavailable episode as unavailable', () => {
-      const [show] = service.map([], [makeSonarrEpisode({ hasFile: false })], start, end);
-      expect((show as ShowItem).available).toBe('unavailable');
-    });
+      it('marks a single unavailable episode as unavailable', () => {
+        const [show] = service.map([], [makeSonarrEpisode({ hasFile: false })], start, end);
+        expect((show as ShowItem).available).toBe('unavailable');
+      });
 
-    it('defaults show title to Unknown when series is missing', () => {
-      const [show] = service.map([], [makeSonarrEpisode({ series: undefined })], start, end);
-      expect((show as ShowItem).title).toBe('Unknown');
-    });
+      it('defaults show title to Unknown when series is missing', () => {
+        const [show] = service.map([], [makeSonarrEpisode({ series: undefined })], start, end);
+        expect((show as ShowItem).title).toBe('Unknown');
+      });
 
-    it('defaults status to unknown when series status is missing', () => {
-      const [show] = service.map(
-        [],
-        [makeSonarrEpisode({ series: { status: undefined } })],
-        start,
-        end
-      );
-      expect((show as ShowItem).status).toBe('unknown');
-    });
+      it('defaults status to unknown when series status is missing', () => {
+        const [show] = service.map(
+          [],
+          [makeSonarrEpisode({ series: { status: undefined } })],
+          start,
+          end
+        );
+        expect((show as ShowItem).status).toBe('unknown');
+      });
 
-    it('defaults certification to NOT RATED when series certification is missing', () => {
-      const [show] = service.map(
-        [],
-        [makeSonarrEpisode({ series: { certification: undefined } })],
-        start,
-        end
-      );
-      expect((show as ShowItem).certification).toBe('NOT RATED');
-    });
+      it('defaults certification to NOT RATED when series certification is missing', () => {
+        const [show] = service.map(
+          [],
+          [makeSonarrEpisode({ series: { certification: undefined } })],
+          start,
+          end
+        );
+        expect((show as ShowItem).certification).toBe('NOT RATED');
+      });
 
-    it('defaults season to 0 when seasonNumber is missing', () => {
-      const [show] = service.map([], [makeSonarrEpisode({ seasonNumber: undefined })], start, end);
-      expect((show as ShowItem).episodes[0]?.season).toBe(0);
-    });
+      it('defaults season to 0 when seasonNumber is missing', () => {
+        const [show] = service.map(
+          [],
+          [makeSonarrEpisode({ seasonNumber: undefined })],
+          start,
+          end
+        );
+        expect((show as ShowItem).episodes[0]?.season).toBe(0);
+      });
 
-    it('defaults episode number to 0 when episodeNumber is missing', () => {
-      const [show] = service.map([], [makeSonarrEpisode({ episodeNumber: undefined })], start, end);
-      expect((show as ShowItem).episodes[0]?.number).toBe(0);
-    });
+      it('defaults episode number to 0 when episodeNumber is missing', () => {
+        const [show] = service.map(
+          [],
+          [makeSonarrEpisode({ episodeNumber: undefined })],
+          start,
+          end
+        );
+        expect((show as ShowItem).episodes[0]?.number).toBe(0);
+      });
 
-    it('defaults available to false when hasFile is undefined', () => {
-      const [show] = service.map([], [makeSonarrEpisode({ hasFile: undefined })], start, end);
-      expect((show as ShowItem).episodes[0]?.available).toBe(false);
+      it('defaults available to false when hasFile is undefined', () => {
+        const [show] = service.map([], [makeSonarrEpisode({ hasFile: undefined })], start, end);
+        expect((show as ShowItem).episodes[0]?.available).toBe(false);
+      });
     });
   });
 });
@@ -383,11 +478,10 @@ describe('CalendarService', () => {
 // ---------------------------------------------------------------------------
 
 describe('getCalendarService', () => {
-  it('returns an ICalendarService instance', () => {
+  it('returns an CalendarService instance', () => {
     const service = getCalendarService();
     expect(service).toBeDefined();
-    expect(typeof service.resolveRange).toBe('function');
-    expect(typeof service.map).toBe('function');
+    expect(service).instanceOf(CalendarService);
   });
 
   it('returns the same instance on subsequent calls', () => {
