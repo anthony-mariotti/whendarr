@@ -113,14 +113,18 @@ function chunk(array: Dayjs[], size: number) {
 
 function Calendar() {
   const { month, filter } = useCalendar();
-  const { data: events, isLoading } = useCalendarApi();
+  const { data: events, isLoading, isFetching } = useCalendarApi();
   const { desktop } = useMediaQuery();
 
   const days = getMonthDays(month);
   const weeks = chunk(days, 7);
 
   return (
-    <div className={clsx('relative mb-16 flex h-full flex-col sm:mb-0', { 'blur-xs': isLoading })}>
+    <div
+      className={clsx('relative mb-16 flex h-full flex-col sm:mb-0', {
+        'blur-xs': isLoading || isFetching
+      })}
+    >
       <div className="flex">
         {desktop &&
           dayjs.weekdays().map((d) => (

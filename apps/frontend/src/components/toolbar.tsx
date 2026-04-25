@@ -29,7 +29,7 @@ import { Separator } from './ui/separator';
 function Toolbar() {
   const { t } = useTranslation(['common']);
   const { month, filter, nextMonth, prevMonth, today, setFilter } = useCalendar();
-  const { isLoading } = useCalendarApi();
+  const { isLoading, isFetching } = useCalendarApi();
   const { data } = useVersionApi();
   const { desktop } = useMediaQuery();
 
@@ -78,7 +78,7 @@ function Toolbar() {
           {desktop && month.format('MMMM YYYY')}
           {!desktop && month.format('MMM YYYY')}
         </h1>
-        {isLoading && <Spinner className="size-6" />}
+        {isLoading || (isFetching && <Spinner className="size-6" />)}
       </div>
       <div className="flex-1" />
       <ModeToggle />
