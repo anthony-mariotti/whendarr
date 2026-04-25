@@ -118,7 +118,9 @@ function Toolbar() {
             <div className="grow">
               <h3>{t('common:labels.version')}</h3>
               <p className="text-muted-foreground *:[a]:hover:text-foreground text-sm *:[a]:underline *:[a]:underline-offset-3">
-                {data?.current.version} {data?.current.commit && `(${data.current.commit})`}
+                {data?.current.version}{' '}
+                {data?.current.commit &&
+                  `(${data.current.commit.length > 6 ? data.current.commit.slice(0, 7) : data.current.commit})`}
               </p>
             </div>
           </div>
