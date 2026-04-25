@@ -3,13 +3,13 @@ import dayjs from 'dayjs';
 import type { FastifyInstance, FastifyPluginAsync } from 'fastify';
 
 async function checkRedis(instance: FastifyInstance): Promise<ServiceHealthCheck> {
-  if (instance.redis.status !== 'ready') {
+  if (instance.redis.server?.status !== 'ready') {
     return {
       status: 'unhealthy'
     };
   }
   try {
-    const pong = await instance.redis.ping();
+    const pong = await instance.redis.server.ping();
     return {
       status: pong === 'PONG' ? 'healthy' : 'unhealthy'
     };
