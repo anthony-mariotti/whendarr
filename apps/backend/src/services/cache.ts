@@ -1,3 +1,4 @@
+import type { IRedisPlugin } from '@/plugins/redis.js';
 import type { CalendarEvent } from '@whendarr/shared';
 import type dayjs from 'dayjs';
 import { type Redis } from 'ioredis';
@@ -41,10 +42,18 @@ export interface ICacheService {
 let cacheService: ICacheService;
 
 class CacheService implements ICacheService {
-  constructor(private redis: Redis) {}
+  private redis!: Redis;
+  private configured: boolean;
 
-  private get enabled() {
-    return this.redis.status === 'ready';
+  constructor(plugin: IRedisPlugin) {
+    this.configured = plugin.configured;
+    if (plugin.server) {
+      this.redis = plugin.server;
+    }
+  }
+
+  private get enabled(): boolean {
+    return this.configured && this.redis?.status === 'ready';
   }
 
   async getCalendar(start: dayjs.Dayjs, end: dayjs.Dayjs): Promise<CalendarEvent[] | undefined> {
@@ -88,8 +97,8 @@ class CacheService implements ICacheService {
   // }
 }
 
-export function createCacheService(redis: Redis): ICacheService {
-  cacheService = new CacheService(redis);
+export function createCacheService(plugin: IRedisPlugin): ICacheService {
+  cacheService = new CacheService(plugin);
   return cacheService;
 }
 

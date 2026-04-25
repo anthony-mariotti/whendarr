@@ -12,9 +12,21 @@ import {
 } from '../utils/environment.js';
 import { setCachePrefix } from '../services/cache.js';
 
+export interface IRedisPluginDisabled {
+  server: undefined;
+  configured: false;
+}
+
+export interface IRedisPluginEnabled {
+  server: Redis;
+  configured: true;
+}
+
+export type IRedisPlugin = IRedisPluginEnabled | IRedisPluginDisabled;
+
 declare module 'fastify' {
   interface FastifyInstance {
-    redis: Redis;
+    redis: IRedisPlugin;
   }
 }
 
@@ -37,12 +49,12 @@ function isConnectionError(err: Error): boolean {
 const build = (
   instance: FastifyInstance,
   config: Pick<RedisOptions, 'maxRetriesPerRequest' | 'connectTimeout' | 'retryStrategy'>
-) => {
-  let endpoint = buildRedisEndpoint(instance);
+): Redis | undefined => {
+  const endpoint = buildRedisEndpoint(instance);
   let tls: ConnectionOptions | undefined;
 
   if (!endpoint) {
-    endpoint = `redis://localhost:6379`;
+    return undefined;
   }
 
   if (endpoint.startsWith('rediss://')) {
@@ -70,14 +82,23 @@ const build = (
 
 const redisPlugin: FastifyPluginAsync = async (instance) => {
   const redis = build(instance, {
-    retryStrategy: (times: number) => {
-      const delay = Math.min(1000 * 60, Math.round(Math.pow(1.2, times) * 750));
+    retryStrategy: (attempts: number) => {
+      const delay = Math.min(1000 * 30, Math.round(Math.pow(1.2, attempts) * 750));
 
-      if (times > 20) return null;
-      instance.log.trace({ times, delay }, 'Server cache reconnecting...');
+      if (attempts > 20) return null;
+      instance.log.trace({ attempts, delay }, 'Server cache reconnecting...');
       return delay;
     }
   });
+
+  if (!redis) {
+    instance.decorate('redis', {
+      configured: false,
+      server: redis
+    });
+
+    return;
+  }
 
   let hasWarnedDisconnect = false;
 
@@ -102,7 +123,10 @@ const redisPlugin: FastifyPluginAsync = async (instance) => {
   });
 
   redis.on('end', (err: Error) => {
-    instance.log.warn({ err }, 'Server caching unavailable');
+    if (!hasWarnedDisconnect) {
+      hasWarnedDisconnect = true;
+      instance.log.warn({ err }, 'Server caching unavailable');
+    }
   });
 
   redis.on('error', (err: Error) => {
@@ -116,7 +140,10 @@ const redisPlugin: FastifyPluginAsync = async (instance) => {
     instance.log.error({ err }, 'Redis error');
   });
 
-  instance.decorate('redis', redis);
+  instance.decorate('redis', {
+    server: redis,
+    configured: true
+  });
 
   instance.addHook('onClose', async () => {
     if (redis.status === 'ready' || redis.status === 'connecting') {
@@ -128,38 +155,15 @@ const redisPlugin: FastifyPluginAsync = async (instance) => {
 };
 
 export async function redisConnect(instance: FastifyInstance): Promise<boolean> {
-  if (instance.redis.status === 'ready') return true;
+  if (!instance.redis.configured) return false;
+  if (instance.redis.server.status === 'ready') return true;
 
   try {
-    await instance.redis.connect();
+    await instance.redis.server.connect();
     return true;
   } catch (err) {
     // If Redis isn't available at startup that's fine — we'll run without caching.
     instance.log.warn({ err }, 'Server caching unavailable at startup');
-    return false;
-  }
-}
-
-function noop() {}
-
-export async function redisConnectTest(instance: FastifyInstance): Promise<boolean> {
-  try {
-    const redis = build(instance, {
-      connectTimeout: 5000,
-      maxRetriesPerRequest: 1,
-      retryStrategy: () => null
-    });
-
-    redis.on('error', noop);
-
-    try {
-      await redis.connect();
-      const pong = await redis.ping();
-      return pong === 'PONG';
-    } finally {
-      redis.disconnect();
-    }
-  } catch {
     return false;
   }
 }

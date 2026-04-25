@@ -12,7 +12,7 @@ import {
   readStringFromEnvironment
 } from './utils/environment.js';
 import { registerPlugins } from './plugins/index.js';
-import { redisConnect, redisConnectTest } from './plugins/redis.js';
+import { redisConnect } from './plugins/redis.js';
 import { createCacheService } from './services/cache.js';
 import { registerHealthRoute } from './routes/health.js';
 import { registerServerRoute } from './routes/server/index.js';
@@ -54,13 +54,7 @@ async function registerAppPlugins(app: FastifyInstance): Promise<void> {
 
   await app.register(fastifySensible);
   await registerPlugins(app);
-
-  const redisReady = await redisConnectTest(app);
-  if (!redisReady) {
-    app.log.warn('Server caching unavailable');
-  } else {
-    await redisConnect(app);
-  }
+  await redisConnect(app);
 
   createCacheService(app.redis);
 }

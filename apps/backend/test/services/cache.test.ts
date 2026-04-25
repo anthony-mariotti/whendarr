@@ -108,7 +108,10 @@ describe('CacheService', () => {
   beforeEach(async () => {
     redis = new RedisMock();
     Object.defineProperty(redis, 'status', { value: 'ready', configurable: true });
-    cache = createCacheService(redis);
+    cache = createCacheService({
+      configured: true,
+      server: redis
+    });
     await redis.flushall();
     setCachePrefix('whendarr');
     setCalendarTTL(300);
