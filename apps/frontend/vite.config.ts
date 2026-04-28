@@ -22,7 +22,7 @@ export default defineConfig(({ command }) => ({
   },
   build: {
     outDir: 'dist',
-    sourcemap: true
+    sourcemap: 'hidden'
   },
   resolve: {
     alias: {
