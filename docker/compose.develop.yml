@@ -1,18 +1,137 @@
 name: whendarr
+
+networks:
+  whendarr-dev:
+    driver: bridge
+  traefik-net:
+    driver: bridge
+  nginx-net:
+    driver: bridge
+
+volumes:
+  redis-data:
+
+x-whendarr-base: &whendarr-base
+  image: ghcr.io/anthony-mariotti/whendarr:dev
+  pull_policy: never
+  env_file: ../.env.production.local
+  networks:
+    - whendarr-dev
+  restart: no
+
+x-whendarr-build-args: &whendarr-build-args
+  context: ../
+  dockerfile: docker/Dockerfile
+  args:
+    BUILD_VERSION: 0.0.0
+    BUILD_TAG: v0.0.0-dev
+    BUILD_COMMIT: abcdefghijklmnopqrstuvwxyz
+  no_cache: true
+
 services:
   valkey:
-    profiles:
-      - valkey
+    # profiles: [valkey, full, down]
     image: ghcr.io/valkey-io/valkey:latest
+    container_name: whendarr_valkey
+    volumes:
+      - redis-data:/data
+    networks:
+      - whendarr-dev
     ports:
       - 6379:6379
 
-  whendarr:
-    profiles:
-      - whendarr
-    container_name: whendarr_development
+  whendarr-build:
+    profiles: [build]
+    container_name: whendarr_build
     image: ghcr.io/anthony-mariotti/whendarr:dev
-    pull_policy: 'never'
-    env_file: ../.env.production.local
+    pull_policy: never
+    build: *whendarr-build-args
+
+  whendarr:
+    profiles: [direct, full, down]
+    <<: *whendarr-base
+    container_name: whendarr_direct
     ports:
       - 8675:3000
+
+  traefik:
+    profiles: [traefik, traefik-subpath, full, down]
+    image: ghcr.io/traefik/traefik:latest
+    container_name: whendarr_traefik
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - 8080:80
+      - 8081:8080
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - traefik-net
+    restart: no
+
+  whendarr-traefik:
+    profiles: [traefik, full, down]
+    <<: *whendarr-base
+    container_name: whendarr_traefik_app
+    networks:
+      - whendarr-dev
+      - traefik-net
+    labels:
+      traefik.enable: true
+      traefik.http.routers.whendarr-traefik.rule: Host(`localhost`)
+      traefik.http.routers.whendarr-traefik.entrypoints: web
+      traefik.http.services.whendarr-traefik.loadbalancer.server.port: 3000
+
+  whendarr-traefik-subpath:
+    profiles: [traefik-subpath, full, down]
+    <<: *whendarr-base
+    container_name: whendarr_traefik_subpath_app
+    networks:
+      - whendarr-dev
+      - traefik-net
+    environment:
+      BASE_PATH: /whendarr
+    labels:
+      traefik.enable: true
+      traefik.http.routers.whendarr-subpath.rule: Host(`localhost`) && PathPrefix(`/whendarr`)
+      traefik.http.routers.whendarr-subpath.entrypoints: web
+      traefik.http.services.whendarr-subpath.loadbalancer.server.port: 3000
+
+
+
+
+# services:
+#   valkey:
+#     profiles:
+#       - valkey
+#     image: ghcr.io/valkey-io/valkey:latest
+#     ports:
+#       - 6379:6379
+
+#   whendarr:
+#     profiles:
+#       - whendarr
+#     container_name: whendarr_development
+#     image: ghcr.io/anthony-mariotti/whendarr:dev
+#     pull_policy: 'never'
+#     env_file: ../.env.production.local
+#     ports:
+#       - 8675:3000
+
+#   whendarr-build:
+#     profiles:
+#       - whendarr-build
+#     container_name: whendarr_development
+#     image: ghcr.io/anthony-mariotti/whendarr:dev
+#     pull_policy: 'never'
+#     build:
+#       context: ../
+#       dockerfile: docker/Dockerfile
+#       args:
+#         BUILD_VERSION: 0.0.0
+#         BUILD_TAG: v0.0.0-dev
+#         BUILD_COMMIT: abcdefghijklmnopqrstuvwxyz
+#       no_cache: true

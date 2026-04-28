@@ -9,10 +9,11 @@
     "check": "turbo run check",
     "test": "turbo run test",
     "test:coverage": "turbo run test:coverage",
-    "docker:build:local": "docker build -f docker/Dockerfile -t ghcr.io/anthony-mariotti/whendarr:dev .",
-    "docker:whendarr:up": "docker compose -f docker/compose.develop.yml --profile whendarr up -d",
-    "docker:whendarr:down": "docker compose -f docker/compose.develop.yml --profile whendarr down -t 0",
-    "docker:valkey:up": "docker compose -f docker/compose.develop.yml --profile valkey up -d"
+    "dev:docker:build": "docker compose -f docker/compose.develop.yml --profile build up -d",
+    "dev:docker:direct": "docker compose -f docker/compose.develop.yml --profile direct up -d",
+    "dev:docker:traefik": "docker compose -f docker/compose.develop.yml --profile traefik up -d",
+    "dev:docker:traefik:subpath": "docker compose -f docker/compose.develop.yml --profile traefik-subpath up -d",
+    "dev:docker:down": "docker compose -f docker/compose.develop.yml --profile down down -t 0"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "catalog:eslint",
