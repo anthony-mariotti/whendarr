@@ -4,10 +4,10 @@ packages:
 
 catalog:
   dayjs: ^1.11.20
-  i18next: ^26.0.4
-  react-i18next: ^17.0.2
-  typescript: ~6.0.2
-  vite: ^8.0.8
+  i18next: ^26.0.8
+  react-i18next: ^17.0.4
+  typescript: ~6.0.3
+  vite: ^8.0.10
   zod: ^4.3.6
 
 catalogs:
@@ -25,12 +25,12 @@ catalogs:
     react: ^19.2.5
     react-dom: ^19.2.5
   tailwind:
-    "@tailwindcss/postcss": ^4.2.2
-    prettier-plugin-tailwindcss: ^0.7.2
-    tailwindcss: ^4.2.2
+    "@tailwindcss/postcss": ^4.2.4
+    prettier-plugin-tailwindcss: ^0.7.3
+    tailwindcss: ^4.2.4
   testing:
-    vitest: ^4.1.4
-    '@vitest/coverage-v8': ^4.1.4
+    vitest: ^4.1.5
+    '@vitest/coverage-v8': ^4.1.5
 
 
 ignoredBuiltDependencies:
