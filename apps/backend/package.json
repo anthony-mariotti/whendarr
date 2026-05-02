@@ -10,7 +10,7 @@
     "check": "tsc --noEmit",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "clean": "rm -rf dist .turbo coverage"
+    "clean": "rm -rf dist .turbo coverage node_modules"
   },
   "dependencies": {
     "@fastify/sensible": "^6.0.4",

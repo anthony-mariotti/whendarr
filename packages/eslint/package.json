@@ -7,6 +7,9 @@
     "./base": "./base.js",
     "./react": "./react.js"
   },
+  "scripts": {
+    "clean": "rm -rf node_modules"
+  },
   "devDependencies": {
     "@eslint/js": "catalog:eslint",
     "eslint": "catalog:eslint",

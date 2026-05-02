@@ -8,6 +8,7 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check": "turbo run check",
     "test": "turbo run test",
+    "clean": "rm -rf dist .turbo coverage node_modules && turbo run clean",
     "test:coverage": "turbo run test:coverage",
     "dev:docker:build": "docker compose -f docker/compose.develop.yml --profile build up -d",
     "dev:docker:direct": "docker compose -f docker/compose.develop.yml --profile direct up -d",

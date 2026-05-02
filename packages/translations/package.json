@@ -18,7 +18,8 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "lint": "eslint src/",
-    "check": "tsc --noEmit"
+    "check": "tsc --noEmit",
+    "clean": "rm -rf dist .turbo coverage node_modules"
   },
   "dependencies": {
     "i18next": "catalog:",
