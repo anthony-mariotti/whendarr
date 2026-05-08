@@ -11,7 +11,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { ThemeProvider } from '@/components/theme-provider';
-import { CalendarProvider } from './components/calendar/calendar';
+import { CalendarProvider } from './hooks/useCalendar';
 
 const queryClient = new QueryClient({
   defaultOptions: {

@@ -11,7 +11,6 @@ import {
   DropdownMenuTrigger
 } from './ui/dropdown-menu';
 import { ButtonGroup } from './ui/button-group';
-import { useCalendar } from './calendar/calendar';
 import { useCalendarApi } from '@/hooks/api/useCalendarApi';
 import { Spinner } from './ui/spinner';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
@@ -25,6 +24,7 @@ import {
 } from './ui/dialog';
 import { useVersionApi } from '@/hooks/api/useVesrionApi';
 import { Separator } from './ui/separator';
+import { useCalendar } from '@/hooks/useCalendar';
 
 function Toolbar() {
   const { t } = useTranslation(['common']);

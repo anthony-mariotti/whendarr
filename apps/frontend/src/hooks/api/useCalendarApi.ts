@@ -1,8 +1,8 @@
-import { useCalendar } from '@/components/calendar/calendar';
 import { api } from '@/lib/api';
 import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getClientTimezone } from '@whendarr/shared';
 import { useEffect } from 'react';
+import { useCalendar } from '../useCalendar';
 
 function calendarQueryOptions(month: string, tz: string) {
   return {
