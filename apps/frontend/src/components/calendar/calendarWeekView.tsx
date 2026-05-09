@@ -19,6 +19,14 @@ function CalendarWeekView({ events }: CalendarWeekViewProps) {
 
   return (
     <div className="flex h-full flex-col">
+      <div className="border-border border-b px-4 py-3 sm:hidden">
+        <h2 className={clsx('text-xl font-semibold')}>{selectedDay.format('MMMM YYYY')}</h2>
+        <p className="text-muted-foreground text-sm">
+          {week.length === 0
+            ? 'No releases'
+            : `${week.length} release${week.length !== 1 ? 's' : ''}`}
+        </p>
+      </div>
       <div className="border-border flex border-b">
         {week.map((day) => {
           const isToday = day.isSame(dayjs(), 'day');

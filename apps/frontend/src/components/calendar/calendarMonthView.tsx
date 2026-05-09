@@ -4,6 +4,7 @@ import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useCalendar, type CalendarState } from '@/hooks/useCalendar';
 import { chunk, getMonthDays } from '@/lib/calendar';
 import { CalendarTile } from './CalendarTile';
+import clsx from 'clsx';
 
 interface CalendarMonthViewProps {
   events?: CalendarEvent[];
@@ -18,6 +19,14 @@ function CalendarMonthView({ events }: CalendarMonthViewProps) {
 
   return (
     <>
+      <div className="border-border border-b px-4 py-3 sm:hidden">
+        <h2 className={clsx('text-xl font-semibold')}>{month.format('MMMM YYYY')}</h2>
+        <p className="text-muted-foreground text-sm">
+          {events?.length === 0
+            ? 'No releases'
+            : `${events?.length} release${events?.length !== 1 ? 's' : ''}`}
+        </p>
+      </div>
       <div className="flex">
         {desktop &&
           dayjs.weekdays().map((d) => (
