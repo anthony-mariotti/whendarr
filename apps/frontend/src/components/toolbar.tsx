@@ -24,17 +24,44 @@ import {
 } from './ui/dialog';
 import { useVersionApi } from '@/hooks/api/useVesrionApi';
 import { Separator } from './ui/separator';
-import { useCalendar } from '@/hooks/useCalendar';
+import { CALENDAR_VIEWS, useCalendar, type CalendarViewMode } from '@/hooks/useCalendar';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from './ui/select';
+import { CalendarViewIcon } from './calendar/CalendarViewIcon';
 
 function Toolbar() {
   const { t } = useTranslation(['common']);
-  const { month, filter, nextMonth, prevMonth, today, setFilter } = useCalendar();
+  const { month, view, filter, nextPeriod, prevPeriod, today, setFilter, setView } = useCalendar();
   const { isLoading, isFetching } = useCalendarApi();
   const { data } = useVersionApi();
   const { desktop } = useMediaQuery();
 
   return (
     <div className="bg-background fixed bottom-0 z-10 flex min-h-16 w-full items-center space-x-2 border-t-2 px-4 py-2 sm:relative sm:bottom-auto sm:border-t-0">
+      <Select defaultValue={view} onValueChange={(view: CalendarViewMode) => setView(view)}>
+        {/* @ts-expect-error shadcn doesn't provide lg, but works as intended :) */}
+        <SelectTrigger size="lg">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            {CALENDAR_VIEWS.map((view) => {
+              return (
+                <SelectItem key={view} value={view}>
+                  <CalendarViewIcon view={view} size={16} />
+                  {t(`common:time.${view}`)}
+                </SelectItem>
+              );
+            })}
+          </SelectGroup>
+        </SelectContent>
+      </Select>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant={'outline'} size={'icon-lg'}>
@@ -64,16 +91,16 @@ function Toolbar() {
         {t('common:time.today')}
       </Button>
       <ButtonGroup>
-        <Button variant={'outline'} size={'icon-lg'} onClick={prevMonth}>
+        <Button variant={'outline'} size={'icon-lg'} onClick={prevPeriod}>
           <ChevronLeft />
           <span className="sr-only">{t('common:actions.previousMonth')}</span>
         </Button>
-        <Button variant={'outline'} size={'icon-lg'} onClick={nextMonth}>
+        <Button variant={'outline'} size={'icon-lg'} onClick={nextPeriod}>
           <ChevronRight />
           <span className="sr-only">{t('common:actions.nextMonth')}</span>
         </Button>
       </ButtonGroup>
-      <div className="flex items-center space-x-2">
+      <div className="hidden items-center space-x-2 sm:flex">
         <h1 className="text-xl font-bold">
           {desktop && month.format('MMMM YYYY')}
           {!desktop && month.format('MMM YYYY')}

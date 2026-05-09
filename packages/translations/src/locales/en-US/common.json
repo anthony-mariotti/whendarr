@@ -10,7 +10,10 @@
     "filterCalendar": "Filter calendar"
   },
   "time": {
-    "today": "Today"
+    "today": "Today",
+    "month": "Month",
+    "week": "Week",
+    "day": "Day"
   },
   "media": {
     "movie": "Movie",

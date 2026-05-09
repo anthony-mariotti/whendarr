@@ -1,34 +1,39 @@
 import dayjs from 'dayjs';
 import { createContext, useContext, useState } from 'react';
 
-export type CalendarViewMode = 'month' | 'week' | 'day';
+export const CALENDAR_VIEWS = ['month', 'week', 'day'] as const;
+export type CalendarViewMode = (typeof CALENDAR_VIEWS)[number];
 
 export type CalendarState = {
   month: dayjs.Dayjs;
+  selectedDay: dayjs.Dayjs;
   view: CalendarViewMode;
   filter: {
     movies: boolean;
     shows: boolean;
   };
-  prevMonth: () => void;
-  nextMonth: () => void;
+  prevPeriod: () => void;
+  nextPeriod: () => void;
   today: () => void;
   setFilter: (filter: Partial<CalendarState['filter']>) => void;
   setView: (view: CalendarViewMode) => void;
+  selectDay: (day: dayjs.Dayjs) => void;
 };
 
 const initialState: CalendarState = {
   month: dayjs(),
+  selectedDay: dayjs(),
   view: 'month',
   filter: {
     movies: true,
     shows: true
   },
-  prevMonth: () => null,
-  nextMonth: () => null,
+  prevPeriod: () => null,
+  nextPeriod: () => null,
   today: () => null,
   setFilter: () => null,
-  setView: () => null
+  setView: () => null,
+  selectDay: () => null
 };
 
 const CalendarProviderContext = createContext<CalendarState>(initialState);
@@ -39,23 +44,76 @@ type CalendarProviderProps = {
 
 export function CalendarProvider({ children, ...props }: CalendarProviderProps) {
   const [month, setMonth] = useState<dayjs.Dayjs>(initialState.month);
+  const [selectedDay, setSelectedDay] = useState<dayjs.Dayjs>(initialState.selectedDay);
   const [view, setView] = useState<CalendarViewMode>(initialState.view);
   const [filters, setFilters] = useState<CalendarState['filter']>(initialState.filter);
 
   const value: CalendarState = {
     month,
+    selectedDay,
     view,
     filter: filters,
-    prevMonth: () => setMonth(month.subtract(1, 'month')),
-    nextMonth: () => setMonth(month.add(1, 'month')),
-    today: () => setMonth(dayjs()),
-    setFilter: (filter: Partial<CalendarState['filter']>) => {
-      setFilters({
-        ...filters,
-        ...filter
-      });
+    prevPeriod: () => {
+      switch (view) {
+        case 'month':
+          setMonth((m) => m.subtract(1, 'month'));
+          break;
+        case 'week':
+          setSelectedDay((d) => {
+            const next = d.subtract(1, 'week');
+            setMonth(next.startOf('month'));
+            return next;
+          });
+          break;
+        case 'day':
+          setSelectedDay((d) => {
+            const next = d.subtract(1, 'day');
+            setMonth(next.startOf('month'));
+            return next;
+          });
+
+          break;
+      }
     },
-    setView: (view) => setView(view)
+    nextPeriod: () => {
+      switch (view) {
+        case 'month':
+          setMonth((m) => m.add(1, 'month'));
+          break;
+        case 'week':
+          setSelectedDay((d) => {
+            const next = d.add(1, 'week');
+            setMonth(next.startOf('month'));
+            return next;
+          });
+
+          break;
+        case 'day':
+          setSelectedDay((d) => {
+            const next = d.add(1, 'day');
+            setMonth(next.startOf('month'));
+            return next;
+          });
+
+          break;
+      }
+    },
+    today: () => {
+      const today = dayjs();
+      setMonth(today);
+      setSelectedDay(today);
+    },
+    setFilter: (filter: Partial<CalendarState['filter']>) => {
+      setFilters((prev) => ({
+        ...prev,
+        ...filter
+      }));
+    },
+    setView: (view) => setView(view),
+    selectDay: (day: dayjs.Dayjs) => {
+      setSelectedDay(day);
+      setMonth(day.startOf('month'));
+    }
   };
 
   return (

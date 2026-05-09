@@ -1,4 +1,5 @@
-export { Calendar } from './calendar';
-export { CalendarMonthView } from './calendarMonthView';
-export { CalendarWeekView } from './calendarWeekView';
-export { CalendarDayView } from './calendarDayView';
+export { Calendar } from './Calendar';
+export { CalendarMonthView } from './CalendarMonthView';
+export { CalendarWeekView } from './CalendarWeekView';
+export { CalendarDayView } from './CalendarDayView';
+export { CalendarTile } from './CalendarTile';

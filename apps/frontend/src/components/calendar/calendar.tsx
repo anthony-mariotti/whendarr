@@ -1,8 +1,8 @@
 import { useCalendarApi } from '@/hooks/api/useCalendarApi';
 import clsx from 'clsx';
-import { CalendarWeekView } from './calendarWeekView';
-import { CalendarDayView } from './calendarDayView';
-import { CalendarMonthView } from './calendarMonthView';
+import { CalendarWeekView } from './CalendarWeekView';
+import { CalendarDayView } from './CalendarDayView';
+import { CalendarMonthView } from './CalendarMonthView';
 import { useCalendar } from '@/hooks/useCalendar';
 
 export function Calendar() {
