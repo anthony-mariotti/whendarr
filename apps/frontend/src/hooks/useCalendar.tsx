@@ -7,6 +7,7 @@ export type CalendarViewMode = (typeof CALENDAR_VIEWS)[number];
 export type CalendarState = {
   selected: dayjs.Dayjs;
   view: CalendarViewMode;
+  prevView: CalendarViewMode | null;
   filter: {
     movies: boolean;
     shows: boolean;
@@ -17,11 +18,13 @@ export type CalendarState = {
   setFilter: (filter: Partial<CalendarState['filter']>) => void;
   setView: (view: CalendarViewMode) => void;
   selectDay: (day: dayjs.Dayjs) => void;
+  navigateToDay: (day: dayjs.Dayjs) => void;
 };
 
 const initialState: CalendarState = {
   selected: dayjs(),
   view: 'month',
+  prevView: null,
   filter: {
     movies: true,
     shows: true
@@ -31,7 +34,8 @@ const initialState: CalendarState = {
   today: () => null,
   setFilter: () => null,
   setView: () => null,
-  selectDay: () => null
+  selectDay: () => null,
+  navigateToDay: () => null
 };
 
 const CalendarProviderContext = createContext<CalendarState>(initialState);
@@ -43,6 +47,7 @@ type CalendarProviderProps = {
 export function CalendarProvider({ children, ...props }: CalendarProviderProps) {
   const [selected, setSelected] = useState<dayjs.Dayjs>(initialState.selected);
   const [view, setView] = useState<CalendarViewMode>(initialState.view);
+  const [prevView, setPrevView] = useState<CalendarViewMode | null>(initialState.prevView);
   const [filters, setFilters] = useState<CalendarState['filter']>(initialState.filter);
 
   const prevPeriod = useCallback(() => {
@@ -89,16 +94,32 @@ export function CalendarProvider({ children, ...props }: CalendarProviderProps) 
     setSelected(day);
   }, []);
 
+  const handleSetView = useCallback((view: CalendarViewMode) => {
+    setPrevView(null);
+    setView(view);
+  }, []);
+
+  const navigateToDay = useCallback(
+    (day: dayjs.Dayjs) => {
+      setPrevView(view);
+      setSelected(day);
+      setView('day');
+    },
+    [view]
+  );
+
   const value: CalendarState = {
     selected,
     view,
+    prevView,
     filter: filters,
     prevPeriod,
     nextPeriod,
     today,
     setFilter,
-    setView,
-    selectDay
+    setView: handleSetView,
+    selectDay,
+    navigateToDay
   };
 
   return (

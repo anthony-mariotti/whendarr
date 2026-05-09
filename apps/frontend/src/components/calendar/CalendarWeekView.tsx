@@ -11,7 +11,7 @@ interface CalendarWeekViewProps {
 }
 
 function CalendarWeekView({ events }: CalendarWeekViewProps) {
-  const { selected, filter, selectDay, setView } = useCalendar();
+  const { selected, filter, navigateToDay } = useCalendar();
 
   const week = getWeekDays(selected);
   const filtered = filterEvents(events, filter);
@@ -38,10 +38,7 @@ function CalendarWeekView({ events }: CalendarWeekViewProps) {
                 'hover:text-primary flex h-auto flex-1 flex-col rounded-none py-2 text-center text-sm transition-colors',
                 isToday && 'text-primary font-bold'
               )}
-              onClick={() => {
-                selectDay(day);
-                setView('day');
-              }}
+              onClick={() => navigateToDay(day)}
             >
               <div className="text-xs font-semibold sm:text-base">{day.format('ddd')}</div>
               <div

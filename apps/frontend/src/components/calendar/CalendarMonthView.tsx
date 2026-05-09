@@ -12,7 +12,7 @@ interface CalendarMonthViewProps {
 }
 
 function CalendarMonthView({ events }: CalendarMonthViewProps) {
-  const { selected, filter, selectDay, setView } = useCalendar();
+  const { selected, filter, navigateToDay } = useCalendar();
   const { desktop } = useMediaQuery();
 
   const days = getMonthDays(selected);
@@ -43,10 +43,7 @@ function CalendarMonthView({ events }: CalendarMonthViewProps) {
             week={week}
             events={filtered}
             currentMonth={selected}
-            onCellClick={(day) => {
-              selectDay(day);
-              setView('day');
-            }}
+            onCellClick={(day) => navigateToDay(day)}
           />
         ))}
       </div>

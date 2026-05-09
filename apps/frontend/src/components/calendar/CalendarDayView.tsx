@@ -10,7 +10,7 @@ import {
   DialogTrigger
 } from '../ui/dialog';
 import { Separator } from '../ui/separator';
-import { CalendarIcon, TvIcon } from 'lucide-react';
+import { ArrowLeftIcon, CalendarIcon, TvIcon } from 'lucide-react';
 import { Card } from '../ui/card';
 import { useTranslation } from 'react-i18next';
 import { ExpandableText } from '../expandableText';
@@ -19,13 +19,15 @@ import { eventsForDay, filterEvents, movieBorderColor, showBorderColor } from '@
 import { MediaMovieDetail } from '../media/MediaMovieDetail';
 import { MediaShowEpisode } from '../media/MediaShowEpisode';
 import { MediaMovieReleaseIcon } from '../media/MediaMovieReleaseIcon';
+import { Button } from '../ui/button';
+import { cn } from '@/lib/utils';
 
 interface CalendarDayViewProps {
   events?: CalendarEvent[];
 }
 
 export function CalendarDayView({ events }: CalendarDayViewProps) {
-  const { selected, filter } = useCalendar();
+  const { selected, filter, prevView, setView } = useCalendar();
 
   const filtered = filterEvents(events, filter);
   const dayEvents = eventsForDay(filtered, selected);
@@ -34,20 +36,36 @@ export function CalendarDayView({ events }: CalendarDayViewProps) {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="border-border border-b px-4 py-3">
-        <h2 className={clsx('text-xl font-semibold', isToday && 'text-primary')}>
-          {selected.format('dddd, MMMM D, YYYY')}
-          {isToday && (
-            <span className="text-primary bg-primary/10 ml-2 rounded-full px-2 py-0.5 text-sm font-normal">
-              Today
-            </span>
-          )}
-        </h2>
-        <p className="text-muted-foreground text-sm">
-          {dayEvents.length === 0
-            ? 'No releases'
-            : `${dayEvents.length} release${dayEvents.length !== 1 ? 's' : ''}`}
-        </p>
+      <div
+        className={cn('border-border flex items-center space-x-2 border-b pr-4', {
+          'pl-4': !prevView
+        })}
+      >
+        {prevView && (
+          <Button
+            variant={'ghost'}
+            size={'icon-lg'}
+            className="h-full min-w-12 rounded-none"
+            onClick={() => setView(prevView)}
+          >
+            <ArrowLeftIcon className="size-6" />
+          </Button>
+        )}
+        <div className="py-3">
+          <h2 className={clsx('text-xl font-semibold', isToday && 'text-primary')}>
+            {selected.format('dddd, MMMM D, YYYY')}
+            {isToday && (
+              <span className="text-primary bg-primary/10 ml-2 rounded-full px-2 py-0.5 text-sm font-normal">
+                Today
+              </span>
+            )}
+          </h2>
+          <p className="text-muted-foreground text-sm">
+            {dayEvents.length === 0
+              ? 'No releases'
+              : `${dayEvents.length} release${dayEvents.length !== 1 ? 's' : ''}`}
+          </p>
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto">
