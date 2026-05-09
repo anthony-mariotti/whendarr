@@ -3,16 +3,15 @@ import { CalendarTile } from './CalendarTile';
 import clsx from 'clsx';
 import dayjs from 'dayjs';
 import { eventsForDay, filterEvents, getWeekDays } from '@/lib/calendar';
-import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useCalendar } from '@/hooks/useCalendar';
+import { Button } from '../ui/button';
 
 interface CalendarWeekViewProps {
   events?: CalendarEvent[];
 }
 
 function CalendarWeekView({ events }: CalendarWeekViewProps) {
-  const { selected, filter } = useCalendar();
-  const { desktop } = useMediaQuery();
+  const { selected, filter, selectDay, setView } = useCalendar();
 
   const week = getWeekDays(selected);
   const filtered = filterEvents(events, filter);
@@ -32,39 +31,28 @@ function CalendarWeekView({ events }: CalendarWeekViewProps) {
           const isToday = day.isSame(dayjs(), 'day');
 
           return (
-            <div
+            <Button
               key={day.toString()}
+              variant={'ghost'}
               className={clsx(
-                'hover:text-primary flex-1 py-2 text-center text-sm transition-colors',
+                'hover:text-primary flex h-auto flex-1 flex-col rounded-none py-2 text-center text-sm transition-colors',
                 isToday && 'text-primary font-bold'
               )}
+              onClick={() => {
+                selectDay(day);
+                setView('day');
+              }}
             >
-              {desktop ? (
-                <>
-                  <div className="font-semibold">{day.format('ddd')}</div>
-                  <div
-                    className={clsx(
-                      'mx-auto mt-0.5 flex h-7 w-7 items-center justify-center rounded-full text-sm',
-                      isToday && 'bg-primary text-primary-foreground'
-                    )}
-                  >
-                    {day.format('D')}
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="text-xs font-semibold">{day.format('dd')}</div>
-                  <div
-                    className={clsx(
-                      'mx-auto mt-0.5 flex h-6 w-6 items-center justify-center rounded-full text-xs',
-                      isToday && 'bg-primary text-primary-foreground'
-                    )}
-                  >
-                    {day.format('D')}
-                  </div>
-                </>
-              )}
-            </div>
+              <div className="text-xs font-semibold sm:text-base">{day.format('ddd')}</div>
+              <div
+                className={clsx(
+                  'flex h-6 w-6 items-center justify-center rounded-full text-xs sm:h-7 sm:w-7 sm:text-sm',
+                  isToday && 'bg-primary text-primary-foreground'
+                )}
+              >
+                {day.format('D')}
+              </div>
+            </Button>
           );
         })}
       </div>
