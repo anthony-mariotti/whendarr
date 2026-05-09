@@ -10,7 +10,10 @@
     "filterCalendar": "Filter calendar"
   },
   "time": {
-    "today": "Today"
+    "today": "Today",
+    "month": "Month",
+    "week": "Week",
+    "day": "Day"
   },
   "media": {
     "movie": "Movie",
@@ -24,9 +27,18 @@
   },
   "labels": {
     "whendarr": "Whendarr",
-    "version": "Version"
+    "version": "Version",
+    "legend": "Legend",
+    "github": "GitHub",
+    "docs": "Docs"
   },
   "descriptions": {
     "whendarr": "An open source, self hosted calendar that aggregates release data from *arr services into a simple monthly interface."
+  },
+  "legend": {
+    "available": "Available",
+    "future": "Unreleased",
+    "missing": "Missing",
+    "untracked": "Untracked"
   }
 }
