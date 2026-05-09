@@ -11,7 +11,7 @@ interface CalendarWeekViewProps {
 }
 
 function CalendarWeekView({ events }: CalendarWeekViewProps) {
-  const { selectedDay, filter, selectDay, setView } = useCalendar();
+  const { selectedDay, filter } = useCalendar();
   const { desktop } = useMediaQuery();
 
   const week = getWeekDays(selectedDay);
@@ -24,13 +24,8 @@ function CalendarWeekView({ events }: CalendarWeekViewProps) {
           const isToday = day.isSame(dayjs(), 'day');
 
           return (
-            <button
+            <div
               key={day.toString()}
-              type="button"
-              onClick={() => {
-                selectDay(day);
-                setView('day');
-              }}
               className={clsx(
                 'hover:text-primary flex-1 py-2 text-center text-sm transition-colors',
                 isToday && 'text-primary font-bold'
@@ -61,7 +56,7 @@ function CalendarWeekView({ events }: CalendarWeekViewProps) {
                   </div>
                 </>
               )}
-            </button>
+            </div>
           );
         })}
       </div>
