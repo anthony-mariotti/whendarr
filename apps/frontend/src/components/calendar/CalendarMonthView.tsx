@@ -1,21 +1,23 @@
 import type { CalendarEvent } from '@whendarr/shared';
 import dayjs, { Dayjs } from 'dayjs';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
-import { useCalendar, type CalendarState } from '@/hooks/useCalendar';
-import { chunk, getMonthDays } from '@/lib/calendar';
+import { useCalendar } from '@/hooks/useCalendar';
+import { chunk, eventsForDay, filterEvents, getMonthDays } from '@/lib/calendar';
 import { CalendarTile } from './CalendarTile';
 import clsx from 'clsx';
+import { Button } from '../ui/button';
 
 interface CalendarMonthViewProps {
   events?: CalendarEvent[];
 }
 
 function CalendarMonthView({ events }: CalendarMonthViewProps) {
-  const { month, filter } = useCalendar();
+  const { month, filter, selectDay, setView } = useCalendar();
   const { desktop } = useMediaQuery();
 
   const days = getMonthDays(month);
   const weeks = chunk(days, 7);
+  const filtered = filterEvents(events, filter);
 
   return (
     <>
@@ -28,70 +30,83 @@ function CalendarMonthView({ events }: CalendarMonthViewProps) {
         </p>
       </div>
       <div className="flex">
-        {desktop &&
-          dayjs.weekdays().map((d) => (
-            <div key={d} className="m-0 flex-1 p-3 text-center text-lg text-ellipsis">
-              <h1 className="font-semibold">{d}</h1>
-            </div>
-          ))}
-        {!desktop &&
-          dayjs.weekdaysShort().map((d) => (
-            <div key={d} className="m-0 flex-1 p-3 text-center text-lg text-ellipsis">
-              <h1 className="font-semibold">{d}</h1>
-            </div>
-          ))}
+        {(desktop ? dayjs.weekdays() : dayjs.weekdaysShort()).map((d) => (
+          <div key={d} className="m-0 flex-1 p-3 text-center text-lg text-ellipsis">
+            <h1 className="font-semibold">{d}</h1>
+          </div>
+        ))}
       </div>
       <div className="flex flex-1 flex-col">
         {weeks.map((week, i) => (
-          <CalendarWeek key={i} week={week} events={events} filter={filter} />
+          <CalendarWeekRow
+            key={i}
+            week={week}
+            events={filtered}
+            currentMonth={month}
+            onCellClick={(day) => {
+              selectDay(day);
+              setView('day');
+            }}
+          />
         ))}
       </div>
     </>
   );
 }
 
-interface CalendarWeekProps {
+interface CalendarWeekRowProps {
   week: Dayjs[];
-  events?: CalendarEvent[];
-  filter: CalendarState['filter'];
+  events: CalendarEvent[];
+  currentMonth: Dayjs;
+  onCellClick: (day: Dayjs) => void;
 }
 
-function CalendarWeek({ week, events, filter }: CalendarWeekProps) {
+function CalendarWeekRow({ week, events, currentMonth, onCellClick }: CalendarWeekRowProps) {
   return (
     <div className="border-border flex h-full w-full flex-1 flex-col border-t last:border-b">
       <div className="flex h-full w-full">
         {week.map((day, j) => {
-          return <CalendarDay key={j} day={day} events={events} filter={filter} />;
+          return (
+            <CalendarDayCell
+              key={j}
+              day={day}
+              events={events}
+              currentMonth={currentMonth}
+              onCellClick={onCellClick}
+            />
+          );
         })}
       </div>
     </div>
   );
 }
 
-interface CalendarDayProps {
+interface CalendarDayCellProps {
   day: Dayjs;
-  events?: CalendarEvent[];
-  filter: CalendarState['filter'];
+  events: CalendarEvent[];
+  currentMonth: Dayjs;
+  onCellClick: (day: Dayjs) => void;
 }
 
-function CalendarDay({ day, events, filter }: CalendarDayProps) {
-  const dayEvents = events
-    ?.filter((e) => day.isSame(dayjs(e.date), 'day'))
-    .filter((event) => {
-      switch (event.type) {
-        case 'movie':
-          return filter.movies;
-        case 'show':
-          return filter.shows;
-        default:
-          return true;
-      }
-    });
+function CalendarDayCell({ day, events, currentMonth, onCellClick }: CalendarDayCellProps) {
+  const dayEvents = eventsForDay(events, day);
+  const isToday = day.isSame(dayjs(), 'day');
+  const isCurrentMonth = day.isSame(currentMonth, 'month');
+
   return (
-    <div className="border-border relative flex h-full w-full flex-1 flex-col overflow-hidden border-l last:border-r">
-      <h2 className="text-center">
+    <div
+      className={clsx(
+        'border-border relative flex h-full w-full flex-1 flex-col overflow-hidden border-l last:border-r',
+        { 'opacity-65': !isCurrentMonth }
+      )}
+    >
+      <Button
+        variant={'ghost'}
+        className={clsx('rounded-none text-center', isToday && 'text-primary font-bold')}
+        onClick={() => onCellClick(day)}
+      >
         {day.date() === 1 ? `${day.format('MMM')} ${day.format('D')}` : day.format('D')}
-      </h2>
+      </Button>
       <div className="flex h-full w-full flex-1 flex-col flex-nowrap space-y-1 p-1">
         {dayEvents?.map((event, idx) => (
           <CalendarTile key={idx} event={event} />
