@@ -56,11 +56,15 @@ export function CalendarProvider({ children, ...props }: CalendarProviderProps) 
     prevPeriod: () => {
       switch (view) {
         case 'month':
-          setMonth((m) => m.subtract(1, 'month'));
+          setMonth((m) => {
+            const next = m.subtract(1, 'month');
+            setSelectedDay(next.endOf('month'));
+            return next;
+          });
           break;
         case 'week':
           setSelectedDay((d) => {
-            const next = d.subtract(1, 'week');
+            const next = d.subtract(1, 'week').startOf('week');
             setMonth(next.startOf('month'));
             return next;
           });
@@ -78,11 +82,15 @@ export function CalendarProvider({ children, ...props }: CalendarProviderProps) 
     nextPeriod: () => {
       switch (view) {
         case 'month':
-          setMonth((m) => m.add(1, 'month'));
+          setMonth((m) => {
+            const next = m.add(1, 'month');
+            setSelectedDay(next.startOf('month'));
+            return next;
+          });
           break;
         case 'week':
           setSelectedDay((d) => {
-            const next = d.add(1, 'week');
+            const next = d.add(1, 'week').startOf('week');
             setMonth(next.startOf('month'));
             return next;
           });

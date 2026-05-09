@@ -34,6 +34,7 @@ import {
   SelectValue
 } from './ui/select';
 import { CalendarViewIcon } from './calendar/CalendarViewIcon';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 function Toolbar() {
   const { t } = useTranslation(['common']);
@@ -153,6 +154,7 @@ function Toolbar() {
           </div>
         </DialogContent>
       </Dialog>
+      <ReactQueryDevtools initialIsOpen={false} buttonPosition="relative" />
     </div>
   );
 }

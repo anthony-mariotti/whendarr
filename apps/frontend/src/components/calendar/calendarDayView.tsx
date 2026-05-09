@@ -34,7 +34,6 @@ export function CalendarDayView({ events }: CalendarDayViewProps) {
 
   return (
     <div className="flex h-full flex-col">
-      {/* Day heading */}
       <div className="border-border border-b px-4 py-3">
         <h2 className={clsx('text-xl font-semibold', isToday && 'text-primary')}>
           {selectedDay.format('dddd, MMMM D, YYYY')}
@@ -51,7 +50,6 @@ export function CalendarDayView({ events }: CalendarDayViewProps) {
         </p>
       </div>
 
-      {/* Event list */}
       <div className="flex-1 overflow-y-auto">
         {dayEvents.length === 0 ? (
           <div className="text-muted-foreground flex h-full flex-col items-center justify-center gap-2 py-16 text-sm">
@@ -102,10 +100,6 @@ function DayEventCard({ event }: DayEventCardProps) {
   );
 }
 
-// ---------------------------------------------------------------------------
-// Movie card for day view
-// ---------------------------------------------------------------------------
-
 interface DayMovieCardProps {
   event: MovieItem;
 }
@@ -152,10 +146,6 @@ function DayMovieCard({ event, ...props }: DayMovieCardProps) {
     </Card>
   );
 }
-
-// ---------------------------------------------------------------------------
-// Show card for day view
-// ---------------------------------------------------------------------------
 
 interface DayShowCardProps {
   event: ShowItem;

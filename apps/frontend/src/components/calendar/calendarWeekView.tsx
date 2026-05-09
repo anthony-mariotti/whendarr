@@ -19,11 +19,9 @@ function CalendarWeekView({ events }: CalendarWeekViewProps) {
 
   return (
     <div className="flex h-full flex-col">
-      {/* Weekday headers with full date */}
       <div className="border-border flex border-b">
         {week.map((day) => {
           const isToday = day.isSame(dayjs(), 'day');
-          const isSelected = day.isSame(selectedDay, 'day');
 
           return (
             <button
@@ -35,8 +33,7 @@ function CalendarWeekView({ events }: CalendarWeekViewProps) {
               }}
               className={clsx(
                 'hover:text-primary flex-1 py-2 text-center text-sm transition-colors',
-                isToday && 'text-primary font-bold',
-                isSelected && 'bg-accent'
+                isToday && 'text-primary font-bold'
               )}
             >
               {desktop ? (
@@ -69,7 +66,6 @@ function CalendarWeekView({ events }: CalendarWeekViewProps) {
         })}
       </div>
 
-      {/* Event columns */}
       <div className="flex flex-1 overflow-hidden">
         {week.map((day) => {
           const dayEvents = eventsForDay(filtered, day);
