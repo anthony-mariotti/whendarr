@@ -54,7 +54,11 @@ function Toolbar() {
 
   return (
     <div className="bg-background fixed bottom-0 z-10 flex min-h-16 w-full items-center space-x-2 border-t-2 px-4 py-2 sm:relative sm:bottom-auto sm:border-t-0">
-      <Select defaultValue={view} onValueChange={(view: CalendarViewMode) => setView(view)}>
+      <Select
+        value={view}
+        defaultValue={view}
+        onValueChange={(view: CalendarViewMode) => setView(view)}
+      >
         {/* @ts-expect-error shadcn doesn't provide lg, but works as intended :) */}
         <SelectTrigger size="lg">
           <SelectValue />
