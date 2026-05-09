@@ -5,8 +5,7 @@ export const CALENDAR_VIEWS = ['month', 'week', 'day'] as const;
 export type CalendarViewMode = (typeof CALENDAR_VIEWS)[number];
 
 export type CalendarState = {
-  month: dayjs.Dayjs;
-  selectedDay: dayjs.Dayjs;
+  selected: dayjs.Dayjs;
   view: CalendarViewMode;
   filter: {
     movies: boolean;
@@ -21,8 +20,7 @@ export type CalendarState = {
 };
 
 const initialState: CalendarState = {
-  month: dayjs(),
-  selectedDay: dayjs(),
+  selected: dayjs(),
   view: 'month',
   filter: {
     movies: true,
@@ -43,33 +41,20 @@ type CalendarProviderProps = {
 };
 
 export function CalendarProvider({ children, ...props }: CalendarProviderProps) {
-  const [month, setMonth] = useState<dayjs.Dayjs>(initialState.month);
-  const [selectedDay, setSelectedDay] = useState<dayjs.Dayjs>(initialState.selectedDay);
+  const [selected, setSelected] = useState<dayjs.Dayjs>(initialState.selected);
   const [view, setView] = useState<CalendarViewMode>(initialState.view);
   const [filters, setFilters] = useState<CalendarState['filter']>(initialState.filter);
 
   const prevPeriod = useCallback(() => {
     switch (view) {
       case 'month':
-        setMonth((m) => {
-          const next = m.subtract(1, 'month');
-          setSelectedDay(next.endOf('month'));
-          return next;
-        });
+        setSelected((m) => m.subtract(1, 'month').startOf('month'));
         break;
       case 'week':
-        setSelectedDay((d) => {
-          const next = d.subtract(1, 'week').startOf('week');
-          setMonth(next.startOf('month'));
-          return next;
-        });
+        setSelected((m) => m.subtract(1, 'week').startOf('week'));
         break;
       case 'day':
-        setSelectedDay((d) => {
-          const next = d.subtract(1, 'day');
-          setMonth(next.startOf('month'));
-          return next;
-        });
+        setSelected((m) => m.subtract(1, 'day'));
         break;
     }
   }, [view]);
@@ -77,35 +62,20 @@ export function CalendarProvider({ children, ...props }: CalendarProviderProps) 
   const nextPeriod = useCallback(() => {
     switch (view) {
       case 'month':
-        setMonth((m) => {
-          const next = m.add(1, 'month');
-          setSelectedDay(next.startOf('month'));
-          return next;
-        });
+        setSelected((m) => m.add(1, 'month').startOf('month'));
         break;
       case 'week':
-        setSelectedDay((d) => {
-          const next = d.add(1, 'week').startOf('week');
-          setMonth(next.startOf('month'));
-          return next;
-        });
-
+        setSelected((m) => m.add(1, 'week').startOf('week'));
         break;
       case 'day':
-        setSelectedDay((d) => {
-          const next = d.add(1, 'day');
-          setMonth(next.startOf('month'));
-          return next;
-        });
-
+        setSelected((d) => d.add(1, 'day'));
         break;
     }
   }, [view]);
 
   const today = useCallback(() => {
     const today = dayjs();
-    setMonth(today);
-    setSelectedDay(today);
+    setSelected(today);
   }, []);
 
   const setFilter = useCallback((filter: Partial<CalendarState['filter']>) => {
@@ -116,13 +86,11 @@ export function CalendarProvider({ children, ...props }: CalendarProviderProps) 
   }, []);
 
   const selectDay = useCallback((day: dayjs.Dayjs) => {
-    setSelectedDay(day);
-    setMonth(day.startOf('month'));
+    setSelected(day);
   }, []);
 
   const value: CalendarState = {
-    month,
-    selectedDay,
+    selected,
     view,
     filter: filters,
     prevPeriod,

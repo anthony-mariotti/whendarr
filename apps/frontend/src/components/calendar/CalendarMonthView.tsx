@@ -12,17 +12,17 @@ interface CalendarMonthViewProps {
 }
 
 function CalendarMonthView({ events }: CalendarMonthViewProps) {
-  const { month, filter, selectDay, setView } = useCalendar();
+  const { selected, filter, selectDay, setView } = useCalendar();
   const { desktop } = useMediaQuery();
 
-  const days = getMonthDays(month);
+  const days = getMonthDays(selected);
   const weeks = chunk(days, 7);
   const filtered = filterEvents(events, filter);
 
   return (
     <>
       <div className="border-border border-b px-4 py-3 sm:hidden">
-        <h2 className={clsx('text-xl font-semibold')}>{month.format('MMMM YYYY')}</h2>
+        <h2 className={clsx('text-xl font-semibold')}>{selected.format('MMMM YYYY')}</h2>
         <p className="text-muted-foreground text-sm">
           {events?.length === 0
             ? 'No releases'
@@ -42,7 +42,7 @@ function CalendarMonthView({ events }: CalendarMonthViewProps) {
             key={i}
             week={week}
             events={filtered}
-            currentMonth={month}
+            currentMonth={selected}
             onCellClick={(day) => {
               selectDay(day);
               setView('day');

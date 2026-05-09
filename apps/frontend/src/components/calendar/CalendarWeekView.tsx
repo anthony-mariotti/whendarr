@@ -11,16 +11,16 @@ interface CalendarWeekViewProps {
 }
 
 function CalendarWeekView({ events }: CalendarWeekViewProps) {
-  const { selectedDay, filter } = useCalendar();
+  const { selected, filter } = useCalendar();
   const { desktop } = useMediaQuery();
 
-  const week = getWeekDays(selectedDay);
+  const week = getWeekDays(selected);
   const filtered = filterEvents(events, filter);
 
   return (
     <div className="flex h-full flex-col">
       <div className="border-border border-b px-4 py-3 sm:hidden">
-        <h2 className={clsx('text-xl font-semibold')}>{selectedDay.format('MMMM YYYY')}</h2>
+        <h2 className={clsx('text-xl font-semibold')}>{selected.format('MMMM YYYY')}</h2>
         <p className="text-muted-foreground text-sm">
           {week.length === 0
             ? 'No releases'

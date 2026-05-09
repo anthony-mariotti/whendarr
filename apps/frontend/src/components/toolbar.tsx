@@ -40,7 +40,8 @@ import { cn } from '@/lib/utils';
 
 function Toolbar() {
   const { t } = useTranslation(['common']);
-  const { month, view, filter, nextPeriod, prevPeriod, today, setFilter, setView } = useCalendar();
+  const { selected, view, filter, nextPeriod, prevPeriod, today, setFilter, setView } =
+    useCalendar();
   const { isLoading, isFetching } = useCalendarApi();
   const { data } = useVersionApi();
   const { desktop } = useMediaQuery();
@@ -116,8 +117,8 @@ function Toolbar() {
       </ButtonGroup>
       <div className="hidden items-center space-x-2 sm:flex">
         <h1 className="text-xl font-bold">
-          {desktop && month.format('MMMM YYYY')}
-          {!desktop && month.format('MMM YYYY')}
+          {desktop && selected.format('MMMM YYYY')}
+          {!desktop && selected.format('MMM YYYY')}
         </h1>
         {isLoading || (isFetching && <Spinner className="size-6" />)}
       </div>

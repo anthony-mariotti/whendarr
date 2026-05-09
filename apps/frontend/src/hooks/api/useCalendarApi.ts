@@ -13,21 +13,21 @@ function calendarQueryOptions(month: string, tz: string) {
 }
 
 export function useCalendarApi() {
-  const { month } = useCalendar();
+  const { selected } = useCalendar();
   const tz = getClientTimezone();
   const queryClient = useQueryClient();
 
-  const monthKey = month.format('YYYY-MM-DD');
+  const normalized = selected.startOf('month');
 
   useEffect(() => {
-    const prev = month.subtract(1, 'month').format('YYYY-MM-DD');
-    const next = month.add(1, 'month').format('YYYY-MM-DD');
+    const prev = normalized.subtract(1, 'month').format('YYYY-MM-DD');
+    const next = normalized.add(1, 'month').format('YYYY-MM-DD');
     queryClient.prefetchQuery(calendarQueryOptions(prev, tz));
     queryClient.prefetchQuery(calendarQueryOptions(next, tz));
-  }, [monthKey, queryClient]);
+  }, [normalized, queryClient]);
 
   return useQuery({
-    ...calendarQueryOptions(monthKey, tz),
+    ...calendarQueryOptions(normalized.format('YYYY-MM-DD'), tz),
     placeholderData: keepPreviousData
   });
 }

@@ -25,18 +25,18 @@ interface CalendarDayViewProps {
 }
 
 export function CalendarDayView({ events }: CalendarDayViewProps) {
-  const { selectedDay, filter } = useCalendar();
+  const { selected, filter } = useCalendar();
 
   const filtered = filterEvents(events, filter);
-  const dayEvents = eventsForDay(filtered, selectedDay);
+  const dayEvents = eventsForDay(filtered, selected);
 
-  const isToday = selectedDay.isSame(dayjs(), 'day');
+  const isToday = selected.isSame(dayjs(), 'day');
 
   return (
     <div className="flex h-full flex-col">
       <div className="border-border border-b px-4 py-3">
         <h2 className={clsx('text-xl font-semibold', isToday && 'text-primary')}>
-          {selectedDay.format('dddd, MMMM D, YYYY')}
+          {selected.format('dddd, MMMM D, YYYY')}
           {isToday && (
             <span className="text-primary bg-primary/10 ml-2 rounded-full px-2 py-0.5 text-sm font-normal">
               Today
