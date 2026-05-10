@@ -54,7 +54,7 @@ function Toolbar() {
   ] as const;
 
   return (
-    <div className="bg-background fixed bottom-0 z-10 flex min-h-16 w-full items-center space-x-2 border-t-2 px-4 py-2 sm:relative sm:bottom-auto sm:border-t-0">
+    <div className="bg-background fixed bottom-0 z-10 flex min-h-16 w-full items-center space-x-2 border-t-2 px-4 py-2 sm:relative sm:bottom-auto sm:border-t-0 sm:border-b-2">
       <Select
         value={view}
         defaultValue={view}
