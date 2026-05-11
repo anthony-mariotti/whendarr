@@ -4,9 +4,8 @@ ARG BUILD_VERSION=0.0.0
 ARG BUILD_TAG=
 ARG BUILD_COMMIT=
 ARG BUILD_DATE=
-ARG BUILD_PNPM_VERSION=10.33.0
 
-RUN corepack enable && corepack prepare pnpm@${BUILD_PNPM_VERSION} --activate
+RUN corepack enable && corepack prepare pnpm --activate
 
 WORKDIR /build
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
@@ -28,9 +27,8 @@ ARG BUILD_VERSION=0.0.0
 ARG BUILD_TAG=
 ARG BUILD_COMMIT=
 ARG BUILD_DATE=
-ARG BUILD_PNPM_VERSION=10.33.0
 
-RUN corepack enable && corepack prepare pnpm@${BUILD_PNPM_VERSION} --activate
+RUN corepack enable && corepack prepare pnpm --activate
 WORKDIR /srv/whendarr
 
 ARG BUST_CACHE
