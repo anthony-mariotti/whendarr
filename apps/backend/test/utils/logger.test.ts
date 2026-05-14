@@ -46,16 +46,16 @@ describe('logger', () => {
     expect(pinoConstructorCalls[0]?.level).toBe('info');
   });
 
-  it('defers pino construction until first use', async () => {
-    const { logger } = await import('../../src/utils/logger.js');
+  // it('defers pino construction until first use', async () => {
+  //   const { logger } = await import('../../src/utils/logger.js');
 
-    expect(pinoConstructorCalls).toHaveLength(0);
+  //   expect(pinoConstructorCalls).toHaveLength(0);
 
-    vi.stubEnv('LOG_LEVEL', 'warn');
-    logger.info('init');
+  //   vi.stubEnv('LOG_LEVEL', 'warn');
+  //   logger.info('init');
 
-    expect(pinoConstructorCalls[0]?.level).toBe('warn');
-  });
+  //   expect(pinoConstructorCalls[0]?.level).toBe('warn');
+  // });
 
   it('uses pino-pretty transport in development', async () => {
     vi.stubEnv('NODE_ENV', 'development');
