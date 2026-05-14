@@ -10,7 +10,7 @@
     "test": "turbo run test",
     "clean": "rm -rf dist .turbo coverage node_modules && turbo run clean",
     "test:coverage": "turbo run test:coverage",
-    "dev:docker:build": "docker compose -f docker/compose.develop.yml --profile build up -d",
+    "dev:docker:build": "docker compose -f docker/compose.develop.yml --profile build build",
     "dev:docker:direct": "docker compose -f docker/compose.develop.yml --profile direct up -d",
     "dev:docker:traefik": "docker compose -f docker/compose.develop.yml --profile traefik up -d",
     "dev:docker:traefik:subpath": "docker compose -f docker/compose.develop.yml --profile traefik-subpath up -d",
