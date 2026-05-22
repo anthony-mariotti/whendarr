@@ -3,6 +3,7 @@ import '@/lib/dayjs.js';
 
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { BrowserRouter } from 'react-router';
 
 import App from '@/App';
 
@@ -34,11 +35,13 @@ void i18nReady.then(() => {
     <StrictMode>
       <ThemeProvider defaultTheme="dark" storageKey="whendarr-theme">
         <QueryClientProvider client={queryClient}>
-          <CalendarProvider>
-            <TooltipProvider>
-              <App />
-            </TooltipProvider>
-          </CalendarProvider>
+          <BrowserRouter>
+            <CalendarProvider>
+              <TooltipProvider>
+                <App />
+              </TooltipProvider>
+            </CalendarProvider>
+          </BrowserRouter>
         </QueryClientProvider>
       </ThemeProvider>
     </StrictMode>

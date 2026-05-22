@@ -1,12 +1,36 @@
-import { Calendar } from '@/components/calendar';
+import { Route, Routes } from 'react-router';
+
+// TODO: Remove once complete
+import { Calendar as OldCalender } from '@/components/calendar';
 import { Toolbar } from '@/components/toolbar';
 
-function App() {
+import { Layout } from '@/components/layout/Layout';
+
+import { Upcoming } from '@/pages/Upcoming';
+import { Calendar } from '@/pages/Calendar';
+import { Settings } from '@/pages/Settings';
+
+function AppOld() {
   return (
     <div className="relative flex h-full w-full flex-col">
       <Toolbar />
-      <Calendar />
+      <OldCalender />
     </div>
+  );
+}
+
+function App() {
+  return (
+    <>
+      <Routes>
+        <Route element={<Layout />}>
+          <Route index element={<Upcoming />} />
+          <Route path="calendar" element={<Calendar />} />
+          <Route path="settings" element={<Settings />} />
+        </Route>
+        <Route path="/old" element={<AppOld />} />
+      </Routes>
+    </>
   );
 }
 
