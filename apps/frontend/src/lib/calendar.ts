@@ -1,5 +1,5 @@
 import type { CalendarState } from '@/hooks/useCalendar';
-import type { CalendarEvent, MovieItem, ShowItem } from '@whendarr/shared';
+import type { CalendarEvent, EpisodeItem, MovieItem, ShowItem } from '@whendarr/shared';
 import dayjs from 'dayjs';
 
 export function getMonthDays(date: dayjs.Dayjs): dayjs.Dayjs[] {
@@ -47,24 +47,58 @@ export function eventsForDay(events: CalendarEvent[], day: dayjs.Dayjs): Calenda
   return events.filter((e) => day.isSame(dayjs(e.date), 'day'));
 }
 
-const BORDER_COLORS = {
-  available: 'border-green-500',
-  unavailable: 'border-red-500',
-  partial: 'border-orange-500',
-  future: 'border-blue-500',
-  untracked: 'border-gray-500'
+export const STATUS_COLORS = {
+  available: {
+    border: 'border-green-500',
+    background: 'bg-green-500 dark:bg-green-700',
+    label: 'common:legend.available'
+  },
+  unavailable: {
+    border: 'border-red-500',
+    background: 'bg-red-500 dark:bg-red-700',
+    label: 'common:legend.missing'
+  },
+  partial: {
+    border: 'border-orange-500',
+    background: 'bg-orange-500 dark:bg-orange-700',
+    label: 'common:legend.partial'
+  },
+  future: {
+    border: 'border-blue-500',
+    background: 'bg-blue-500 dark:bg-blue-700',
+    label: 'common:legend.future'
+  },
+  untracked: {
+    border: 'border-gray-500',
+    background: 'bg-gray-500 dark:bg-gray-700',
+    label: 'common:legend.untracked'
+  }
 } as const;
 
-export function movieBorderColor(event: MovieItem) {
-  if (event.release === 'cinema') return BORDER_COLORS.untracked;
-  if (dayjs(event.date).isAfter(dayjs())) return BORDER_COLORS.future;
-  if (event.available) return BORDER_COLORS.available;
-  return BORDER_COLORS.unavailable;
+export type StatusKey = keyof typeof STATUS_COLORS;
+
+export function movieStatus(event: MovieItem): StatusKey {
+  if (event.release === 'cinema') return 'untracked';
+  if (dayjs(event.date).isAfter(dayjs())) return 'future';
+  if (event.available) return 'available';
+  return 'unavailable';
 }
 
-export function showBorderColor(event: ShowItem) {
-  if (dayjs(event.date).isAfter(dayjs())) return BORDER_COLORS.future;
-  if (event.available === 'available') return BORDER_COLORS.available;
-  if (event.available === 'partial') return BORDER_COLORS.partial;
-  return BORDER_COLORS.unavailable;
+export function showStatus(event: ShowItem): StatusKey {
+  if (dayjs(event.date).isAfter(dayjs())) return 'future';
+  if (event.available === 'available') return 'available';
+  if (event.available === 'partial') return 'partial';
+  return 'unavailable';
 }
+
+export function episodeStatus(episode: EpisodeItem): StatusKey {
+  if (dayjs(episode.date).isAfter(dayjs())) return 'future';
+  if (episode.available) return 'available';
+  return 'unavailable';
+}
+
+export const movieBorderColor = (event: MovieItem) => STATUS_COLORS[movieStatus(event)].border;
+export const movieBackgroundColor = (event: MovieItem) =>
+  STATUS_COLORS[movieStatus(event)].background;
+export const showBorderColor = (event: ShowItem) => STATUS_COLORS[showStatus(event)].border;
+export const showBackgroundColor = (event: ShowItem) => STATUS_COLORS[showStatus(event)].background;

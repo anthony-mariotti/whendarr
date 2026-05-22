@@ -3,6 +3,7 @@ import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-quer
 import { getClientTimezone } from '@whendarr/shared';
 import { useEffect } from 'react';
 import { useCalendar } from '../useCalendar';
+import dayjs from 'dayjs';
 
 function calendarQueryOptions(month: string, tz: string) {
   return {
@@ -29,5 +30,17 @@ export function useCalendarApi() {
   return useQuery({
     ...calendarQueryOptions(normalized.format('YYYY-MM-DD'), tz),
     placeholderData: keepPreviousData
+  });
+}
+
+export function useCalendarFeedApi() {
+  const tz = getClientTimezone();
+  const date = dayjs();
+  const normalized = date.format('YYYY-MM-DD');
+
+  return useQuery({
+    queryKey: ['feed', normalized],
+    staleTime: 1000 * 60 * 30,
+    queryFn: () => api.calendar.feed.get({ date: normalized, tz })
   });
 }

@@ -49,6 +49,11 @@ export interface EpisodeItem {
 
 export type CalendarEvent = MovieItem | ShowItem;
 
+export interface FeedDay {
+  date: string;
+  items: CalendarEvent[];
+}
+
 export interface VesrionInfo {
   current: {
     version: string;

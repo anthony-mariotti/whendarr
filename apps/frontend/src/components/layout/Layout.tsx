@@ -4,6 +4,7 @@ import { AppHeader, AppHeaderProvider } from '../mobile/AppHeader';
 import { AppBar } from '../mobile/AppBar';
 import { CalendarIcon, ListIcon, SettingsIcon } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 function Layout() {
   const { desktop } = useMediaQuery();
@@ -26,6 +27,7 @@ function MobileLayout() {
           <AppBar.Button text={'Settings'} icon={<SettingsIcon />} to={'/settings'} />
         </AppBar>
       </div>
+      <ReactQueryDevtools buttonPosition="top-right" />
     </AppHeaderProvider>
   );
 }

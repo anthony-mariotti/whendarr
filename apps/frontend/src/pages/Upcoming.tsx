@@ -3,158 +3,96 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Separator } from '@/components/ui/separator';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { useCalendarFeedApi } from '@/hooks/api/useCalendarApi';
+import { movieBackgroundColor, showStatus, STATUS_COLORS } from '@/lib/calendar';
+import type { MovieItem, ShowItem } from '@whendarr/shared';
+import clsx from 'clsx';
 import dayjs from 'dayjs';
-import { FilmIcon, TvIcon } from 'lucide-react';
-
-const data: TempFeedData = [
-  {
-    date: '2026-05-21',
-    releases: [
-      {
-        type: 'show',
-        title: 'The Last of Us',
-        season: 2,
-        status: 'partial',
-        episodes: [
-          {
-            episode: 5,
-            title: 'Cycle',
-            status: 'available'
-          },
-          {
-            episode: 6,
-            title: 'The Price',
-            status: 'missing'
-          }
-        ]
-      },
-      {
-        type: 'movie',
-        title: 'Mission Impossible: Dead Reckoning',
-        release: 'Digital release',
-        status: 'available'
-      },
-      {
-        type: 'episode',
-        title: 'Welcome to Kalani',
-        season: 2,
-        episode: 9,
-        show: {
-          title: 'Andor'
-        },
-        status: 'missing'
-      }
-    ]
-  }
-];
-
-type TempFeedData = Array<{
-  date: string;
-  releases: Array<TempShowItem | TempEpisodeItem | TempMovieItem>;
-}>;
-
-type TempShowItem = {
-  type: 'show';
-  title: string;
-  season: number;
-  status: string;
-  episodes: Array<TempShowEpisodeItem>;
-};
-
-type TempShowEpisodeItem = {
-  episode: number;
-  title: string;
-  status: string;
-};
-
-type TempEpisodeItem = {
-  type: 'episode';
-  title: string;
-  season: number;
-  episode: number;
-  show: {
-    title: string;
-  };
-  status: string;
-};
-
-type TempMovieItem = {
-  type: 'movie';
-  title: string;
-  release: string;
-  status: string;
-};
+import { t } from 'i18next';
+import { ChevronDownIcon, FilmIcon, TvIcon } from 'lucide-react';
+import { useMemo } from 'react';
 
 function Upcoming() {
-  useAppHeaderContent(<UpcomingAppHeader />);
+  const { data } = useCalendarFeedApi();
+
+  const tvCount = useMemo(
+    () => data?.feed.flatMap((day) => day.items).filter((item) => item.type === 'show').length,
+    [data]
+  );
+  const movieCount = useMemo(
+    () => data?.feed.flatMap((day) => day.items).filter((item) => item.type === 'movie').length,
+    [data]
+  );
+
+  useAppHeaderContent(<UpcomingAppHeader tvCount={tvCount} movieCount={movieCount} />);
+
+  if (!data || !data.feed) {
+    return <div>Nothing to see here...</div>;
+  }
+
+  const { feed } = data;
 
   return (
     <div className="flex flex-col gap-2 p-3">
-      {data.map((d) => (
-        <>
-          <div>
-            <span className="font-medium">
-              {dayjs(d.date).format('ddd DD MMM').toLocaleUpperCase()}
-            </span>
+      {feed.map((d, dayIndex) => {
+        const date = dayjs(d.date);
+        return (
+          <div className="flex flex-col gap-2" key={dayIndex}>
+            <div>
+              <span className="font-medium">{date.format('ddd DD MMM').toLocaleUpperCase()}</span>
+            </div>
+            <div key={`${d.date}-body`} className="flex flex-col space-y-4">
+              {d.items.map((item, i) => {
+                if (item.type === 'show') return <ShowGroup key={`${i}-show`} item={item} />;
+                if (item.type === 'movie') return <MovieGroup key={`${i}-movie`} item={item} />;
+                return <></>;
+              })}
+            </div>
           </div>
-          <div className="flex flex-col space-y-4">
-            {d.releases.map((r, i) => {
-              if (r.type === 'show') {
-                return <TempShowGroup key={i} item={r} />;
-              }
-
-              if (r.type === 'episode') {
-                return <TempEpisodeGroup key={i} item={r} />;
-              }
-
-              if (r.type === 'movie') {
-                return <TempMovieGroup key={i} item={r} />;
-              }
-
-              return <></>;
-            })}
-          </div>
-        </>
-      ))}
+        );
+      })}
     </div>
   );
 }
 
-function TempShowGroup({ item }: { item: TempShowItem }) {
+function ShowGroup({ item }: { item: ShowItem }) {
+  if (item.episodes.length < 2) {
+    return <EpisodeGroup item={item} />;
+  }
+
+  const availability = STATUS_COLORS[showStatus(item)];
+
   return (
     <Card className="p-0">
-      <Collapsible className="" defaultOpen>
+      <Collapsible className="group">
         <CollapsibleTrigger asChild>
           <div className="flex">
-            <div className="bg-accent flex items-center justify-center p-4">
+            <div className={clsx('flex items-center justify-center p-4', availability.background)}>
+              <span className="sr-only">{t(availability.label)}</span>
               <TvIcon />
             </div>
             <CardHeader className="grow rounded-none py-4">
-              <CardTitle>{item.title}</CardTitle>
-              <CardDescription>{item.season}</CardDescription>
+              <CardTitle className="truncate overflow-hidden">{item.title}</CardTitle>
+              <CardDescription className="truncate overflow-hidden">TODO</CardDescription>
             </CardHeader>
             <div className="flex items-center justify-center gap-1 p-4">
-              <span className="text-purple-500">Partially Available</span>
+              <ChevronDownIcon className="group-data-[state=open]:rotate-180" />
             </div>
           </div>
         </CollapsibleTrigger>
         <CollapsibleContent>
           <CardContent className="border-t-2 px-0">
-            <div className="flex items-center gap-2 px-4 py-2">
-              <span className="text-muted-foreground shrink-0">Episode 1</span>
-              <span className="grow">Totally Normal</span>
-              <div className="flex items-center justify-center gap-1">
-                <span className="text-green-500">Available</span>
-              </div>
-            </div>
-            <Separator />
-            <div className="flex items-center gap-2 px-4 py-2">
-              <span className="text-muted-foreground shrink-0">Episode 2</span>
-              <span className="grow">Never Normal</span>
-              <div className="flex items-center justify-center gap-1">
-                <span className="text-red-500">Missing</span>
-              </div>
-            </div>
+            {item.episodes.map((episode, i) => (
+              <>
+                {i > 0 && <Separator />}
+                <div key={episode.number} className="flex items-center gap-2 px-4 py-2">
+                  <span className="text-muted-foreground shrink-0">
+                    {`S${String(episode.season).padStart(2, '0')}E${String(episode.number).padStart(2, '0')}`}
+                  </span>
+                  <span className="grow">{episode.title}</span>
+                </div>
+              </>
+            ))}
           </CardContent>
         </CollapsibleContent>
       </Collapsible>
@@ -162,45 +100,60 @@ function TempShowGroup({ item }: { item: TempShowItem }) {
   );
 }
 
-function TempEpisodeGroup({ item }: { item: TempEpisodeItem }) {
+function EpisodeGroup({ item }: { item: ShowItem }) {
+  const episode = item.episodes.at(0);
+
+  if (!episode) {
+    return <></>;
+  }
+
+  const availability = STATUS_COLORS[showStatus(item)];
+
   return (
     <Card className="p-0">
       <div className="flex">
-        <div className="bg-accent flex items-center justify-center p-4">
+        <div className={clsx('flex items-center justify-center p-4', availability.background)}>
+          <span className="sr-only">{t(availability.label)}</span>
           <TvIcon />
         </div>
         <CardHeader className="grow rounded-none py-4">
-          <CardTitle>{item.title}</CardTitle>
-          <CardDescription>{item.season}</CardDescription>
+          <CardTitle className="truncate overflow-hidden">{item.title}</CardTitle>
+          <CardDescription className="truncate overflow-hidden">
+            <span>{`S${String(episode.season).padStart(2, '0')}E${String(episode.number).padStart(2, '0')}`}</span>
+            <span>{' - '}</span>
+            <span>{episode.title}</span>
+          </CardDescription>
         </CardHeader>
-        <div className="flex items-center justify-center gap-1 p-4">
-          <span className="text-blue-500">Upcoming</span>
-        </div>
+        {/* <div className="flex items-center justify-center gap-1 p-4">
+          <AvailabilityBadge status={showStatus(item)} />
+        </div> */}
       </div>
     </Card>
   );
 }
 
-function TempMovieGroup({ item }: { item: TempMovieItem }) {
+function MovieGroup({ item }: { item: MovieItem }) {
   return (
     <Card className="p-0">
       <div className="flex">
-        <div className="bg-accent flex items-center justify-center p-4">
+        <div className={clsx('flex items-center justify-center p-4', movieBackgroundColor(item))}>
           <FilmIcon />
         </div>
         <CardHeader className="grow rounded-none py-4">
-          <CardTitle>{item.title}</CardTitle>
-          <CardDescription>{item.release}</CardDescription>
+          <CardTitle className="truncate overflow-hidden">{item.title}</CardTitle>
+          <CardDescription className="truncate overflow-hidden">
+            {t(`common:media:${item.release}`)}
+          </CardDescription>
         </CardHeader>
-        <div className="flex items-center justify-center gap-1 p-4">
-          <span className="text-green-500">Available</span>
-        </div>
+        {/* <div className="flex items-center justify-center gap-1 p-4">
+          <AvailabilityBadge status={movieStatus(item)} />
+        </div> */}
       </div>
     </Card>
   );
 }
 
-function UpcomingAppHeader() {
+function UpcomingAppHeader({ tvCount, movieCount }: { tvCount?: number; movieCount?: number }) {
   return (
     <div className="flex gap-1">
       <ToggleGroup type="single" defaultValue="all">
@@ -208,10 +161,10 @@ function UpcomingAppHeader() {
           All
         </ToggleGroupItem>
         <ToggleGroupItem value="tv" variant={'outline'} size={'lg'}>
-          TV <span className="text-muted-foreground text-xs">0</span>
+          TV <span className="text-muted-foreground text-xs">{tvCount ?? 0}</span>
         </ToggleGroupItem>
         <ToggleGroupItem value="movie" variant={'outline'} size={'lg'}>
-          Movie <span className="text-muted-foreground text-xs">0</span>
+          Movie <span className="text-muted-foreground text-xs">{movieCount ?? 0}</span>
         </ToggleGroupItem>
       </ToggleGroup>
     </div>

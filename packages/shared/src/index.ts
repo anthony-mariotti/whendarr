@@ -13,6 +13,7 @@ export type {
   // Calendar
   EventItem,
   CalendarEvent,
+  FeedDay,
   // Metadata
   VesrionInfo,
   HealthCheck,
@@ -22,6 +23,6 @@ export type {
 
 export { getClientTimezone } from './functions.js';
 
-export { calendarQuerySchema } from './schemas.js';
+export { calendarQuerySchema, calendarFeedQuerySchema } from './schemas.js';
 
-export type { CalendarQuery } from './schemas.js';
+export type { CalendarQuery, CalendarFeedQuery } from './schemas.js';

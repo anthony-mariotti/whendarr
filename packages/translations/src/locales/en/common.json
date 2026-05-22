@@ -39,6 +39,7 @@
     "available": "Available",
     "future": "Unreleased",
     "missing": "Missing",
-    "untracked": "Untracked"
+    "untracked": "Untracked",
+    "partial": "Partial"
   }
 }

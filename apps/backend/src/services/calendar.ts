@@ -3,6 +3,7 @@ import type { SonarrCalendarResponse } from '@/integrations/sonarr.js';
 import type {
   CalendarEvent,
   EpisodeItem,
+  FeedDay,
   MovieItem,
   ShowAvailability,
   ShowItem,
@@ -19,12 +20,19 @@ export interface CalendarRange {
 
 export interface ICalendarService {
   resolveRange(month?: string, tz?: string): CalendarRange;
+  resolveFeed(date?: string, tz?: string): CalendarRange;
   map(
     radarr: RadarrCalendarResponse[],
     sonarr: SonarrCalendarResponse[],
     start: dayjs.Dayjs,
     end: dayjs.Dayjs
   ): CalendarEvent[];
+  mapFeed(
+    radarr: RadarrCalendarResponse[],
+    sonarr: SonarrCalendarResponse[],
+    start: dayjs.Dayjs,
+    end: dayjs.Dayjs
+  ): FeedDay[];
 }
 
 let calendarService: ICalendarService;
@@ -50,6 +58,28 @@ export class CalendarService implements ICalendarService {
     };
   }
 
+  resolveFeed(date?: string, tz?: string): CalendarRange {
+    const resolvedTz = tz ?? 'UTC';
+
+    if (date) {
+      const current = dayjs.tz(date, resolvedTz).utc();
+
+      return {
+        tz: resolvedTz,
+        start: current.utc(),
+        end: current.add(14, 'day').utc()
+      };
+    }
+
+    const current = dayjs().tz(resolvedTz);
+
+    return {
+      tz: resolvedTz,
+      start: current.utc(),
+      end: current.add(14, 'day').utc()
+    };
+  }
+
   map(
     radarr: RadarrCalendarResponse[],
     sonarr: SonarrCalendarResponse[],
@@ -59,6 +89,30 @@ export class CalendarService implements ICalendarService {
     const mappedRadarr = radarr.flatMap((movie) => mapMovie(movie, start, end));
     const mappedSonarr = mapEpisodeToShow(sonarr);
     return [...mappedRadarr, ...mappedSonarr];
+  }
+
+  mapFeed(
+    radarr: RadarrCalendarResponse[],
+    sonarr: SonarrCalendarResponse[],
+    start: dayjs.Dayjs,
+    end: dayjs.Dayjs
+  ): FeedDay[] {
+    const events = this.map(radarr, sonarr, start, end);
+    const grouped = new Map<string, CalendarEvent[]>();
+
+    for (const event of events) {
+      const dateKey = dayjs.utc(event.date).format('YYYY-MM-DD');
+      const existing = grouped.get(dateKey);
+      if (existing) {
+        existing.push(event);
+      } else {
+        grouped.set(dateKey, [event]);
+      }
+    }
+
+    return Array.from(grouped.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([date, items]) => ({ date, items }));
   }
 }
 

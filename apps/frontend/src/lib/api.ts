@@ -2,7 +2,9 @@ import {
   API_V1_BASE_PATH,
   type VesrionInfo,
   type CalendarEvent,
-  type CalendarQuery
+  type CalendarQuery,
+  type CalendarFeedQuery,
+  type FeedDay
 } from '@whendarr/shared';
 import { BASE_PATH } from './basePath';
 
@@ -51,6 +53,17 @@ class WhendarrApi {
       return this.request<{ data: CalendarEvent[]; raw: unknown }>(
         searchParams.size > 0 ? `/calendar?${searchParams.toString()}` : '/calendar'
       );
+    },
+
+    feed: {
+      get: (params?: CalendarFeedQuery) => {
+        const searchParams = new URLSearchParams();
+        if (params?.date) searchParams.set('date', String(params.date));
+        if (params?.tz) searchParams.set('tz', String(params.tz));
+        return this.request<{ feed: FeedDay[]; start: string }>(
+          searchParams.size > 0 ? `/calendar/feed?${searchParams.toString()}` : '/calendar/feed'
+        );
+      }
     }
   };
 
