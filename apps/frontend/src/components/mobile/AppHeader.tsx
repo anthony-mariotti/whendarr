@@ -2,9 +2,22 @@ import { useRouteMeta } from '@/hooks/useRouteMeta';
 import clsx from 'clsx';
 import { createContext, useContext, useEffect, useState } from 'react';
 
+const AppHeaderStateContext = createContext<React.ReactNode>(undefined);
+const AppHeaderDispatchContext = createContext<(content: React.ReactNode) => void>(() => null);
+
+function AppHeaderProvider({ children, ...props }: { children: React.ReactNode }) {
+  const [content, setContent] = useState<React.ReactNode>(undefined);
+
+  return (
+    <AppHeaderDispatchContext.Provider value={setContent} {...props}>
+      <AppHeaderStateContext.Provider value={content}>{children}</AppHeaderStateContext.Provider>
+    </AppHeaderDispatchContext.Provider>
+  );
+}
+
 function AppHeader() {
   const { title } = useRouteMeta();
-  const { content } = useAppHeader();
+  const content = useContext(AppHeaderStateContext);
 
   return (
     <header
@@ -20,49 +33,13 @@ function AppHeader() {
   );
 }
 
-interface AppHeaderState {
-  content: React.ReactNode;
-  setContent: (content: React.ReactNode) => void;
-}
-
-const initState: AppHeaderState = {
-  content: undefined,
-  setContent: () => null
-};
-
-const AppHeaderContext = createContext<AppHeaderState>(initState);
-
-interface AppHeaderProviderProps {
-  children: React.ReactNode;
-}
-
-function AppHeaderProvider({ children, ...props }: AppHeaderProviderProps) {
-  const [content, setContent] = useState<React.ReactNode>(initState.content);
-
-  const value: AppHeaderState = {
-    content,
-    setContent
-  };
-
-  return (
-    <AppHeaderContext.Provider {...props} value={value}>
-      {children}
-    </AppHeaderContext.Provider>
-  );
-}
-
-function useAppHeader(): AppHeaderState {
-  const context = useContext(AppHeaderContext);
-  if (!context) throw new Error('useAppHeader must be used within a <AppHeaderProvider>');
-  return context;
-}
-
 function useAppHeaderContent(content: React.ReactNode) {
-  const { setContent } = useAppHeader();
+  const setContent = useContext(AppHeaderDispatchContext);
+
   useEffect(() => {
     setContent(content);
     return () => setContent(undefined);
   }, [content, setContent]);
 }
 
-export { AppHeader, AppHeaderProvider, useAppHeader, useAppHeaderContent };
+export { AppHeader, AppHeaderProvider, useAppHeaderContent };

@@ -61,22 +61,13 @@ export class CalendarService implements ICalendarService {
   resolveFeed(date?: string, tz?: string): CalendarRange {
     const resolvedTz = tz ?? 'UTC';
 
-    if (date) {
-      const current = dayjs.tz(date, resolvedTz).utc();
-
-      return {
-        tz: resolvedTz,
-        start: current.utc(),
-        end: current.add(14, 'day').utc()
-      };
-    }
-
-    const current = dayjs().tz(resolvedTz);
-
+    const localDay = date
+      ? dayjs.tz(date, resolvedTz).startOf('day')
+      : dayjs().tz(resolvedTz).startOf('day');
     return {
       tz: resolvedTz,
-      start: current.utc(),
-      end: current.add(14, 'day').utc()
+      start: localDay.utc(),
+      end: localDay.add(14, 'day').utc()
     };
   }
 
