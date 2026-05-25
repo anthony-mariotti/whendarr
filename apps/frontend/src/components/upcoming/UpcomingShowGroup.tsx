@@ -6,8 +6,12 @@ import { showStatus, STATUS_COLORS } from '@/lib/calendar';
 import clsx from 'clsx';
 import { t } from 'i18next';
 import dayjs from 'dayjs';
+import { Button } from '../ui/button';
+import { useState } from 'react';
 
 export function UpcomingShowGroup({ item }: { item: ShowItem }) {
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+
   if (item.episodes.length < 2) {
     return <EpisodeGroup item={item} />;
   }
@@ -16,24 +20,31 @@ export function UpcomingShowGroup({ item }: { item: ShowItem }) {
 
   return (
     <Card className="p-0">
-      <Collapsible className="group">
-        <CollapsibleTrigger asChild>
-          <div className="flex">
-            <div className={clsx('flex items-center justify-center p-4', availability.background)}>
-              <span className="sr-only">{t(availability.label)}</span>
-              <TvIcon />
-            </div>
-            <CardHeader className="grow rounded-none py-4">
-              <CardTitle className="truncate overflow-hidden">{item.title}</CardTitle>
-              <CardDescription className="truncate overflow-hidden">
-                {item.episodes.length} Episodes
-              </CardDescription>
-            </CardHeader>
-            <div className="flex items-center justify-center gap-1 p-4">
-              <ChevronDownIcon className="group-data-[state=open]:rotate-180" />
-            </div>
+      <Collapsible className="group" open={isOpen} onOpenChange={setIsOpen}>
+        <div className="flex">
+          <div className={clsx('flex items-center justify-center p-4', availability.background)}>
+            <span className="sr-only">{t(availability.label)}</span>
+            <TvIcon />
           </div>
-        </CollapsibleTrigger>
+          <CardHeader className="grow rounded-none py-4">
+            <CardTitle className="truncate overflow-hidden">{item.title}</CardTitle>
+            <CardDescription className="truncate overflow-hidden">
+              {t('common:count.episode_multi', { count: item.episodes.length })}
+            </CardDescription>
+          </CardHeader>
+          <CollapsibleTrigger asChild>
+            <Button
+              variant={'ghost'}
+              size={'icon-lg'}
+              className="flex size-auto items-center justify-center gap-1 rounded-none p-4"
+            >
+              <span className="sr-only">
+                {isOpen ? t('common:actions.showLess') : t('common:actions.showMore')}
+              </span>
+              <ChevronDownIcon className="group-data-[state=open]:rotate-180" />
+            </Button>
+          </CollapsibleTrigger>
+        </div>
         <CollapsibleContent>
           <CardContent className="border-border border-t px-0">
             {item.episodes.map((episode, i) => (

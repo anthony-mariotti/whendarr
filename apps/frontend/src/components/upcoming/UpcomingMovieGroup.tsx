@@ -14,8 +14,8 @@ export function UpcomingMovieGroup({ item }: { item: MovieItem }) {
         </div>
         <CardHeader className="grow rounded-none py-4">
           <CardTitle className="truncate overflow-hidden">{item.title}</CardTitle>
-          <CardDescription className="truncate overflow-hidden">
-            {t(`common:media:${item.release}`)}
+          <CardDescription className="space-x-1 truncate overflow-hidden">
+            <span>{t(`common:media:${item.release}`)}</span>
           </CardDescription>
         </CardHeader>
       </div>

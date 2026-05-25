@@ -7,7 +7,8 @@
     "openInformation": "Open information",
     "previousMonth": "Previous month",
     "nextMonth": "Next month",
-    "filterCalendar": "Filter calendar"
+    "filterCalendar": "Filter calendar",
+    "all": "All"
   },
   "time": {
     "today": "Today",
@@ -19,9 +20,12 @@
   "media": {
     "movie": "Movie",
     "movie_plural": "Movies",
+    "show": "Show",
+    "show_plural": "Shows",
     "tv_show": "TV Show",
     "tv_show_plural": "TV Shows",
     "episode": "Episode",
+    "episode_plural": "Episodes",
     "cinema": "Cinema",
     "digital": "Digital",
     "physical": "Physical"
@@ -42,5 +46,9 @@
     "missing": "Missing",
     "untracked": "Untracked",
     "partial": "Partial"
+  },
+  "count": {
+    "episode_one": "{{count}} episode",
+    "episode_multi": "{{count}} episodes"
   }
 }

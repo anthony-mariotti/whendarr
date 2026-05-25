@@ -5,9 +5,11 @@ import dayjs from 'dayjs';
 import { t } from 'i18next';
 import { UpcomingShowGroup } from './UpcomingShowGroup';
 import { UpcomingMovieGroup } from './UpcomingMovieGroup';
+import { TicketXIcon } from 'lucide-react';
+import { Skeleton } from '../ui/skeleton';
 
 export function UpcomingFeed() {
-  const { data } = useCalendarFeedApi();
+  const { data, isLoading } = useCalendarFeedApi();
   const { filter, setShowCount, setMovieCount } = useUpcoming();
 
   const allItems = useMemo(() => data?.feed.flatMap((d) => d.items) ?? [], [data]);
@@ -27,8 +29,19 @@ export function UpcomingFeed() {
       .filter((day) => day.items.length > 0);
   }, [data, filter]);
 
+  if (isLoading) {
+    return <UpcomingSkeleton />;
+  }
+
   if (!data || !data.feed) {
-    return <div>Nothing to see here...</div>;
+    return (
+      <div className="absolute h-full w-full">
+        <div className="text-muted-foreground flex h-full w-full flex-col items-center justify-center">
+          <TicketXIcon size={48} />
+          <h2 className="text-xl">No upcoming media</h2>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -52,7 +65,7 @@ export function UpcomingFeed() {
               )}
               <span className="font-medium">{date.format('ddd DD MMM').toLocaleUpperCase()}</span>
             </div>
-            <div key={`${d.date}-body`} className="flex flex-col space-y-4">
+            <div key={`${d.date}-body`} className="flex flex-col space-y-2">
               {d.items.map((item, i) => {
                 if (item.type === 'show')
                   return <UpcomingShowGroup key={`${i}-show`} item={item} />;
@@ -64,6 +77,26 @@ export function UpcomingFeed() {
           </div>
         );
       })}
+    </div>
+  );
+}
+
+function UpcomingSkeleton() {
+  return (
+    <div className="flex flex-col gap-4 p-3">
+      {[1, 2, 3].map((dayIndex) => (
+        <div className="flex flex-col gap-2" key={dayIndex}>
+          <Skeleton className="h-6 w-32" />
+          <div className="flex flex-col space-y-2">
+            {[1, 2].map((itemIndex) => (
+              <div key={itemIndex} className="flex items-center gap-4">
+                {/* Poster/Thumbnail Skeleton */}
+                <Skeleton className="h-20 w-full" />
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
