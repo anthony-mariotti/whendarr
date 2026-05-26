@@ -20,7 +20,7 @@ export interface CalendarRange {
 
 export interface ICalendarService {
   resolveRange(month?: string, tz?: string): CalendarRange;
-  resolveFeed(date?: string, tz?: string): CalendarRange;
+  resolveFeed(cursor?: string, tz?: string): CalendarRange;
   map(
     radarr: RadarrCalendarResponse[],
     sonarr: SonarrCalendarResponse[],
@@ -58,11 +58,11 @@ export class CalendarService implements ICalendarService {
     };
   }
 
-  resolveFeed(date?: string, tz?: string): CalendarRange {
+  resolveFeed(cursor?: string, tz?: string): CalendarRange {
     const resolvedTz = tz ?? 'UTC';
 
-    const localDay = date
-      ? dayjs.tz(date, resolvedTz).startOf('day')
+    const localDay = cursor
+      ? dayjs.tz(cursor, resolvedTz).startOf('day')
       : dayjs().tz(resolvedTz).startOf('day');
     return {
       tz: resolvedTz,

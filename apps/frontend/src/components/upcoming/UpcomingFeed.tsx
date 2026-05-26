@@ -1,18 +1,20 @@
 import { useCalendarFeedApi } from '@/hooks/api/useCalendarApi';
 import { useUpcoming } from './UpcomingContext';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import dayjs from 'dayjs';
 import { t } from 'i18next';
 import { UpcomingShowGroup } from './UpcomingShowGroup';
 import { UpcomingMovieGroup } from './UpcomingMovieGroup';
-import { TicketXIcon } from 'lucide-react';
+import { Loader2Icon, TicketXIcon } from 'lucide-react';
 import { Skeleton } from '../ui/skeleton';
 
 export function UpcomingFeed() {
-  const { data, isLoading } = useCalendarFeedApi();
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useCalendarFeedApi();
   const { filter, setShowCount, setMovieCount } = useUpcoming();
 
-  const allItems = useMemo(() => data?.feed.flatMap((d) => d.items) ?? [], [data]);
+  const flatFeed = useMemo(() => data?.pages.flatMap((page) => page.feed) ?? [], [data]);
+
+  const allItems = useMemo(() => flatFeed.flatMap((d) => d.items) ?? [], [flatFeed]);
 
   useEffect(() => {
     setShowCount(allItems.filter((i) => i.type === 'show').length);
@@ -20,20 +22,45 @@ export function UpcomingFeed() {
   }, [allItems, setShowCount, setMovieCount]);
 
   const filteredFeed = useMemo(() => {
-    if (filter === 'all') return data?.feed ?? [];
-    return (data?.feed ?? [])
+    if (filter === 'all') return flatFeed;
+    return flatFeed
       .map((day) => ({
         ...day,
         items: day.items.filter((item) => item.type === filter)
       }))
       .filter((day) => day.items.length > 0);
-  }, [data, filter]);
+  }, [flatFeed, filter]);
+
+  const observerTarget = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const target = observerTarget.current;
+    if (!target) return;
+
+    const scrollContainer = target.closest('[data-radix-scroll-area-viewport]');
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      {
+        root: scrollContainer,
+        rootMargin: '0px 0px 600px 0px',
+        threshold: 0
+      }
+    );
+
+    observer.observe(target);
+    return () => observer.unobserve(target);
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   if (isLoading) {
     return <UpcomingSkeleton />;
   }
 
-  if (!data || !data.feed) {
+  if (filteredFeed.length === 0) {
     return (
       <div className="absolute h-full w-full">
         <div className="text-muted-foreground flex h-full w-full flex-col items-center justify-center">
@@ -77,6 +104,22 @@ export function UpcomingFeed() {
           </div>
         );
       })}
+
+      <div
+        ref={observerTarget}
+        className="text-muted-foreground flex w-full items-center justify-center py-6 text-sm"
+      >
+        {isFetchingNextPage ? (
+          <div className="flex animate-pulse items-center gap-2">
+            <Loader2Icon className="animate-spin" size={16} />
+            <span>Loading more...</span>
+          </div>
+        ) : hasNextPage ? (
+          <span>Scroll for more</span>
+        ) : (
+          <span>You have reached the end</span>
+        )}
+      </div>
     </div>
   );
 }

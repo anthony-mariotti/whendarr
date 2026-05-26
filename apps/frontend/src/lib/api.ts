@@ -58,9 +58,9 @@ class WhendarrApi {
     feed: {
       get: (params?: CalendarFeedQuery) => {
         const searchParams = new URLSearchParams();
-        if (params?.date) searchParams.set('date', String(params.date));
+        if (params?.cursor) searchParams.set('cursor', String(params.cursor));
         if (params?.tz) searchParams.set('tz', String(params.tz));
-        return this.request<{ feed: FeedDay[]; start: string }>(
+        return this.request<{ feed: FeedDay[]; start: string; nextCursor: string }>(
           searchParams.size > 0 ? `/calendar/feed?${searchParams.toString()}` : '/calendar/feed'
         );
       }

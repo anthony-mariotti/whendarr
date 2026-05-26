@@ -64,10 +64,14 @@ const calendarV1: FastifyPluginAsync = async (instance: FastifyInstance) => {
 
     const calendarService = getCalendarService();
 
-    const { start, end, tz } = calendarService.resolveFeed(query.data.date, query.data.tz);
+    const { start, end, tz } = calendarService.resolveFeed(query.data.cursor, query.data.tz);
 
     const cacheService = getCacheService();
-    const cached = await cacheService.getCalendar(start, end);
+    const cached = await cacheService.getFeed(start, end);
+
+    const absoluteMax = instance.dayjs().add(6, 'month');
+
+    const nextCursor = end.isBefore(absoluteMax) ? end.format('YYYY-MM-DD') : null;
 
     if (cached) {
       reply.cached = true;
@@ -75,7 +79,8 @@ const calendarV1: FastifyPluginAsync = async (instance: FastifyInstance) => {
         tz,
         start,
         end,
-        data: cached
+        nextCursor,
+        feed: cached
       };
     }
 
@@ -105,6 +110,8 @@ const calendarV1: FastifyPluginAsync = async (instance: FastifyInstance) => {
     const item = first?.items.filter((e) => e.type === 'show').at(0);
 
     if (first && item) {
+      // TODO: Since we are working on this feature in `dev` branch.
+      // this is currently temp since we want to force seeing the multi episode release
       first.items.push({
         type: 'show',
         title: 'The Custom Show',
@@ -140,6 +147,7 @@ const calendarV1: FastifyPluginAsync = async (instance: FastifyInstance) => {
       feed: [...feed],
       start,
       end,
+      nextCursor,
       radarrResponse,
       sonarrResponse
     };

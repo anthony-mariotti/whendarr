@@ -1,5 +1,10 @@
 import { api } from '@/lib/api';
-import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  keepPreviousData,
+  useInfiniteQuery,
+  useQuery,
+  useQueryClient
+} from '@tanstack/react-query';
 import { getClientTimezone } from '@whendarr/shared';
 import { useEffect } from 'react';
 import { useCalendar } from '../useCalendar';
@@ -35,12 +40,13 @@ export function useCalendarApi() {
 
 export function useCalendarFeedApi() {
   const tz = getClientTimezone();
-  const date = dayjs();
-  const normalized = date.format('YYYY-MM-DD');
+  const initialPage = dayjs().format('YYYY-MM-DD');
 
-  return useQuery({
-    queryKey: ['feed', normalized],
+  return useInfiniteQuery({
+    queryKey: ['feed', tz],
     staleTime: 1000 * 60 * 30,
-    queryFn: () => api.calendar.feed.get({ date: normalized, tz })
+    initialPageParam: initialPage,
+    queryFn: ({ pageParam }) => api.calendar.feed.get({ cursor: pageParam, tz }),
+    getNextPageParam: (lastPage) => lastPage.nextCursor || undefined
   });
 }

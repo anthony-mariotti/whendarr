@@ -16,7 +16,7 @@ export const calendarQuerySchema = z.object({
 export type CalendarQuery = z.infer<typeof calendarQuerySchema>;
 
 export const calendarFeedQuerySchema = z.object({
-  date: z.iso.date().optional(),
+  cursor: z.iso.date().optional(),
   tz: timezoneSchema
 });
 
