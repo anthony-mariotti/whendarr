@@ -1,5 +1,5 @@
 import type { FastifyInstance, FastifyPluginAsync } from 'fastify';
-import { calendarFeedQuerySchema, calendarQuerySchema } from '@whendarr/shared';
+import { calendarFeedQuerySchema, calendarQuerySchema, type FeedDay } from '@whendarr/shared';
 import { getCalendarService } from '@/services/calendar.js';
 import { getCacheService } from '@/services/cache.js';
 
@@ -63,93 +63,72 @@ const calendarV1: FastifyPluginAsync = async (instance: FastifyInstance) => {
     instance.assert(query.success, 400, query.error?.issues?.at(0)?.message);
 
     const calendarService = getCalendarService();
+    const cacheService = getCacheService();
 
     const { start, end, tz } = calendarService.resolveFeed(query.data.cursor, query.data.tz);
 
-    const cacheService = getCacheService();
-    const cached = await cacheService.getFeed(start, end);
-
     const absoluteMax = instance.dayjs().add(6, 'month');
-
     const nextCursor = end.isBefore(absoluteMax) ? end.format('YYYY-MM-DD') : null;
 
-    if (cached) {
+    const startMonthKey = start.format('YYYY-MM');
+    const endMonthKey = end.format('YYYY-MM');
+    const monthsNeeded =
+      startMonthKey === endMonthKey ? [startMonthKey] : [startMonthKey, endMonthKey];
+
+    let combinedFeed: FeedDay[] = [];
+    let allCached = true;
+
+    for (const monthKey of monthsNeeded) {
+      let monthData = await cacheService.getFeedMonth(monthKey);
+
+      if (!monthData) {
+        allCached = false;
+
+        const monthStart = instance.dayjs(monthKey).startOf('month');
+        const monthEnd = instance.dayjs(monthKey).endOf('month');
+
+        const [radarrRes, sonarrRes] = await Promise.all([
+          instance.radarr.calendar({
+            start: monthStart.toISOString(),
+            end: monthEnd.toISOString()
+          }),
+          instance.sonarr.calendar({
+            start: monthStart.toISOString(),
+            end: monthEnd.toISOString(),
+            includeSeries: true
+          })
+        ]);
+
+        if (!radarrRes.ok || !sonarrRes.ok) {
+          return reply.badGateway(`Upstream API failed.`);
+        }
+
+        monthData = calendarService.mapFeed(radarrRes.data, sonarrRes.data, monthStart, monthEnd);
+
+        await cacheService.setFeedMonth(monthKey, monthData);
+      }
+
+      combinedFeed = combinedFeed.concat(monthData);
+    }
+
+    const slicedFeed = combinedFeed.filter((day) => {
+      const current = instance.dayjs(day.date);
+      return (
+        (current.isSame(start, 'day') || current.isAfter(start, 'day')) &&
+        (current.isSame(end, 'day') || current.isBefore(end, 'day'))
+      );
+    });
+
+    if (allCached) {
       reply.cached = true;
-      return {
-        tz,
-        start,
-        end,
-        nextCursor,
-        feed: cached
-      };
-    }
-
-    const [radarrResponse, sonarrResponse] = await Promise.all([
-      instance.radarr.calendar({ start: start.toISOString(), end: end.toISOString() }),
-      instance.sonarr.calendar({
-        start: start.toISOString(),
-        end: end.toISOString(),
-        includeSeries: true
-      })
-    ]);
-
-    if (!radarrResponse.ok) {
-      return reply.badGateway(`Radarr API failed with status ${radarrResponse.status}`);
-    }
-
-    if (!sonarrResponse.ok) {
-      return reply.badGateway(`Sonarr API failed with status ${sonarrResponse.status}`);
-    }
-
-    const feed = calendarService.mapFeed(radarrResponse.data, sonarrResponse.data, start, end);
-    // .sort((a, b) => instance.dayjs(a.date).diff(instance.dayjs(b.date)));
-
-    await cacheService.setFeed(start, end, feed);
-
-    const first = feed.at(0);
-    const item = first?.items.filter((e) => e.type === 'show').at(0);
-
-    if (first && item) {
-      // TODO: Since we are working on this feature in `dev` branch.
-      // this is currently temp since we want to force seeing the multi episode release
-      first.items.push({
-        type: 'show',
-        title: 'The Custom Show',
-        date: first.date,
-        certification: item.certification,
-        available: item.available,
-        overview: 'The custom show is custom to the show',
-        status: item.status,
-        episodes: [
-          {
-            title: 'Now Showing Custom',
-            overview: 'Custom episode for the custom show',
-            available: false,
-            date: first.date,
-            number: 1,
-            season: 1
-          },
-          {
-            title: 'The End of Custom',
-            overview: 'Custom episode for the custom show',
-            available: false,
-            date: first.date,
-            number: 2,
-            season: 1
-          }
-        ]
-      });
-      feed[0] = first;
     }
 
     return {
       tz,
-      feed: [...feed],
+      feed: slicedFeed,
       start,
       end,
-      nextCursor,
-      radarrResponse,
-      sonarrResponse
+      nextCursor
     };
   });
 };

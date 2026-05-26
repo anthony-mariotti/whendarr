@@ -32,16 +32,16 @@ export const REDIS_KEYS = {
   CALENDAR_RANGE(start: dayjs.Dayjs, end: dayjs.Dayjs): string {
     return `${cachePrefix}:calendar:${start.format('YYYYMMDD')}-${end.format('YYYYMMDD')}`;
   },
-  CALENDAR_FEED(start: dayjs.Dayjs, end: dayjs.Dayjs): string {
-    return `${cachePrefix}:feed:${start.format('YYYYMMDD')}-${end.format('YYYYMMDD')}`;
+  CALENDAR_FEED_MONTH(monthKey: string): string {
+    return `${cachePrefix}:feed:month:${monthKey}`;
   }
 };
 
 export interface ICacheService {
   getCalendar(start: dayjs.Dayjs, end: dayjs.Dayjs): Promise<CalendarEvent[] | undefined>;
   setCalendar(start: dayjs.Dayjs, end: dayjs.Dayjs, data: CalendarEvent[]): Promise<void>;
-  getFeed(start: dayjs.Dayjs, end: dayjs.Dayjs): Promise<FeedDay[] | undefined>;
-  setFeed(start: dayjs.Dayjs, end: dayjs.Dayjs, data: FeedDay[]): Promise<void>;
+  getFeedMonth(monthKey: string): Promise<FeedDay[] | undefined>;
+  setFeedMonth(monthKey: string, data: FeedDay[]): Promise<void>;
 }
 
 let cacheService: ICacheService;
@@ -77,17 +77,17 @@ class CacheService implements ICacheService {
     );
   }
 
-  async getFeed(start: dayjs.Dayjs, end: dayjs.Dayjs): Promise<FeedDay[] | undefined> {
+  async getFeedMonth(monthKey: string): Promise<FeedDay[] | undefined> {
     if (!this.enabled) return undefined;
 
-    const cached = await this.redis.get(REDIS_KEYS.CALENDAR_FEED(start, end));
+    const cached = await this.redis.get(REDIS_KEYS.CALENDAR_FEED_MONTH(monthKey));
     return cached ? (JSON.parse(cached) as FeedDay[]) : undefined;
   }
 
-  async setFeed(start: dayjs.Dayjs, end: dayjs.Dayjs, data: FeedDay[]): Promise<void> {
+  async setFeedMonth(monthKey: string, data: FeedDay[]): Promise<void> {
     if (!this.enabled) return;
     await this.redis.setex(
-      REDIS_KEYS.CALENDAR_FEED(start, end),
+      REDIS_KEYS.CALENDAR_FEED_MONTH(monthKey),
       getCalendarTTL(),
       JSON.stringify(data)
     );
