@@ -1,4 +1,4 @@
-FROM node:24-alpine3.23 AS builder
+FROM node:26-alpine3.23 AS builder
 
 ARG BUILD_VERSION=0.0.0
 ARG BUILD_TAG=
@@ -21,7 +21,7 @@ COPY . .
 
 RUN pnpm turbo run build --filter=@whendarr/shared --filter=@whendarr/backend --filter=@whendarr/frontend
 
-FROM node:24-alpine3.23 AS runner
+FROM node:26-alpine3.23 AS runner
 
 ARG BUILD_VERSION=0.0.0
 ARG BUILD_TAG=
