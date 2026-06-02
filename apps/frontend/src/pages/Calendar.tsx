@@ -1,5 +1,7 @@
+import { CalendarView } from '@/components/calendar';
+
 function Calendar() {
-  return <></>;
+  return <CalendarView />;
 }
 
 export { Calendar };

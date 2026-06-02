@@ -20,14 +20,8 @@ function AppHeader() {
   const content = useContext(AppHeaderStateContext);
 
   return (
-    <header
-      className={clsx('border-border grid gap-y-1 border-b px-3.5 pt-2.5 pb-2.5', {
-        'grid-rows-2': content
-      })}
-    >
-      <div className="col-span-2 flex">
-        <h1 className="text-foreground text-2xl font-medium tracking-[0.08em]">{title}</h1>
-      </div>
+    <header className={clsx('border-border grid min-h-16 gap-y-1 border-b pt-2 pb-2')}>
+      <span className="sr-only">{title}</span>
       {content && content}
     </header>
   );

@@ -11,7 +11,7 @@ interface UpcomingHeaderProps {
 
 export function UpcomingHeader({ filter, setFilter, showCount, movieCount }: UpcomingHeaderProps) {
   return (
-    <div className="flex gap-1">
+    <div className="flex gap-1 px-3">
       <ToggleGroup
         type="single"
         value={filter}

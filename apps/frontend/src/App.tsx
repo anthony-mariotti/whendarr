@@ -1,7 +1,7 @@
 import { Route, Routes } from 'react-router';
 
 // TODO: Remove once complete
-import { Calendar as OldCalender } from '@/components/calendar';
+import { CalendarView } from '@/components/calendar';
 import { Toolbar } from '@/components/toolbar';
 
 import { Layout } from '@/components/layout/Layout';
@@ -14,7 +14,7 @@ function AppOld() {
   return (
     <div className="relative flex h-full w-full flex-col">
       <Toolbar />
-      <OldCalender />
+      <CalendarView />
     </div>
   );
 }

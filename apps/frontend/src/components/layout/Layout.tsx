@@ -3,7 +3,9 @@ import { Outlet } from 'react-router';
 import { AppHeader, AppHeaderProvider } from '../mobile/AppHeader';
 import { AppBar } from '../mobile/AppBar';
 import { CalendarIcon, ListIcon, SettingsIcon } from 'lucide-react';
-import { ScrollArea } from '@/components/ui/scroll-area';
+// import { ScrollArea } from '@/components/ui/scroll-area';
+// import { useState } from 'react';
+// import { ScrollAreaContext } from './ScrollAreaContext';
 // import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 function Layout() {
@@ -12,14 +14,17 @@ function Layout() {
 }
 
 function MobileLayout() {
+  // const [viewportRef, setViewportRef] = useState<HTMLDivElement | null>(null);
+
   return (
     <AppHeaderProvider>
+      {/* <ScrollAreaContext.Provider value={viewportRef}> */}
       <div className="grid h-full grid-cols-1 grid-rows-[min-content_1fr_min-content]">
         <AppHeader />
         <main className="flex overflow-hidden">
-          <ScrollArea className="flex-1">
-            <Outlet />
-          </ScrollArea>
+          {/* <ScrollArea className="flex-1" viewportRef={setViewportRef}> */}
+          <Outlet />
+          {/* </ScrollArea> */}
         </main>
         <AppBar>
           <AppBar.Button text={'Upcoming'} icon={<ListIcon />} to={'/'} />
@@ -28,6 +33,7 @@ function MobileLayout() {
         </AppBar>
       </div>
       {/* <ReactQueryDevtools buttonPosition="top-right" /> */}
+      {/* </ScrollAreaContext.Provider> */}
     </AppHeaderProvider>
   );
 }
