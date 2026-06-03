@@ -68,7 +68,7 @@ const calendarV1: FastifyPluginAsync = async (instance: FastifyInstance) => {
     const { start, end, tz } = calendarService.resolveFeed(query.data.cursor, query.data.tz);
 
     const absoluteMax = instance.dayjs().add(6, 'month');
-    const nextCursor = end.isBefore(absoluteMax) ? end.format('YYYY-MM-DD') : null;
+    const nextCursor = end.isBefore(absoluteMax) ? end.add(1, 'day').format('YYYY-MM-DD') : null;
 
     const startMonthKey = start.format('YYYY-MM');
     const endMonthKey = end.format('YYYY-MM');
