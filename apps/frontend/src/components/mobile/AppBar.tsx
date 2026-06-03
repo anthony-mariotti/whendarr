@@ -1,10 +1,11 @@
 import clsx from 'clsx';
+import { type LucideIcon } from 'lucide-react';
 import React from 'react';
 import { NavLink } from 'react-router';
 
 interface AppBarButtonProps {
   text: string;
-  icon: React.ReactNode;
+  icon: LucideIcon;
   to: string;
 }
 
@@ -16,7 +17,7 @@ interface AppBarComposition extends React.FC<AppBarProps> {
   Button: React.FC<AppBarButtonProps>;
 }
 
-const AppBarButton: React.FC<AppBarButtonProps> = ({ text, icon, to }) => {
+const AppBarButton: React.FC<AppBarButtonProps> = ({ text, icon: Icon, to }) => {
   return (
     <NavLink
       to={to}
@@ -29,7 +30,7 @@ const AppBarButton: React.FC<AppBarButtonProps> = ({ text, icon, to }) => {
       aria-label={text}
     >
       <span className="" aria-hidden="true">
-        {icon}
+        <Icon />
       </span>
       <span className="">{text}</span>
     </NavLink>

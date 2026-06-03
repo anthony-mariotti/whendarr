@@ -8,7 +8,7 @@ import { Layout } from '@/components/layout/Layout';
 
 import { Upcoming } from '@/pages/Upcoming';
 import { Calendar } from '@/pages/Calendar';
-import { Settings } from '@/pages/Settings';
+import { Preferences } from '@/pages/Preferences';
 
 function AppOld() {
   return (
@@ -26,7 +26,7 @@ function App() {
         <Route element={<Layout />}>
           <Route index element={<Upcoming />} />
           <Route path="calendar" element={<Calendar />} />
-          <Route path="settings" element={<Settings />} />
+          <Route path="preferences" element={<Preferences />} />
         </Route>
         <Route path="/old" element={<AppOld />} />
       </Routes>

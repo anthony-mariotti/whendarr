@@ -50,5 +50,10 @@
   "count": {
     "episode_one": "{{count}} episode",
     "episode_multi": "{{count}} episodes"
+  },
+  "navigation": {
+    "upcoming": "Upcoming",
+    "calendar": "Calendar",
+    "preferences": "Preferences"
   }
 }

@@ -79,8 +79,8 @@ export type StatusKey = keyof typeof STATUS_COLORS;
 
 export function movieStatus(event: MovieItem): StatusKey {
   if (event.release === 'cinema') return 'untracked';
-  if (dayjs(event.date).isAfter(dayjs())) return 'future';
   if (event.available) return 'available';
+  if (dayjs(event.date).isAfter(dayjs())) return 'future';
   return 'unavailable';
 }
 
