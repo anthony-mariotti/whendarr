@@ -21,6 +21,7 @@ import { registerCalendarRoute } from './routes/calendar/index.js';
 import { registerVersionRoute } from './routes/version.js';
 import { logger } from './utils/logger.js';
 import { PROJECT_ROOT } from './bootstrap.js';
+import type { ProcessEventMap } from 'process';
 
 const PORT = readNumberFromEnvironment('PORT', 10, { default: 3000 });
 const HOST = readStringFromEnvironment('HOST', { default: '0.0.0.0' });
@@ -111,14 +112,16 @@ async function serveFrontend(app: FastifyInstance): Promise<void> {
 async function build(): Promise<FastifyInstance> {
   const app = createServer();
 
-  switch (app.log.level) {
-    case 'trace':
-      app.log.trace('Server trace enabled');
-      break;
-    case 'debug':
-      app.log.debug('Server debug enabled');
-      break;
-  }
+  app.addHook('onReady', () => {
+    switch (app.log.level) {
+      case 'trace':
+        app.log.trace('Server trace enabled');
+        break;
+      case 'debug':
+        app.log.debug('Server debug enabled');
+        break;
+    }
+  });
 
   app.log.info(
     {
@@ -142,6 +145,22 @@ async function build(): Promise<FastifyInstance> {
 async function start(): Promise<void> {
   try {
     const app = await build();
+
+    const shutdown = async (signal: keyof ProcessEventMap) => {
+      app.log.info({ signal }, 'Server received shutdown signal, shutting down gracefully');
+      try {
+        await app.close();
+        app.log.info('Server shutdown complete');
+        process.exit(0);
+      } catch (err) {
+        app.log.error(err, 'Server error during shutdown');
+        process.exit(1);
+      }
+    };
+
+    process.once('SIGTERM', shutdown);
+    process.once('SIGINT', shutdown);
+
     app.listen(
       {
         port: PORT,

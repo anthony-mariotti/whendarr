@@ -146,6 +146,7 @@ const redisPlugin: FastifyPluginAsync = async (instance) => {
   });
 
   instance.addHook('onClose', async () => {
+    instance.log.info('Server caching disconnecting');
     if (redis.status === 'ready' || redis.status === 'connecting') {
       await redis.quit();
     } else {
