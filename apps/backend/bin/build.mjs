@@ -7,7 +7,7 @@ await esbuild.build({
   bundle: true,
   minify: false,
   platform: 'node',
-  target: 'node24.13',
+  target: 'node26.3',
   format: 'cjs',
   sourcemap: true,
 });

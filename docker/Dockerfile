@@ -1,10 +1,14 @@
-FROM node:24-alpine3.23 AS builder
+FROM node:26-alpine3.23 AS builder
 
 ARG BUILD_VERSION=0.0.0
 ARG BUILD_TAG=
 ARG BUILD_COMMIT=
 ARG BUILD_DATE=
 
+# SETUP PNPM FOR NODE 26
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN npm install -g corepack
 RUN corepack enable && corepack prepare pnpm --activate
 
 WORKDIR /build
@@ -21,7 +25,7 @@ COPY . .
 
 RUN pnpm turbo run build --filter=@whendarr/shared --filter=@whendarr/backend --filter=@whendarr/frontend
 
-FROM node:24-alpine3.23 AS runner
+FROM node:26-alpine3.23 AS runner
 
 ARG BUILD_VERSION=0.0.0
 ARG BUILD_TAG=
