@@ -3,12 +3,12 @@ packages:
   - "packages/*"
 
 catalog:
-  dayjs: ^1.11.20
+  dayjs: ^1.11.21
   i18next: ^26.3.1
   react-i18next: ^17.0.8
   typescript: ~6.0.3
   vite: ^8.0.16
-  zod: ^4.3.6
+  zod: ^4.4.3
 
 catalogs:
   eslint:
