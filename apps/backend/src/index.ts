@@ -1,9 +1,10 @@
+import './bootstrap.js';
+
 import Fastify, { type FastifyInstance } from 'fastify';
 import fastifySensible from '@fastify/sensible';
 import fastifyStatic from '@fastify/static';
 import { resolve } from 'path';
 import { existsSync, readFileSync } from 'fs';
-import { config } from 'dotenv';
 
 import {
   isDevelopment,
@@ -19,9 +20,7 @@ import { registerServerRoute } from './routes/server/index.js';
 import { registerCalendarRoute } from './routes/calendar/index.js';
 import { registerVersionRoute } from './routes/version.js';
 import { logger } from './utils/logger.js';
-
-const PROJECT_ROOT = resolve(process.cwd(), isDevelopment() ? '../..' : '');
-config({ path: resolve(PROJECT_ROOT, '.env'), quiet: true });
+import { PROJECT_ROOT } from './bootstrap.js';
 
 const PORT = readNumberFromEnvironment('PORT', 10, { default: 3000 });
 const HOST = readStringFromEnvironment('HOST', { default: '0.0.0.0' });
@@ -130,7 +129,7 @@ async function build(): Promise<FastifyInstance> {
       trustedProxy: TRUSTED_PROXY,
       trustedProxyHop: TRUSTED_PROXY_HOP
     },
-    'Initializing backend'
+    'Server initializing backend'
   );
 
   await registerAppPlugins(app);

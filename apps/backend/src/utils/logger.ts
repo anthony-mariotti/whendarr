@@ -50,26 +50,7 @@ function buildOptions(): FastifyLoggerOptions & LoggerOptions {
   };
 }
 
-let _logger: Logger | undefined;
-
-// function getLogger(): Logger {
-//   if (!_logger) {
-//     _logger = pino(buildOptions());
-//   }
-//   return _logger;
-// }
-
 export const logger: FastifyBaseLogger = pino(buildOptions());
-
-// export const logger = new Proxy({} as FastifyBaseLogger, {
-//   get(_target, prop) {
-//     return (getLogger() as unknown as Record<string | symbol, unknown>)[prop];
-//   },
-//   set(_target, prop, value) {
-//     (getLogger() as unknown as Record<string | symbol, unknown>)[prop] = value;
-//     return true;
-//   }
-// });
 
 // Re-export
 export type WhendarrLogger = Logger;
