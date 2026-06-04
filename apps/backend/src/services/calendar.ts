@@ -33,6 +33,7 @@ export interface ICalendarService {
     start: dayjs.Dayjs,
     end: dayjs.Dayjs
   ): FeedDay[];
+  groupByDay(events: CalendarEvent[]): FeedDay[];
 }
 
 let calendarService: ICalendarService;
@@ -64,6 +65,7 @@ export class CalendarService implements ICalendarService {
     const localDay = cursor
       ? dayjs.tz(cursor, resolvedTz).startOf('day')
       : dayjs().tz(resolvedTz).startOf('day');
+
     return {
       tz: resolvedTz,
       start: localDay.utc(),
@@ -88,7 +90,10 @@ export class CalendarService implements ICalendarService {
     start: dayjs.Dayjs,
     end: dayjs.Dayjs
   ): FeedDay[] {
-    const events = this.map(radarr, sonarr, start, end);
+    return this.groupByDay(this.map(radarr, sonarr, start, end));
+  }
+
+  groupByDay(events: CalendarEvent[]): FeedDay[] {
     const grouped = new Map<string, CalendarEvent[]>();
 
     for (const event of events) {

@@ -34,14 +34,21 @@ export const REDIS_KEYS = {
   },
   CALENDAR_FEED_MONTH(monthKey: string): string {
     return `${cachePrefix}:feed:month:${monthKey}`;
+  },
+  MONTH_RAW(monthKey: string): string {
+    return `${cachePrefix}:raw:month:${monthKey}`;
   }
 };
 
 export interface ICacheService {
+  // Retained for backward compatibility - no longer called by routes
   getCalendar(start: dayjs.Dayjs, end: dayjs.Dayjs): Promise<CalendarEvent[] | undefined>;
   setCalendar(start: dayjs.Dayjs, end: dayjs.Dayjs, data: CalendarEvent[]): Promise<void>;
   getFeedMonth(monthKey: string): Promise<FeedDay[] | undefined>;
   setFeedMonth(monthKey: string, data: FeedDay[]): Promise<void>;
+  // Shared month-keyed raw event cache used by both /calendar and /calendar/feed
+  getMonthRaw(monthKey: string): Promise<CalendarEvent[] | undefined>;
+  setMonthRaw(monthKey: string, data: CalendarEvent[]): Promise<void>;
 }
 
 let cacheService: ICacheService;
@@ -63,7 +70,6 @@ class CacheService implements ICacheService {
 
   async getCalendar(start: dayjs.Dayjs, end: dayjs.Dayjs): Promise<CalendarEvent[] | undefined> {
     if (!this.enabled) return undefined;
-
     const cached = await this.redis.get(REDIS_KEYS.CALENDAR_RANGE(start, end));
     return cached ? (JSON.parse(cached) as CalendarEvent[]) : undefined;
   }
@@ -79,7 +85,6 @@ class CacheService implements ICacheService {
 
   async getFeedMonth(monthKey: string): Promise<FeedDay[] | undefined> {
     if (!this.enabled) return undefined;
-
     const cached = await this.redis.get(REDIS_KEYS.CALENDAR_FEED_MONTH(monthKey));
     return cached ? (JSON.parse(cached) as FeedDay[]) : undefined;
   }
@@ -93,29 +98,16 @@ class CacheService implements ICacheService {
     );
   }
 
-  // TODO: aotmicSetEx<T> Planned Not Ready
-  // async atomicSetEx<T>(key: string, ttl: number, get: () => Promise<T>): Promise<T> {
-  //   if (!this.enabled) return new Promise((_, reject) => reject());
-  //   const lockKey = `${key}:lock`;
-  //   const hasLock = await this.redis.set(key, '1', 'EX', 5, 'NX');
+  async getMonthRaw(monthKey: string): Promise<CalendarEvent[] | undefined> {
+    if (!this.enabled) return undefined;
+    const cached = await this.redis.get(REDIS_KEYS.MONTH_RAW(monthKey));
+    return cached ? (JSON.parse(cached) as CalendarEvent[]) : undefined;
+  }
 
-  //   if (!hasLock) {
-  //     await new Promise((resolve) => setTimeout(resolve, 100));
-  //     const cached = await this.redis.get(key);
-  //     if (cached) {
-  //       return JSON.parse(cached) as T;
-  //     }
-  //     return this.atomicSetEx(key, ttl, get);
-  //   }
-
-  //   try {
-  //     const data = await get();
-  //     await this.redis.setex(key, ttl, JSON.stringify(data));
-  //     return data;
-  //   } finally {
-  //     await this.redis.del(lockKey);
-  //   }
-  // }
+  async setMonthRaw(monthKey: string, data: CalendarEvent[]): Promise<void> {
+    if (!this.enabled) return;
+    await this.redis.setex(REDIS_KEYS.MONTH_RAW(monthKey), getCalendarTTL(), JSON.stringify(data));
+  }
 }
 
 export function createCacheService(plugin: IRedisPlugin): ICacheService {

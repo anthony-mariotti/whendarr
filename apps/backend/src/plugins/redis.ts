@@ -162,7 +162,7 @@ export async function redisConnect(instance: FastifyInstance): Promise<boolean> 
     await instance.redis.server.connect();
     return true;
   } catch (err) {
-    // If Redis isn't available at startup that's fine — we'll run without caching.
+    // If Redis isn't available at startup that's fine - we'll run without caching.
     instance.log.warn({ err }, 'Server caching unavailable at startup');
     return false;
   }
