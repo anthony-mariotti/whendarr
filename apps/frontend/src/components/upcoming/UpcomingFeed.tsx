@@ -41,6 +41,8 @@ export function UpcomingFeed() {
   const headerSize = 24;
   const itemSize = 78;
   const spacing = 8;
+
+  // eslint-disable-next-line react-hooks/incompatible-library -- opted out of memoization via "use no memo"
   const virtualizer = useVirtualizer({
     count: filteredFeed.length,
     getScrollElement: () => scrollElement,
