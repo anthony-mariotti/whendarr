@@ -16,8 +16,8 @@ import RedisMock from 'ioredis-mock';
 
 dayjs.extend(utc);
 
-const start = dayjs.utc('2024-03-01');
-const end = dayjs.utc('2024-03-31');
+const start = dayjs('2024-03-01');
+const end = dayjs('2024-03-31');
 
 const sampleEvents: CalendarEvent[] = [
   {
@@ -53,6 +53,32 @@ describe('REDIS_KEYS', () => {
     it('formats start and end dates independently', () => {
       const key = REDIS_KEYS.CALENDAR_RANGE(dayjs.utc('2024-01-01'), dayjs.utc('2024-12-31'));
       expect(key).toBe('whendarr:calendar:20240101-20241231');
+    });
+  });
+
+  describe('CALENDAR_FEED_MONTH', () => {
+    it('reflects an updated prefix', () => {
+      setCachePrefix('customprefix');
+      const key = REDIS_KEYS.CALENDAR_FEED_MONTH('2026-06');
+      expect(key).toBe('customprefix:feed:month:2026-06');
+    });
+
+    it('formats key with provided monthKey', () => {
+      const key = REDIS_KEYS.CALENDAR_FEED_MONTH('2026-06');
+      expect(key).toBe('whendarr:feed:month:2026-06');
+    });
+  });
+
+  describe('MONTH_RAW', () => {
+    it('reflects an updated prefix', () => {
+      setCachePrefix('customprefix');
+      const key = REDIS_KEYS.MONTH_RAW('2026-06');
+      expect(key).toBe('customprefix:raw:month:2026-06');
+    });
+
+    it('formats key with provided monthKey', () => {
+      const key = REDIS_KEYS.MONTH_RAW('2026-06');
+      expect(key).toBe('whendarr:raw:month:2026-06');
     });
   });
 });
@@ -125,56 +151,56 @@ describe('CacheService', () => {
   });
 
   // -------------------------------------------------------------------------
-  // getCalendar
+  // getMonthRaw
   // -------------------------------------------------------------------------
 
-  describe('getCalendar', () => {
+  describe('getMonthRaw', () => {
     it('returns undefined when key does not exist', async () => {
-      const result = await cache.getCalendar(start, end);
+      const result = await cache.getMonthRaw('2024-03');
       expect(result).toBeUndefined();
     });
 
     it('returns events after having been set', async () => {
-      await cache.setCalendar(start, end, sampleEvents);
-      const result = await cache.getCalendar(start, end);
+      await cache.setMonthRaw('2024-03', sampleEvents);
+      const result = await cache.getMonthRaw('2024-03');
       expect(result).toEqual(sampleEvents);
     });
 
     it('returns undefined for a different date range than what was set', async () => {
-      await cache.setCalendar(start, end, sampleEvents);
-      const result = await cache.getCalendar(dayjs.utc('2024-04-01'), dayjs.utc('2024-04-30'));
+      await cache.setMonthRaw('2024-03', sampleEvents);
+      const result = await cache.getMonthRaw('2024-04');
       expect(result).toBeUndefined();
     });
 
     it('returns undefined after key is flushed', async () => {
-      await cache.setCalendar(start, end, sampleEvents);
+      await cache.setMonthRaw('2024-03', sampleEvents);
       await redis.flushall();
-      const result = await cache.getCalendar(start, end);
+      const result = await cache.getMonthRaw('2024-03');
       expect(result).toBeUndefined();
     });
 
     it('uses current prefix when looking up keys', async () => {
-      await cache.setCalendar(start, end, sampleEvents);
+      await cache.setMonthRaw('2024-03', sampleEvents);
       setCachePrefix('otherprefix');
-      const result = await cache.getCalendar(start, end);
+      const result = await cache.getMonthRaw('2024-03');
       expect(result).toBeUndefined();
     });
   });
 
   // -------------------------------------------------------------------------
-  // setCalendar
+  // setMonthRaw
   // -------------------------------------------------------------------------
 
-  describe('setCalendar', () => {
+  describe('setMonthRaw', () => {
     it('persists events that can be retrieved with getCalendar', async () => {
-      await cache.setCalendar(start, end, sampleEvents);
-      const result = await cache.getCalendar(start, end);
+      await cache.setMonthRaw('2024-03', sampleEvents);
+      const result = await cache.getMonthRaw('2024-03');
       expect(result).toEqual(sampleEvents);
     });
 
     it('persists an empty array of events', async () => {
-      await cache.setCalendar(start, end, []);
-      const result = await cache.getCalendar(start, end);
+      await cache.setMonthRaw('2024-03', []);
+      const result = await cache.getMonthRaw('2024-03');
       expect(result).toEqual([]);
     });
 
@@ -182,39 +208,39 @@ describe('CacheService', () => {
       const updated: CalendarEvent[] = [
         { ...sampleEvents[0], title: 'Updated Movie' } as MovieItem
       ];
-      await cache.setCalendar(start, end, sampleEvents);
-      await cache.setCalendar(start, end, updated);
-      const result = await cache.getCalendar(start, end);
+      await cache.setMonthRaw('2024-03', sampleEvents);
+      await cache.setMonthRaw('2024-03', updated);
+      const result = await cache.getMonthRaw('2024-03');
       expect(result).toEqual(updated);
     });
 
     it('stores keys under separate prefixes independently', async () => {
-      await cache.setCalendar(start, end, sampleEvents);
+      await cache.setMonthRaw('2024-03', sampleEvents);
 
       setCachePrefix('other');
       const otherEvents: CalendarEvent[] = [
         { ...sampleEvents[0], title: 'Other Movie' } as MovieItem
       ];
-      await cache.setCalendar(start, end, otherEvents);
+      await cache.setMonthRaw('2024-03', otherEvents);
 
       setCachePrefix('whendarr');
-      expect(await cache.getCalendar(start, end)).toEqual(sampleEvents);
+      expect(await cache.getMonthRaw('2024-03')).toEqual(sampleEvents);
 
       setCachePrefix('other');
-      expect(await cache.getCalendar(start, end)).toEqual(otherEvents);
+      expect(await cache.getMonthRaw('2024-03')).toEqual(otherEvents);
     });
 
     it('sets the key with the correct TTL', async () => {
-      await cache.setCalendar(start, end, sampleEvents);
-      const ttl = await redis.ttl(REDIS_KEYS.CALENDAR_RANGE(start, end));
+      await cache.setMonthRaw('2024-03', sampleEvents);
+      const ttl = await redis.ttl(REDIS_KEYS.MONTH_RAW('2024-03'));
       expect(ttl).toBeGreaterThan(0);
       expect(ttl).toBeLessThanOrEqual(300);
     });
 
     it('uses the TTL from getCalendarTTL', async () => {
       setCalendarTTL(60);
-      await cache.setCalendar(start, end, sampleEvents);
-      const ttl = await redis.ttl(REDIS_KEYS.CALENDAR_RANGE(start, end));
+      await cache.setMonthRaw('2024-03', sampleEvents);
+      const ttl = await redis.ttl(REDIS_KEYS.MONTH_RAW('2024-03'));
       expect(ttl).toBeGreaterThan(0);
       expect(ttl).toBeLessThanOrEqual(60);
     });
@@ -234,15 +260,14 @@ describe('CacheService', () => {
       redis.disconnect();
     });
 
-    it('getCalendar returns undefined when Redis is not ready', async () => {
-      const result = await cache.getCalendar(start, end);
+    it('getMonthRaw does nothing when Redis is not ready', async () => {
+      const result = await cache.getMonthRaw('2024-03');
       expect(result).toBeUndefined();
     });
 
-    it('setCalendar does nothing when Redis is not ready', async () => {
-      await cache.setCalendar(start, end, sampleEvents);
-      // Nothing should have been written — check against the connected cache
-      const result = await cache.getCalendar(start, end);
+    it('setMonthRaw does nothing when Redis is not ready', async () => {
+      await cache.setMonthRaw('2024-03', sampleEvents);
+      const result = await cache.getMonthRaw('2024-03');
       expect(result).toBeUndefined();
     });
   });

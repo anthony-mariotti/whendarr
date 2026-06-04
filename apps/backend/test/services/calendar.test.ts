@@ -3,10 +3,10 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc.js';
 import isBetween from 'dayjs/plugin/isBetween.js';
 import timezone from 'dayjs/plugin/timezone.js';
-import type { RadarrCalendarResponse } from '../../src/integrations/radarr/api.js';
-import type { SonarrCalendarResponse } from '../../src/integrations/sonarr/api.js';
+import type { RadarrCalendarResponse } from '../../src/integrations/radarr.js';
+import type { SonarrCalendarResponse } from '../../src/integrations/sonarr.js';
 import { CalendarService, getCalendarService } from '../../src/services/calendar.js';
-import type { EpisodeItem, MovieItem, ShowItem } from '@whendarr/shared';
+import type { CalendarEvent, EpisodeItem, MovieItem, ShowItem } from '@whendarr/shared';
 
 dayjs.extend(utc);
 dayjs.extend(isBetween);
@@ -105,6 +105,50 @@ describe('CalendarService', () => {
     it('start is before end when no month or tz is provided', () => {
       const { start, end } = service.resolveRange(undefined, 'America/New_York');
       expect(start.isBefore(end)).toBe(true);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // resolveFeed
+  // -------------------------------------------------------------------------
+
+  describe('resolveFeed', () => {
+    it('defaults tz to UTC when not provided', () => {
+      const { tz } = service.resolveFeed('2024-03-15');
+      expect(tz).toBe('UTC');
+    });
+
+    it('uses the provided tz', () => {
+      const { tz } = service.resolveFeed('2024-03-15', 'America/New_York');
+      expect(tz).toBe('America/New_York');
+    });
+
+    it('feed start is before end', () => {
+      const { start, end } = service.resolveFeed('2024-03-15');
+      expect(start.isBefore(end)).toBe(true);
+    });
+
+    it('feed window is 14 days', () => {
+      const { start, end } = service.resolveFeed('2024-03-15');
+      expect(end.diff(start, 'day')).toBe(14);
+    });
+
+    it('start is the UTC equivalent of local midnight on the cursor', () => {
+      const { start } = service.resolveFeed('2024-03-15', 'America/New_York');
+      const result = start.tz('America/New_York').format('YYYY-MM-DD HH:mm:ss');
+      expect(result).toBe('2024-03-15 00:00:00');
+    });
+
+    it('returns a valid range when no cursor is provided', () => {
+      const { start, end } = service.resolveFeed();
+      expect(start).toBeDefined();
+      expect(end).toBeDefined();
+      expect(start.isBefore(end)).toBe(true);
+    });
+
+    it('window spans exactly 14 days when no cursor is provided', () => {
+      const { start, end } = service.resolveFeed();
+      expect(end.diff(start, 'day')).toBe(14);
     });
   });
 
@@ -469,6 +513,94 @@ describe('CalendarService', () => {
         const [show] = service.map([], [makeSonarrEpisode({ hasFile: undefined })], start, end);
         expect((show as ShowItem).episodes[0]?.available).toBe(false);
       });
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // mapFeed
+  // -------------------------------------------------------------------------
+
+  describe('mapFeed', () => {
+    it('returns an empty array when both radarr and sonarr are empty', () => {
+      expect(service.mapFeed([], [], start, end)).toEqual([]);
+    });
+
+    it('groups events from the same day into one FeedDay', () => {
+      const radarr = [
+        makeRadarrMovie({ digitalRelease: '2024-03-15T00:00:00Z' }),
+        makeRadarrMovie({ title: 'Another Movie', digitalRelease: '2024-03-15T00:00:00Z' })
+      ];
+      const result = service.mapFeed(radarr, [], start, end);
+      expect(result).toHaveLength(1);
+      expect(result[0]?.items).toHaveLength(2);
+    });
+
+    it('separates events on different days into distinct FeedDays', () => {
+      const radarr = [
+        makeRadarrMovie({ digitalRelease: '2024-03-15T00:00:00Z' }),
+        makeRadarrMovie({ title: 'Another Movie', digitalRelease: '2024-03-20T00:00:00Z' })
+      ];
+      expect(service.mapFeed(radarr, [], start, end)).toHaveLength(2);
+    });
+
+    it('sorts FeedDays ascending by date', () => {
+      const radarr = [
+        makeRadarrMovie({ title: 'Later', digitalRelease: '2024-03-20T00:00:00Z' }),
+        makeRadarrMovie({ title: 'Earlier', digitalRelease: '2024-03-15T00:00:00Z' })
+      ];
+      const result = service.mapFeed(radarr, [], start, end);
+      // map() adds 1 day to release dates
+      expect(result[0]?.date).toBe('2024-03-16');
+      expect(result[1]?.date).toBe('2024-03-21');
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // groupByDay
+  // -------------------------------------------------------------------------
+
+  describe('groupByDay', () => {
+    const movieEvent: MovieItem = {
+      type: 'movie',
+      title: 'Test Movie',
+      release: 'digital',
+      available: true,
+      date: '2024-03-15T00:00:00.000Z',
+      certification: 'PG-13',
+      overview: 'Overview'
+    };
+
+    it('returns an empty array when given no events', () => {
+      expect(service.groupByDay([])).toEqual([]);
+    });
+
+    it('groups events sharing the same UTC date into one FeedDay', () => {
+      const events: CalendarEvent[] = [
+        { ...movieEvent, date: '2024-03-15T00:00:00.000Z' },
+        { ...movieEvent, title: 'Another Movie', date: '2024-03-15T18:00:00.000Z' }
+      ];
+      const result = service.groupByDay(events);
+      expect(result).toHaveLength(1);
+      expect(result[0]?.date).toBe('2024-03-15');
+      expect(result[0]?.items).toHaveLength(2);
+    });
+
+    it('separates events on different UTC dates into distinct FeedDays', () => {
+      const events: CalendarEvent[] = [
+        { ...movieEvent, date: '2024-03-15T00:00:00.000Z' },
+        { ...movieEvent, title: 'Another Movie', date: '2024-03-16T00:00:00.000Z' }
+      ];
+      expect(service.groupByDay(events)).toHaveLength(2);
+    });
+
+    it('sorts FeedDays ascending by date', () => {
+      const events: CalendarEvent[] = [
+        { ...movieEvent, title: 'Later', date: '2024-03-20T00:00:00.000Z' },
+        { ...movieEvent, title: 'Earlier', date: '2024-03-15T00:00:00.000Z' }
+      ];
+      const result = service.groupByDay(events);
+      expect(result[0]?.date).toBe('2024-03-15');
+      expect(result[1]?.date).toBe('2024-03-20');
     });
   });
 });

@@ -1,5 +1,5 @@
 import type { IRedisPlugin } from '@/plugins/redis.js';
-import type { CalendarEvent, FeedDay } from '@whendarr/shared';
+import type { CalendarEvent } from '@whendarr/shared';
 import type dayjs from 'dayjs';
 import { type Redis } from 'ioredis';
 
@@ -41,11 +41,6 @@ export const REDIS_KEYS = {
 };
 
 export interface ICacheService {
-  // Retained for backward compatibility - no longer called by routes
-  getCalendar(start: dayjs.Dayjs, end: dayjs.Dayjs): Promise<CalendarEvent[] | undefined>;
-  setCalendar(start: dayjs.Dayjs, end: dayjs.Dayjs, data: CalendarEvent[]): Promise<void>;
-  getFeedMonth(monthKey: string): Promise<FeedDay[] | undefined>;
-  setFeedMonth(monthKey: string, data: FeedDay[]): Promise<void>;
   // Shared month-keyed raw event cache used by both /calendar and /calendar/feed
   getMonthRaw(monthKey: string): Promise<CalendarEvent[] | undefined>;
   setMonthRaw(monthKey: string, data: CalendarEvent[]): Promise<void>;
@@ -66,36 +61,6 @@ class CacheService implements ICacheService {
 
   private get enabled(): boolean {
     return this.configured && this.redis?.status === 'ready';
-  }
-
-  async getCalendar(start: dayjs.Dayjs, end: dayjs.Dayjs): Promise<CalendarEvent[] | undefined> {
-    if (!this.enabled) return undefined;
-    const cached = await this.redis.get(REDIS_KEYS.CALENDAR_RANGE(start, end));
-    return cached ? (JSON.parse(cached) as CalendarEvent[]) : undefined;
-  }
-
-  async setCalendar(start: dayjs.Dayjs, end: dayjs.Dayjs, data: CalendarEvent[]): Promise<void> {
-    if (!this.enabled) return;
-    await this.redis.setex(
-      REDIS_KEYS.CALENDAR_RANGE(start, end),
-      getCalendarTTL(),
-      JSON.stringify(data)
-    );
-  }
-
-  async getFeedMonth(monthKey: string): Promise<FeedDay[] | undefined> {
-    if (!this.enabled) return undefined;
-    const cached = await this.redis.get(REDIS_KEYS.CALENDAR_FEED_MONTH(monthKey));
-    return cached ? (JSON.parse(cached) as FeedDay[]) : undefined;
-  }
-
-  async setFeedMonth(monthKey: string, data: FeedDay[]): Promise<void> {
-    if (!this.enabled) return;
-    await this.redis.setex(
-      REDIS_KEYS.CALENDAR_FEED_MONTH(monthKey),
-      getCalendarTTL(),
-      JSON.stringify(data)
-    );
   }
 
   async getMonthRaw(monthKey: string): Promise<CalendarEvent[] | undefined> {
