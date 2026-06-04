@@ -26,7 +26,6 @@ x-whendarr-build-args: &whendarr-build-args
     BUILD_VERSION: 0.0.0
     BUILD_TAG: v0.0.0-dev
     BUILD_COMMIT: abcdefghijklmnopqrstuvwxyz
-  no_cache: true
 
 services:
   valkey:
