@@ -32,7 +32,6 @@ ARG BUILD_TAG=
 ARG BUILD_COMMIT=
 ARG BUILD_DATE=
 
-RUN corepack enable && corepack prepare pnpm --activate
 WORKDIR /srv/whendarr
 
 ARG BUST_CACHE
@@ -52,10 +51,10 @@ COPY --from=builder /build/apps/frontend/dist ./frontend
 
 RUN find . -name "*.map" -type f -delete
 
-RUN addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 whendarr
+RUN addgroup -Sg 1001 whendarr && \
+    adduser -SHu 1001 -G whendarr whendarr
 
-RUN chown -R whendarr:nodejs /srv/whendarr
+RUN chown -R whendarr:whendarr /srv/whendarr
 
 USER whendarr
 
