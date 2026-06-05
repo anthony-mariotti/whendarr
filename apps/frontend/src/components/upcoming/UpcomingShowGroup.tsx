@@ -4,12 +4,13 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/colla
 import type { EpisodeItem, ShowItem } from '@whendarr/shared';
 import { showStatus, STATUS_COLORS } from '@/lib/calendar';
 import clsx from 'clsx';
-import { t } from 'i18next';
 import dayjs from 'dayjs';
 import { Button } from '../ui/button';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export function UpcomingShowGroup({ item }: { item: ShowItem }) {
+  const { t } = useTranslation(['common', 'media']);
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   if (item.episodes.length < 2) {
@@ -23,13 +24,13 @@ export function UpcomingShowGroup({ item }: { item: ShowItem }) {
       <Collapsible className="group" open={isOpen} onOpenChange={setIsOpen}>
         <div className="flex">
           <div className={clsx('flex items-center justify-center p-4', availability.background)}>
-            <span className="sr-only">{t(availability.label)}</span>
+            <span className="sr-only">{availability.i18n}</span>
             <TvIcon />
           </div>
           <CardHeader className="grow rounded-none py-4">
             <CardTitle className="truncate overflow-hidden">{item.title}</CardTitle>
             <CardDescription className="truncate overflow-hidden">
-              {t('common:count.episode_multi', { count: item.episodes.length })}
+              {t('media:count.episode_other', { count: item.episodes.length })}
             </CardDescription>
           </CardHeader>
           <CollapsibleTrigger asChild>
@@ -70,7 +71,7 @@ function EpisodeGroup({ item }: { item: ShowItem }) {
     <Card className="p-0">
       <div className="flex">
         <div className={clsx('flex items-center justify-center p-4', availability.background)}>
-          <span className="sr-only">{t(availability.label)}</span>
+          <span className="sr-only">{availability.i18n}</span>
           <TvIcon />
         </div>
         <CardHeader className="grow rounded-none py-4">

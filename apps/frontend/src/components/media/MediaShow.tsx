@@ -10,7 +10,7 @@ interface MediaShowProps {
 }
 
 export function MediaShow({ event, ...props }: MediaShowProps) {
-  const { t } = useTranslation(['common']);
+  const { t } = useTranslation(['media']);
 
   return (
     <div
@@ -24,7 +24,7 @@ export function MediaShow({ event, ...props }: MediaShowProps) {
         <TooltipTrigger>
           <TvIcon size={16} />
         </TooltipTrigger>
-        <TooltipContent side="left">{t(`common:media:tv_show`)}</TooltipContent>
+        <TooltipContent side="left">{t(`show`)}</TooltipContent>
       </Tooltip>
       <h3 className="cursor-pointer truncate">{event.title}</h3>
     </div>

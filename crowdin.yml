@@ -1,4 +1,8 @@
+base_path: .
 preserve_hierarchy: true
+
 files:
-  - source: packages/translations/src/locales/en/*.json
+  - source: packages/translations/src/locales/en-US/*.json
     translation: /packages/translations/src/locales/%locale%/%original_file_name%
+    type: i18next_json
+    update_option: update_as_unapproved

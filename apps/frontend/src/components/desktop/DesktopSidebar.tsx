@@ -11,10 +11,20 @@ import {
   SidebarMenuItem,
   SidebarRail
 } from '../ui/sidebar';
-import { CalendarIcon, ListIcon, SettingsIcon, type LucideIcon } from 'lucide-react';
-import { t } from 'i18next';
+import {
+  BookTextIcon,
+  CalendarIcon,
+  ListIcon,
+  MessageSquareIcon,
+  SettingsIcon,
+  type LucideIcon
+} from 'lucide-react';
+import { GitHubIcon } from '../icons/GitHubIcon';
+import { Separator } from '../ui/separator';
+import { useTranslation } from 'react-i18next';
 
 export function DesktopSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { t } = useTranslation(['common']);
   const items: DesktopNavItem[] = [
     {
       name: t('common:navigation.upcoming'),
@@ -50,7 +60,39 @@ export function DesktopSidebar({ ...props }: React.ComponentProps<typeof Sidebar
       <SidebarContent>
         <DesktopNav items={items} />
       </SidebarContent>
-      <SidebarFooter>Test</SidebarFooter>
+      <SidebarFooter>
+        <Separator />
+        <SidebarMenu className="gap-1">
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild>
+              <a
+                href="https://github.com/anthony-mariotti/whendarr"
+                target="_blank"
+                rel="noreferrer"
+              >
+                <GitHubIcon className="size-5" />
+                <span>{t('common:labels.github')}</span>
+              </a>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild>
+              <a href="https://discord.gg/your-invite" target="_blank" rel="noreferrer">
+                <MessageSquareIcon size={20} />
+                <span>Discord</span>
+              </a>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild>
+              <a href="https://docs.whendarr.com" target="_blank" rel="noreferrer">
+                <BookTextIcon size={20} />
+                <span>{t('common:labels.docs')}</span>
+              </a>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
       <SidebarRail />
     </Sidebar>
   );

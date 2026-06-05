@@ -7,38 +7,29 @@
     "openInformation": "Open information",
     "previousMonth": "Previous month",
     "nextMonth": "Next month",
-    "filterCalendar": "Filter calendar"
+    "filterCalendar": "Filter calendar",
+    "all": "All"
   },
   "time": {
     "today": "Today",
+    "tomorrow": "Tomorrow",
     "month": "Month",
     "week": "Week",
     "day": "Day"
   },
-  "media": {
-    "movie": "Movie",
-    "movie_plural": "Movies",
-    "tv_show": "TV Show",
-    "tv_show_plural": "TV Shows",
-    "episode": "Episode",
-    "cinema": "Cinema",
-    "digital": "Digital",
-    "physical": "Physical"
+  "navigation": {
+    "upcoming": "Upcoming",
+    "calendar": "Calendar",
+    "preferences": "Preferences"
   },
   "labels": {
     "whendarr": "Whendarr",
     "version": "Version",
     "legend": "Legend",
     "github": "GitHub",
-    "docs": "Docs"
+    "docs": "Documentation"
   },
   "descriptions": {
     "whendarr": "An open source, self hosted calendar that aggregates release data from *arr services into a simple monthly interface."
-  },
-  "legend": {
-    "available": "Available",
-    "future": "Unreleased",
-    "missing": "Missing",
-    "untracked": "Untracked"
   }
 }

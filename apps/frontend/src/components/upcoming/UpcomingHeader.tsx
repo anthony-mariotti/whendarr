@@ -1,4 +1,4 @@
-import { t } from 'i18next';
+import { useTranslation } from 'react-i18next';
 import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group';
 import type { UpcomingFilter } from './UpcomingContext';
 
@@ -10,6 +10,7 @@ interface UpcomingHeaderProps {
 }
 
 export function UpcomingHeader({ filter, setFilter, showCount, movieCount }: UpcomingHeaderProps) {
+  const { t } = useTranslation(['common', 'media']);
   return (
     <div className="flex gap-1 px-3">
       <ToggleGroup
@@ -21,12 +22,10 @@ export function UpcomingHeader({ filter, setFilter, showCount, movieCount }: Upc
           {t('common:actions.all')}
         </ToggleGroupItem>
         <ToggleGroupItem value="movie" variant={'outline'} size={'lg'} className="leading-snug">
-          {t('common:media.movie')}{' '}
-          <span className="text-muted-foreground text-xs">{movieCount}</span>
+          {t('media:movie_one')} <span className="text-muted-foreground text-xs">{movieCount}</span>
         </ToggleGroupItem>
         <ToggleGroupItem value="show" variant={'outline'} size={'lg'} className="leading-snug">
-          {t('common:media.show')}{' '}
-          <span className="text-muted-foreground text-xs">{showCount}</span>
+          {t('media:show_one')} <span className="text-muted-foreground text-xs">{showCount}</span>
         </ToggleGroupItem>
       </ToggleGroup>
     </div>

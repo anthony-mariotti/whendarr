@@ -10,7 +10,7 @@ interface MediaMovieProps {
 }
 
 export function MediaMovie({ event, ...props }: MediaMovieProps) {
-  const { t } = useTranslation(['common']);
+  const { t } = useTranslation(['media']);
   const release = event.release;
 
   return (
@@ -25,7 +25,7 @@ export function MediaMovie({ event, ...props }: MediaMovieProps) {
         <TooltipTrigger>
           <MediaMovieReleaseIcon release={release} />
         </TooltipTrigger>
-        <TooltipContent side="left">{t(`common:media:${release}`)}</TooltipContent>
+        <TooltipContent side="left">{t(`media:${release}`)}</TooltipContent>
       </Tooltip>
       <h3 className="cursor-pointer truncate">{event.title}</h3>
     </div>

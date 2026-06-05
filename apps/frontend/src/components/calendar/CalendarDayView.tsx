@@ -123,7 +123,7 @@ interface DayMovieCardProps {
 }
 
 function DayMovieCard({ event, ...props }: DayMovieCardProps) {
-  const { t } = useTranslation(['common']);
+  const { t } = useTranslation(['media']);
   const borderColor = movieBorderColor(event);
   // const isFuture = dayjs(event.date).isAfter(dayjs());
 
@@ -144,7 +144,7 @@ function DayMovieCard({ event, ...props }: DayMovieCardProps) {
         {/* Title + meta */}
         <div className="min-w-0 flex-1">
           <div className="truncate font-medium">{event.title}</div>
-          <div className="text-muted-foreground text-xs">{t(`common:media:${event.release}`)}</div>
+          <div className="text-muted-foreground text-xs">{t(`${event.release}`)}</div>
         </div>
 
         {/* Status badge */}

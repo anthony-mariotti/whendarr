@@ -1,6 +1,7 @@
 import type { CalendarState } from '@/hooks/useCalendar';
 import type { CalendarEvent, EpisodeItem, MovieItem, ShowItem } from '@whendarr/shared';
 import dayjs from 'dayjs';
+import { t } from 'i18next';
 
 export function getMonthDays(date: dayjs.Dayjs): dayjs.Dayjs[] {
   const start = date.startOf('month').startOf('week');
@@ -51,27 +52,27 @@ export const STATUS_COLORS = {
   available: {
     border: 'border-green-500',
     background: 'bg-green-500 dark:bg-green-700',
-    label: 'common:legend.available'
+    i18n: t('media:legend.available')
   },
   unavailable: {
     border: 'border-red-500',
     background: 'bg-red-500 dark:bg-red-700',
-    label: 'common:legend.missing'
+    i18n: t('media:legend.missing')
   },
   partial: {
     border: 'border-orange-500',
     background: 'bg-orange-500 dark:bg-orange-700',
-    label: 'common:legend.partial'
+    i18n: t('media:legend.partial')
   },
   future: {
     border: 'border-blue-500',
     background: 'bg-blue-500 dark:bg-blue-700',
-    label: 'common:legend.future'
+    i18n: t('media:legend.future')
   },
   untracked: {
     border: 'border-gray-500',
     background: 'bg-gray-500 dark:bg-gray-700',
-    label: 'common:legend.untracked'
+    i18n: t('media:legend.untracked')
   }
 } as const;
 

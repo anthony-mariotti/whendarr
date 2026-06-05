@@ -44,8 +44,8 @@ export function ExpandableText({ value, maxLength = 128, ...props }: ExpandableT
         {initialText}
         {!open && <>&hellip;</>}
         <span className={clsx({ hidden: !open })}>{remainingText}</span>
-        {!open && <span className="text-primary text-nowrap"> {t('common:actions:showMore')}</span>}
-        {open && <span className="text-primary text-nowrap"> {t('common:actions:showLess')}</span>}
+        {!open && <span className="text-primary text-nowrap"> {t('actions.showMore')}</span>}
+        {open && <span className="text-primary text-nowrap"> {t('actions.showLess')}</span>}
       </CollapsibleTrigger>
     </Collapsible>
   );

@@ -1,3 +1,5 @@
+import './i18next.js';
+
 export {
   i18n,
   initI18n,

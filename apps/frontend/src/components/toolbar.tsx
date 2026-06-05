@@ -39,7 +39,7 @@ import { GitHubIcon } from './icons/GitHubIcon';
 import { cn } from '@/lib/utils';
 
 function Toolbar() {
-  const { t } = useTranslation(['common']);
+  const { t } = useTranslation(['common', 'media']);
   const { selected, view, filter, nextPeriod, prevPeriod, today, setFilter, setView } =
     useCalendar();
   const { isLoading, isFetching } = useCalendarApi();
@@ -47,10 +47,10 @@ function Toolbar() {
   const { desktop } = useMediaQuery();
 
   const LEGEND_ITEMS = [
-    { colorClass: 'bg-green-500', label: t('common:legend.available') },
-    { colorClass: 'bg-blue-500', label: t('common:legend.future') },
-    { colorClass: 'bg-red-500', label: t('common:legend.missing') },
-    { colorClass: 'bg-gray-500', label: t('common:legend.untracked') }
+    { colorClass: 'bg-green-500', label: t('media:legend.available') },
+    { colorClass: 'bg-blue-500', label: t('media:legend.future') },
+    { colorClass: 'bg-red-500', label: t('media:legend.missing') },
+    { colorClass: 'bg-gray-500', label: t('media:legend.untracked') }
   ] as const;
 
   return (
@@ -91,13 +91,13 @@ function Toolbar() {
               checked={filter.movies}
               onCheckedChange={(value) => setFilter({ movies: value })}
             >
-              {t('common:media.movie_plural')}
+              {t('media:movie_other')}
             </DropdownMenuCheckboxItem>
             <DropdownMenuCheckboxItem
               checked={filter.shows}
               onCheckedChange={(value) => setFilter({ shows: value })}
             >
-              {t('common:media.tv_show_plural')}
+              {t('media:show_other')}
             </DropdownMenuCheckboxItem>
           </DropdownMenuGroup>
         </DropdownMenuContent>

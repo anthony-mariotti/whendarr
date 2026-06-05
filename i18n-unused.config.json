@@ -1,0 +1,6 @@
+{
+  "localesPath": "./packages/translations/src/locales/en-US",
+  "localesExtensions": ["json"],
+  "srcPath": "./apps/frontend/src/",
+  "translationKeyMatcher": "/\\bt\\s*\\(\\s*(['\"`])(.*?)\\1/g"
+}

@@ -90,6 +90,9 @@ importers:
       husky:
         specifier: ^9.1.7
         version: 9.1.7
+      i18n-unused:
+        specifier: ^0.19.0
+        version: 0.19.0
       lint-staged:
         specifier: ^17.0.7
         version: 17.0.7
@@ -2334,6 +2337,10 @@ packages:
   colorette@2.0.20:
     resolution: {integrity: sha512-IfEDxwoWIjkeXL1eXcDiow4UbKjhLdq6/EuSVR9GMN7KVH3r9gQ83e73hsz1Nd1T3ijd5xv1wcWRYO+D6kCI2w==}
 
+  commander@10.0.1:
+    resolution: {integrity: sha512-y4Mg2tXshplEbSGzx7amzPwKKOCGuoSRP/CjEdwwk0FOGlUbq6lKuoyDZTNZkmxHdJtp54hdfY/JUrdL7Xfdug==}
+    engines: {node: '>=14'}
+
   commander@11.1.0:
     resolution: {integrity: sha512-yPVavfyCcRhmorC7rWlkHn15b4wDVgVmBA7kV4QVBsF7kv/9TKJAbAXVTxvTnwP8HHKjRCJDClKbciiYS7p0DQ==}
     engines: {node: '>=16'}
@@ -2640,6 +2647,10 @@ packages:
     peerDependenciesMeta:
       jiti:
         optional: true
+
+  esm@3.2.25:
+    resolution: {integrity: sha512-U1suiZ2oDVWv4zPO56S0NcR5QriEahGtdN2OR6FiOG4WJvcjBVFB0qI4+eKoWFH483PKGuLuu6V8Z4T5g63UVA==}
+    engines: {node: '>=6'}
 
   espree@10.4.0:
     resolution: {integrity: sha512-j6PAQ2uUr79PZhBjP5C5fhl8e39FmRnOjsD5lGnWrFU8i2G776tBK7+nP8KuQUTTyAZUwfQqXAgrVH5MbH9CYQ==}
@@ -2987,6 +2998,10 @@ packages:
   husky@9.1.7:
     resolution: {integrity: sha512-5gs5ytaNjBrh5Ow3zrvdUUY+0VxIuWVL4i9irt6friV+BqdCfmV11CQTWMiBYWHbXhco+J1kHfTOUkePhCDvMA==}
     engines: {node: '>=18'}
+    hasBin: true
+
+  i18n-unused@0.19.0:
+    resolution: {integrity: sha512-g/zPenRzkE0NV0LWSCKfQ6h08lCSloh5MPHKPAw19oscPKMV5zEcyYF2QrwUvZF5CV96aeR8XQenJcsEWcLlIw==}
     hasBin: true
 
   i18next@26.3.1:
@@ -3620,6 +3635,9 @@ packages:
   optionator@0.9.4:
     resolution: {integrity: sha512-6IpQ7mKUxRcZNLIObR0hz7lxsapSSIYNZJwXPGeF0mTVqGKFIXj1DQcMoT22S3ROcLyY/rz0PWaWZ9ayWmad9g==}
     engines: {node: '>= 0.8.0'}
+
+  options-defaults@2.0.40:
+    resolution: {integrity: sha512-a0oW0AMaP/Uqk1gU7s3unE83wzs/MACy3wsCnNREn4wqp4KCcxRdulRjf0d2FeIxENbGJ4EBGtHTQ6J30XB6Cw==}
 
   ora@8.2.0:
     resolution: {integrity: sha512-weP+BZ8MVNnlCm8c0Qdc1WSWq4Qn7I+9CJGm7Qali6g44e/PUzbjNqJX5NJ9ljlNMosfJvg1fKEGILklK9cwnw==}
@@ -4308,6 +4326,10 @@ packages:
     engines: {node: '>=18.12'}
     peerDependencies:
       typescript: '>=4.8.4'
+
+  ts-import@2.0.40:
+    resolution: {integrity: sha512-yTP9fSDaBL1LvcN7/taRHbcQoazk7cLrDOEPyIDUVKLNYTMhaDkvZhfUwp41iXe+GlAFL6l87ZoGABWZRdIfjg==}
+    engines: {node: '>=14.14.0'}
 
   ts-morph@26.0.0:
     resolution: {integrity: sha512-ztMO++owQnz8c/gIENcM9XfCEzgoGphTv+nKpYNM1bgsdOVC/jRZuEBf6N+mLLDNg68Kl+GgUZfOySaRiG1/Ug==}
@@ -6713,6 +6735,8 @@ snapshots:
 
   colorette@2.0.20: {}
 
+  commander@10.0.1: {}
+
   commander@11.1.0: {}
 
   commander@14.0.3: {}
@@ -7107,6 +7131,8 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  esm@3.2.25: {}
+
   espree@10.4.0:
     dependencies:
       acorn: 8.16.0
@@ -7499,6 +7525,12 @@ snapshots:
   human-signals@8.0.1: {}
 
   husky@9.1.7: {}
+
+  i18n-unused@0.19.0:
+    dependencies:
+      commander: 10.0.1
+      esm: 3.2.25
+      ts-import: 2.0.40
 
   i18next@26.3.1(typescript@6.0.3):
     optionalDependencies:
@@ -8091,6 +8123,8 @@ snapshots:
       prelude-ls: 1.2.1
       type-check: 0.4.0
       word-wrap: 1.2.5
+
+  options-defaults@2.0.40: {}
 
   ora@8.2.0:
     dependencies:
@@ -8847,6 +8881,10 @@ snapshots:
   ts-api-utils@2.5.0(typescript@6.0.3):
     dependencies:
       typescript: 6.0.3
+
+  ts-import@2.0.40:
+    dependencies:
+      options-defaults: 2.0.40
 
   ts-morph@26.0.0:
     dependencies:
