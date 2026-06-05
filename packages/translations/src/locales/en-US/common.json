@@ -31,5 +31,8 @@
   },
   "descriptions": {
     "whendarr": "An open source, self hosted calendar that aggregates release data from *arr services into a simple monthly interface."
+  },
+  "messages": {
+    "nothingScheduledForDay": "Nothing scheduled for this day"
   }
 }

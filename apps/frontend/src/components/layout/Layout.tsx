@@ -7,10 +7,7 @@ import { SidebarInset } from '../ui/sidebar';
 import { DesktopSidebar } from '../desktop/DesktopSidebar';
 import { DesktopHeader } from '../desktop/DesktopHeader';
 import { DesktopSidebarProvider } from '../desktop/DesktopSidebarProvider';
-// import { ScrollArea } from '@/components/ui/scroll-area';
-// import { useState } from 'react';
-// import { ScrollAreaContext } from './ScrollAreaContext';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+// import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { t } from 'i18next';
 
 function Layout() {
@@ -18,7 +15,7 @@ function Layout() {
   return (
     <>
       {desktop ? <DesktopLayout /> : <MobileLayout />}
-      <ReactQueryDevtools buttonPosition={desktop ? 'bottom-right' : 'top-right'} />
+      {/* <ReactQueryDevtools buttonPosition={desktop ? 'bottom-right' : 'top-right'} /> */}
     </>
   );
 }

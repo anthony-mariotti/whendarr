@@ -16,18 +16,10 @@ function CalendarWeekView({ events }: CalendarWeekViewProps) {
   const week = getWeekDays(selected);
   const filtered = filterEvents(events, filter);
 
-  const weekEventCount = week.reduce((sum, day) => sum + eventsForDay(filtered, day).length, 0);
+  // const weekEventCount = week.reduce((sum, day) => sum + eventsForDay(filtered, day).length, 0);
 
   return (
     <div className="flex h-full flex-col">
-      <div className="border-border border-b px-4 py-3 sm:hidden">
-        <h2 className={clsx('text-xl font-semibold')}>{selected.format('MMMM YYYY')}</h2>
-        <p className="text-muted-foreground text-sm">
-          {week.length === 0
-            ? 'No releases'
-            : `${weekEventCount} release${weekEventCount !== 1 ? 's' : ''}`}
-        </p>
-      </div>
       <div className="border-border flex border-b">
         {week.map((day) => {
           const isToday = day.isSame(dayjs(), 'day');

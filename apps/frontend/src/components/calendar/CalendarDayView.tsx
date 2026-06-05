@@ -1,5 +1,4 @@
 import type { CalendarEvent, MovieItem, ShowItem } from '@whendarr/shared';
-import dayjs from 'dayjs';
 import clsx from 'clsx';
 import {
   Dialog,
@@ -10,7 +9,7 @@ import {
   DialogTrigger
 } from '../ui/dialog';
 import { Separator } from '../ui/separator';
-import { ArrowLeftIcon, CalendarIcon, TvIcon } from 'lucide-react';
+import { CalendarIcon, TvIcon } from 'lucide-react';
 import { Card } from '../ui/card';
 import { useTranslation } from 'react-i18next';
 import { ExpandableText } from '../expandableText';
@@ -19,72 +18,38 @@ import { eventsForDay, filterEvents, movieBorderColor, showBorderColor } from '@
 import { MediaMovieDetail } from '../media/MediaMovieDetail';
 import { MediaShowEpisode } from '../media/MediaShowEpisode';
 import { MediaMovieReleaseIcon } from '../media/MediaMovieReleaseIcon';
-import { Button } from '../ui/button';
-import { cn } from '@/lib/utils';
+import { ScrollArea } from '../ui/scroll-area';
 
 interface CalendarDayViewProps {
   events?: CalendarEvent[];
 }
 
 export function CalendarDayView({ events }: CalendarDayViewProps) {
-  const { selected, filter, prevView, setView } = useCalendar();
+  const { t } = useTranslation(['common']);
+  const { selected, filter } = useCalendar();
 
   const filtered = filterEvents(events, filter);
   const dayEvents = eventsForDay(filtered, selected);
 
-  const isToday = selected.isSame(dayjs(), 'day');
+  // const isToday = selected.isSame(dayjs(), 'day');
 
   return (
-    <div className="flex h-full flex-col">
-      <div
-        className={cn('border-border flex items-center space-x-2 border-b pr-4', {
-          'pl-4': !prevView
-        })}
-      >
-        {prevView && (
-          <Button
-            variant={'ghost'}
-            size={'icon-lg'}
-            className="h-full min-w-12 rounded-none"
-            onClick={() => setView(prevView)}
-          >
-            <ArrowLeftIcon className="size-6" />
-          </Button>
-        )}
-        <div className="py-3">
-          <h2 className={clsx('text-xl font-semibold', isToday && 'text-primary')}>
-            {selected.format('dddd, MMMM D, YYYY')}
-            {isToday && (
-              <span className="text-primary bg-primary/10 ml-2 rounded-full px-2 py-0.5 text-sm font-normal">
-                Today
-              </span>
-            )}
-          </h2>
-          <p className="text-muted-foreground text-sm">
-            {dayEvents.length === 0
-              ? 'No releases'
-              : `${dayEvents.length} release${dayEvents.length !== 1 ? 's' : ''}`}
-          </p>
+    <ScrollArea className="h-full flex-1">
+      {dayEvents.length === 0 ? (
+        <div className="text-muted-foreground flex flex-col items-center justify-center gap-2 py-16 text-sm">
+          <span>
+            <CalendarIcon className="size-9" />
+          </span>
+          <h2>{t('common:messages.nothingScheduledForDay')}</h2>
         </div>
-      </div>
-
-      <div className="flex-1 overflow-y-auto">
-        {dayEvents.length === 0 ? (
-          <div className="text-muted-foreground flex h-full flex-col items-center justify-center gap-2 py-16 text-sm">
-            <span>
-              <CalendarIcon className="size-9" />
-            </span>
-            <span>Nothing scheduled for this day</span>
-          </div>
-        ) : (
-          <div className="space-y-2 p-3">
-            {dayEvents.map((event, idx) => (
-              <DayEventCard key={idx} event={event} />
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
+      ) : (
+        <div className="space-y-2 p-3">
+          {dayEvents.map((event, idx) => (
+            <DayEventCard key={idx} event={event} />
+          ))}
+        </div>
+      )}
+    </ScrollArea>
   );
 }
 

@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group';
 import type { UpcomingFilter } from './UpcomingContext';
+import { useRouteMeta } from '@/hooks/useRouteMeta';
 
 interface UpcomingHeaderProps {
   filter: UpcomingFilter;
@@ -11,8 +12,12 @@ interface UpcomingHeaderProps {
 
 export function UpcomingHeader({ filter, setFilter, showCount, movieCount }: UpcomingHeaderProps) {
   const { t } = useTranslation(['common', 'media']);
+  const { title } = useRouteMeta();
   return (
-    <div className="flex gap-1 px-3">
+    <div className="flex min-w-0 gap-1 px-3">
+      <div className="flex min-w-0 flex-1 items-center">
+        <h1 className="truncate text-xl font-semibold">{title}</h1>
+      </div>
       <ToggleGroup
         type="single"
         value={filter}
