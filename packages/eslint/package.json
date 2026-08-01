@@ -15,9 +15,9 @@
     "eslint": "catalog:eslint",
     "eslint-config-prettier": "catalog:eslint",
     "eslint-plugin-react": "catalog:eslint",
-    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-turbo": "catalog:eslint",
-    "globals": "^17.5.0",
+    "globals": "^17.7.0",
     "typescript": "catalog:",
     "typescript-eslint": "catalog:eslint"
   }
